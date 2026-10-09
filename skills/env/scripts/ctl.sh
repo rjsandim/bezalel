@@ -16,13 +16,16 @@ case "$ACTION" in
 esac
 
 PROJECT="$(project_name)"
+apply_docker_engine
 STATE_DIR="$SKILL_DIR/state/$PROJECT/$ENV_NAME"
 COMPOSE="$STATE_DIR/docker-compose.yml"
 [ -f "$COMPOSE" ] || fail "Ambiente '$ENV_NAME' sem compose salvo. Use env new."
+validate_state_owner "$STATE_DIR"
 
 case "$ACTION" in
     start|ensure)
         select_services "$@"
+        require_shared_infra_authorization
         docker start "$ENVSTACK_TRAEFIK" >/dev/null
         start_services start "${SELECTED_SERVICES[@]}" ;;
     stop)

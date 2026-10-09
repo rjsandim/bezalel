@@ -19,8 +19,23 @@ state = json.loads(state_path.read_text())
 state['calls'].append(args)
 state_path.write_text(json.dumps(state))
 if args[0] == 'context':
+    if os.environ.get('ENV_TEST_FAIL_CONTEXT') == '1':
+        sys.exit(6)
+    if args[1] == 'show':
+        print('fixture')
     sys.exit(0)
 if args[0] == 'start':
+    if os.environ.get('ENV_TEST_FAIL_PROXY') == '1':
+        sys.exit(8)
+    sys.exit(0)
+if args[:2] == ['volume', 'ls']:
+    sys.exit(0)
+if args == ['ps', '-aq']:
+    if os.environ.get('ENV_TEST_SHARED_VOLUME') == '1':
+        print('other-container')
+    sys.exit(0)
+if args[0] == 'inspect':
+    print(json.dumps({'project': 'another-project', 'mounts': [{'Name': 'fixture-check_dbdata'}]}))
     sys.exit(0)
 if args[0] != 'compose':
     sys.exit('Unexpected Docker operation: ' + repr(args))
@@ -50,6 +65,10 @@ if command == 'up':
         start(name)
 elif command == 'stop':
     state['running'] = []
+elif command == 'down':
+    if os.environ.get('ENV_TEST_FAIL_DOWN') == '1':
+        sys.exit(9)
+    state['running'] = []
 elif command != 'restart':
     sys.exit('Unexpected Compose command: ' + command)
 state_path.write_text(json.dumps(state))
@@ -69,6 +88,7 @@ class LifecycleTests(unittest.TestCase):
         stack.mkdir()
         (stack / 'stack.yaml').write_text('''project: fixture
 engine: auto
+docker_context: fixture
 database: mysql
 tld: local
 startup:
@@ -83,7 +103,8 @@ services:
             (self.repo / service / 'sentinel.txt').write_text('work in progress\n')
             (stack / f'{service}.env.example').write_text('APP_NAME=${env:name}\nLOCAL_SETTING=original\n')
             (stack / f'{service}.Dockerfile').write_text('FROM busybox\n')
-        self.run_process(['git', 'init', '-b', 'master'])
+        self.run_process(['git', 'init', '-b', 'main'])
+        self.run_process(['git', 'config', 'core.hooksPath', '/dev/null'])
         self.run_process(['git', 'add', '.'])
         self.run_process(['git', '-c', 'user.name=Env Test', '-c', 'user.email=env@example.invalid', '-c', 'core.hooksPath=/dev/null', 'commit', '-m', 'fixture'])
         self.state = self.base / 'docker-state.json'
@@ -92,7 +113,11 @@ services:
         bindir.mkdir()
         (bindir / 'docker').write_text(FAKE_DOCKER)
         (bindir / 'docker').chmod(0o755)
-        self.env = {**os.environ, 'PATH': str(bindir) + os.pathsep + os.environ['PATH'], 'ENV_TEST_STATE': str(self.state), 'ENV_TEST_DOCKER': DOCKER}
+        for forbidden in ['brew', 'sudo', 'mkcert']:
+            sentinel = bindir / forbidden
+            sentinel.write_text('#!/bin/sh\necho "Forbidden real infrastructure command" >&2\nexit 99\n')
+            sentinel.chmod(0o755)
+        self.env = {**os.environ, 'PATH': str(bindir) + os.pathsep + os.environ['PATH'], 'ENV_TEST_STATE': str(self.state), 'ENV_TEST_DOCKER': DOCKER, 'ENV_ALLOW_SHARED_INFRA': '1'}
         self.command('new.sh', 'check', extra={'ENV_DRY_RUN': '1'})
         self.worktree = self.repo / '.worktrees/check'
         self.compose = self.skill / 'state/fixture/check/docker-compose.yml'
@@ -176,6 +201,122 @@ services:
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(self.compose.read_bytes(), before)
         self.assertEqual(list(self.compose.parent.glob('*.pending.*')), [])
+
+    def test_context_failure_does_not_fallback_or_mutate(self):
+        before = self.observed()['calls']
+        self.command('ctl.sh', 'start', 'check', extra={'ENV_TEST_FAIL_CONTEXT': '1'}, expected=1)
+        self.assertTrue(all(call[0] == 'context' for call in self.observed()['calls'][len(before):]))
+
+    def test_unconfigured_auto_context_is_rejected(self):
+        manifest = self.repo / '.envstack/stack.yaml'
+        manifest.write_text(manifest.read_text().replace('docker_context: fixture\n', ''))
+        before = self.observed()['calls']
+        self.command('ctl.sh', 'status', 'check', expected=1)
+        self.assertEqual(before, self.observed()['calls'])
+
+    def test_changed_context_cannot_operate_old_state(self):
+        (self.compose.parent / 'docker-context').write_text('another-context\n')
+        self.command('ctl.sh', 'start', 'check', expected=1)
+        self.assertFalse(any('up' in call for call in self.observed()['calls']))
+
+    def test_shared_infrastructure_requires_explicit_authorization(self):
+        self.command('ctl.sh', 'start', 'check', extra={'ENV_ALLOW_SHARED_INFRA': '0'}, expected=1)
+        self.assertFalse(any(call[0] == 'start' for call in self.observed()['calls']))
+
+    def test_proxy_start_failure_is_not_reported_as_ready(self):
+        result = self.command('ctl.sh', 'start', 'check', extra={'ENV_TEST_FAIL_PROXY': '1'}, expected=8)
+        self.assertNotIn('dependencias prontos', result.stdout)
+        self.assertFalse(any('up' in call for call in self.observed()['calls']))
+
+    def test_destroy_requires_exact_confirmation(self):
+        self.command('destroy.sh', 'check', '--keep-worktree', expected=1)
+        self.assertTrue(self.compose.exists())
+        self.assertFalse(any('down' in call for call in self.observed()['calls']))
+
+    def test_destroy_failure_preserves_state_and_worktree(self):
+        result = self.command('destroy.sh', 'check', '--confirm', 'fixture/check', '--keep-worktree', extra={'ENV_TEST_FAIL_DOWN': '1'}, expected=9)
+        self.assertTrue(self.compose.exists())
+        self.assertTrue(self.worktree.exists())
+        self.assertNotIn('todas as etapas', result.stdout)
+
+    def test_destroy_refuses_dirty_worktree_before_docker_mutation(self):
+        self.command('destroy.sh', 'check', '--confirm', 'fixture/check', expected=1)
+        self.assertTrue(self.worktree.exists())
+        self.assertFalse(any('down' in call for call in self.observed()['calls']))
+
+    def test_destroy_refuses_shared_volume(self):
+        self.command('destroy.sh', 'check', '--confirm', 'fixture/check', '--keep-worktree', extra={'ENV_TEST_SHARED_VOLUME': '1'}, expected=1)
+        self.assertTrue(self.compose.exists())
+        self.assertFalse(any('down' in call for call in self.observed()['calls']))
+
+    def test_destroy_keeps_requested_worktree_and_branch(self):
+        self.command('destroy.sh', 'check', '--confirm', 'fixture/check', '--keep-worktree')
+        self.assertFalse(self.compose.parent.exists())
+        self.assertTrue(self.worktree.exists())
+        self.run_process(['git', 'show-ref', '--verify', 'refs/heads/check'])
+
+    def test_destroy_without_compose_never_guesses_by_prefix(self):
+        self.compose.unlink()
+        self.command('destroy.sh', 'check', '--confirm', 'fixture/check', '--keep-worktree', expected=1)
+        self.assertFalse(any(call[0] in ['ps', 'rm', 'network'] for call in self.observed()['calls']))
+
+    def test_configured_branch_base_and_ambiguous_detection(self):
+        self.run_process(['git', 'branch', 'master'])
+        self.command('new.sh', 'ambiguous', extra={'ENV_DRY_RUN': '1'}, expected=1)
+        self.assertFalse((self.repo / '.worktrees/ambiguous').exists())
+        manifest = self.repo / '.envstack/stack.yaml'
+        manifest.write_text(manifest.read_text() + '\nbase_ref: main\n')
+        self.command('new.sh', 'configured', extra={'ENV_DRY_RUN': '1'})
+        self.assertTrue((self.repo / '.worktrees/configured').exists())
+
+    def remove_generated_fixture_files(self):
+        # Model a clean/static environment: its saved Compose needs no local env files.
+        subprocess.run(['yq', '-i', 'del(.services[].env_file)', str(self.compose)], check=True)
+        shutil.rmtree(self.worktree / '.idea')
+        for service in ['api', 'site', 'docs']:
+            (self.worktree / service / '.env').unlink()
+
+    def test_destroy_removes_clean_integrated_worktree(self):
+        self.remove_generated_fixture_files()
+        self.command('destroy.sh', 'check', '--confirm', 'fixture/check')
+        self.assertFalse(self.worktree.exists())
+        self.assertFalse(self.compose.parent.exists())
+        result = subprocess.run(['git', 'show-ref', '--verify', 'refs/heads/check'], cwd=self.repo, capture_output=True)
+        self.assertNotEqual(result.returncode, 0)
+
+    def test_destroy_preserves_unmerged_commits(self):
+        self.remove_generated_fixture_files()
+        (self.worktree / 'pending.txt').write_text('synthetic pending work')
+        self.run_process(['git', '-C', str(self.worktree), 'add', 'pending.txt'])
+        self.run_process(['git', '-C', str(self.worktree), '-c', 'user.name=Env Test', '-c', 'user.email=env@example.invalid', 'commit', '-m', 'pending'])
+        self.command('destroy.sh', 'check', '--confirm', 'fixture/check', expected=1)
+        self.assertTrue(self.worktree.exists())
+        self.assertFalse(any('down' in call for call in self.observed()['calls']))
+
+    def test_foreign_project_record_blocks_operations(self):
+        (self.compose.parent / 'project-root').write_text('/another/project\n')
+        self.command('ctl.sh', 'start', 'check', expected=1)
+        self.assertFalse(any('up' in call for call in self.observed()['calls']))
+
+    def test_engine_context_conflict_and_unknown_engine_fail(self):
+        manifest = self.repo / '.envstack/stack.yaml'
+        original = manifest.read_text()
+        for engine in ['orbstack', 'unknown-engine']:
+            manifest.write_text(original.replace('engine: auto', 'engine: ' + engine))
+            self.command('ctl.sh', 'status', 'check', expected=1)
+
+    def test_local_remote_head_selects_nonstandard_base(self):
+        self.run_process(['git', 'branch', 'master'])
+        self.run_process(['git', 'update-ref', 'refs/remotes/origin/stable', 'main'])
+        self.run_process(['git', 'symbolic-ref', 'refs/remotes/origin/HEAD', 'refs/remotes/origin/stable'])
+        self.command('new.sh', 'from-remote', extra={'ENV_DRY_RUN': '1'})
+        self.assertTrue((self.repo / '.worktrees/from-remote').exists())
+
+    def test_detect_preserves_existing_manifest(self):
+        manifest = self.repo / '.envstack/stack.yaml'
+        before = manifest.read_bytes()
+        self.command('detect.sh', expected=1)
+        self.assertEqual(before, manifest.read_bytes())
 
 if __name__ == '__main__':
     unittest.main()

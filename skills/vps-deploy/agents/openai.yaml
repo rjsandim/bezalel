@@ -1,0 +1,7 @@
+interface:
+  display_name: "VPS Deploy"
+  short_description: "Opera VPS com configuração e credencial por projeto"
+  default_prompt: "Use $vps-deploy no projeto e na operação que eu indicar, respeitando os limites da skill."
+
+policy:
+  allow_implicit_invocation: false

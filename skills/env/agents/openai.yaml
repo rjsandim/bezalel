@@ -1,4 +1,7 @@
 interface:
-  display_name: "Env"
-  short_description: "Create isolated worktree and Docker environments"
-  default_prompt: "Use $env to create or manage an isolated development environment for this repository."
+  display_name: "ENV"
+  short_description: "Gerencia ambientes locais com alvo e contexto validados"
+  default_prompt: "Use $env no projeto e na operação que eu indicar, respeitando os limites da skill."
+
+policy:
+  allow_implicit_invocation: false

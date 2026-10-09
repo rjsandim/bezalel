@@ -7,12 +7,17 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib.sh"
-require_tools git yq jq
+require_tools git yq jq envsubst docker
 
 ROOT="$(repo_root)"
 PROJECT="$(basename "$ROOT")"
 ENVSTACK="$ROOT/.envstack"
 MANIFEST="$ENVSTACK/stack.yaml"
+[ ! -e "$MANIFEST" ] || fail "Manifesto existente preservado. Edite-o explicitamente; detect nao sobrescreve."
+BASE_REF="$(base_ref)"
+DOCKER_CONTEXT_NAME="$(docker context show)"
+[ -n "$DOCKER_CONTEXT_NAME" ] || fail "Contexto Docker nao identificado."
+docker context inspect "$DOCKER_CONTEXT_NAME" >/dev/null
 mkdir -p "$ENVSTACK"
 
 # Pastas-alvo
@@ -30,7 +35,8 @@ fi
 # Manifesto base (a partir do template). Semeia o engine docker ativo agora
 # (orbstack | docker-desktop | auto) — editavel depois no proprio manifesto.
 ENGINE="$(detect_docker_engine)"
-PROJECT="$PROJECT" ENGINE="$ENGINE" RENDER_VARS='${PROJECT} ${ENGINE}' \
+PROJECT="$PROJECT" ENGINE="$ENGINE" BASE_REF="$BASE_REF" DOCKER_CONTEXT_NAME="$DOCKER_CONTEXT_NAME" \
+    RENDER_VARS='${PROJECT} ${ENGINE} ${BASE_REF} ${DOCKER_CONTEXT_NAME}' \
     render_template stack.yaml.tpl "$MANIFEST"
 
 # Preenche services[] via yq. Falha em uma pasta nunca aborta o init: a pasta

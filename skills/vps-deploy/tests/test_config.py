@@ -4,6 +4,7 @@ import contextlib
 import importlib.util
 import io
 import json
+import shutil
 from pathlib import Path
 import tempfile
 import unittest
@@ -103,6 +104,17 @@ class ProjectConfigTests(unittest.TestCase):
         self.path.symlink_to(original)
         with self.assertRaisesRegex(config.ConfigError, "symlink"):
             config.validate_project(self.project, SYNTHETIC_ENV)
+
+    def test_copied_skill_includes_its_model_and_validator(self):
+        copied = Path(self.temp.name) / 'copied-skill'
+        shutil.copytree(Path(__file__).parents[1], copied)
+        model = copied / 'templates/vps-deploy.example.json'
+        self.assertEqual(json.loads(model.read_text())['coolify_base_url'], 'https://coolify.example.invalid')
+        self.assertIn('/vps-deploy.local.json', (copied / 'templates/project.gitignore').read_text())
+        standalone = importlib.util.spec_from_file_location('standalone_config', copied / 'scripts/check_config.py')
+        module = importlib.util.module_from_spec(standalone)
+        standalone.loader.exec_module(module)
+        module.validate_project(self.project, SYNTHETIC_ENV)
 
 
 if __name__ == "__main__":

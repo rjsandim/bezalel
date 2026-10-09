@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # new.sh — instancia um ambiente efemero a partir do manifesto versionado.
-# Cria worktree (de master), monta o compose juntando templates, resolve os
+# Cria worktree (da base configurada/detectada), monta o compose, resolve os
 # .env de cada pasta e inicia a selecao configurada no manifesto.
 #
 # Uso: new.sh <nome> [servico...|--all]
@@ -9,10 +9,12 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib.sh"
 source "$SCRIPT_DIR/services.sh"
-require_tools git yq envsubst docker
+require_tools git yq jq envsubst docker python3
 
 ENV_NAME="${1:-}"; validate_env_name "$ENV_NAME"
 shift
+apply_docker_engine
+[ "${ENV_DRY_RUN:-0}" = 1 ] || require_shared_infra_authorization
 
 ROOT="$(repo_root)"
 PROJECT="$(project_name)"; TLD="$(project_tld)"
@@ -22,6 +24,7 @@ MANIFEST="$(manifest_path)"
 WORKTREE_DIR="$ROOT/.worktrees/$ENV_NAME"
 STATE_DIR="$SKILL_DIR/state/$PROJECT/$ENV_NAME"
 COMPOSE="$STATE_DIR/docker-compose.yml"
+[ ! -d "$STATE_DIR" ] || validate_state_owner "$STATE_DIR"
 
 # Repetir new e aditivo, sem reescrever configuracoes de um ambiente existente.
 if [ -f "$COMPOSE" ] && [ "${ENVSTACK_UPDATE:-0}" != '1' ]; then
@@ -46,15 +49,17 @@ export ES_PROJECT="$PROJECT" ES_NAME="$ENV_NAME" ES_TLD="$TLD" \
 
 step "Ambiente '${ENV_NAME}' — projeto '${PROJECT}' (*.${PROJECT}.${TLD})"
 
-# ─── 1. Worktree a partir de master ────────────────────────────
+# ─── 1. Worktree a partir de referencia local verificavel ──────
 if [ ! -d "$WORKTREE_DIR" ]; then
     if git -C "$ROOT" show-ref --verify --quiet "refs/heads/$ENV_NAME"; then
         git -C "$ROOT" worktree add "$WORKTREE_DIR" "$ENV_NAME"
     else
-        git -C "$ROOT" worktree add "$WORKTREE_DIR" -b "$ENV_NAME" master
+        BASE_REF="$(base_ref)"
+        git -C "$ROOT" worktree add "$WORKTREE_DIR" -b "$ENV_NAME" "$BASE_REF"
     fi
     ok "Worktree .worktrees/$ENV_NAME (branch $ENV_NAME)"
 else ok "Worktree ja existe"; fi
+validate_worktree "$WORKTREE_DIR" "$ENV_NAME"
 
 # ─── 2. Infra ──────────────────────────────────────────────────
 # DNS + certificado do projeto sao criados no `init`. Aqui so garantimos o
@@ -72,6 +77,8 @@ fi
 # ─── 3. Compose efemero (concatena templates renderizados) ─────
 step "Montando stack"
 mkdir -p "$STATE_DIR"
+printf '%s\n' "$ROOT" > "$STATE_DIR/project-root"
+printf '%s\n' "$DOCKER_CONTEXT" > "$STATE_DIR/docker-context"
 COMPOSE_DEST="$COMPOSE"
 COMPOSE="$(mktemp "$STATE_DIR/compose.pending.XXXXXX")"
 INITDB_PENDING="$(mktemp "$STATE_DIR/initdb.pending.XXXXXX")"
@@ -156,6 +163,8 @@ bash "$SCRIPT_DIR/ide.sh" "$ENV_NAME" || warn "Falha ao gerar config do PhpStorm
 dc config --quiet
 mv "$COMPOSE" "$COMPOSE_DEST"
 mv "$INITDB_PENDING" "$STATE_DIR/initdb.sql"
+printf '%s\n' "$ROOT" > "$STATE_DIR/project-root"
+printf '%s\n' "$DOCKER_CONTEXT" > "$STATE_DIR/docker-context"
 trap - EXIT
 COMPOSE="$COMPOSE_DEST"
 if [ "${ENV_DRY_RUN:-0}" = "1" ]; then warn "DRY-RUN: nao subindo containers. Compose em $COMPOSE"; exit 0; fi

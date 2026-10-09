@@ -1,5 +1,5 @@
 """Real Docker lifecycle rehearsal with synthetic data, isolated from user worktrees.
-Run: python3 tests/integration_lifecycle.py --php-image IMAGE --node-image IMAGE --playwright-module PATH
+Requires --allow-real-infrastructure and --docker-context CONTEXT, plus image/module arguments.
 Images must contain PHP+Composer+pdo_mysql, or Node+npm, respectively.
 Requires the shared envstack proxy infrastructure to be available. Manifests are
 prepared in dry-run mode so this rehearsal never configures host DNS or certificates.
@@ -15,10 +15,14 @@ import tempfile
 import uuid
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--allow-real-infrastructure', action='store_true', required=True)
+parser.add_argument('--docker-context', required=True)
 parser.add_argument('--php-image', required=True)
 parser.add_argument('--node-image', required=True)
 parser.add_argument('--playwright-module', required=True)
 args = parser.parse_args()
+subprocess.run(['docker', 'context', 'inspect', args.docker_context], check=True, stdout=subprocess.DEVNULL)
+run_environment = {**os.environ, 'DOCKER_CONTEXT': args.docker_context, 'ENV_ALLOW_SHARED_INFRA': '1'}
 skill_source = Path(__file__).resolve().parents[1]
 base = Path(tempfile.mkdtemp(prefix='env-real-lifecycle-'))
 skill = base / 'skill'
@@ -36,7 +40,7 @@ checks = []
 
 
 def run(command, *, env=None, echo=False):
-    result = subprocess.run(command, cwd=repo, env={**os.environ, **(env or {})}, text=True, capture_output=True)
+    result = subprocess.run(command, cwd=repo, env={**run_environment, **(env or {})}, text=True, capture_output=True)
     if echo or result.returncode:
         print(result.stdout[-3500:], result.stderr[-3500:], flush=True)
     if result.returncode:
@@ -70,6 +74,7 @@ def database(query):
 
 (stack / 'stack.yaml').write_text(f'''project: {project}
 engine: auto
+docker_context: {json.dumps(args.docker_context)}
 tld: local
 database: mysql
 startup:
@@ -108,6 +113,7 @@ exit($code);
     (stack / f'{service}.Dockerfile').write_text(f'FROM {image}\nCOPY boot.sh /usr/local/bin/envstack-boot\nWORKDIR /app\nCMD {command}\n')
 
 run(['git', 'init', '-b', 'master'])
+run(['git', 'config', 'core.hooksPath', '/dev/null'])
 run(['git', 'add', '.'])
 run(['git', '-c', 'user.name=Env Test', '-c', 'user.email=env@example.invalid', '-c', 'core.hooksPath=/dev/null', 'commit', '-m', 'synthetic fixture'])
 try:
@@ -163,6 +169,7 @@ try:
     run(['bash', '-c', '''
 set -euo pipefail
 source "$1/lib.sh"
+apply_docker_engine
 source "$1/services.sh"
 STATE_DIR="$2"
 COMPOSE="$STATE_DIR/docker-compose.yml"
@@ -175,11 +182,11 @@ start_services update docs
     print('REPORT ' + str(base / 'report.json'), flush=True)
 except Exception:
     if compose.exists():
-        logs = subprocess.run(['docker', 'compose', '-f', str(compose), 'logs', '--no-color'], text=True, capture_output=True)
+        logs = subprocess.run(['docker', 'compose', '-f', str(compose), 'logs', '--no-color'], env=run_environment, text=True, capture_output=True)
         (base / 'failure.log').write_text(logs.stdout + logs.stderr)
         print('DIAGNOSTICS ' + str(base / 'failure.log'), flush=True)
     raise
 finally:
     if compose.exists():
         # This unique project contains only disposable fixtures created above.
-        subprocess.run(['docker', 'compose', '-f', str(compose), 'down', '--volumes', '--rmi', 'local'], cwd=repo, check=True, capture_output=True)
+        subprocess.run(['docker', 'compose', '-f', str(compose), 'down', '--volumes'], env=run_environment, cwd=repo, check=True, capture_output=True)

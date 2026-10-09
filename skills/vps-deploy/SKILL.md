@@ -5,11 +5,20 @@ description: Opera e diagnostica serviços de uma VPS gerenciada pelo Coolify us
 
 # VPS Deploy
 
+## Objetivo e escopo
+
 Use a configuração do projeto que o usuário indicou. Não presuma que projetos
 diferentes usam a mesma instância, servidor ou credencial. Esta skill não instala
 serviços nem cria acesso persistente ao ser carregada.
 
-## Antes de operar
+## Entradas e pré-requisitos
+
+Projeto alvo explícito, Python 3.9+ para validação e configuração local criada
+pelo usuário a partir de `templates/vps-deploy.example.json`. Para operações
+remotas, o usuário deve fornecer ao processo `COOLIFY_API_TOKEN` da instância
+correta. O token não faz parte dos arquivos da skill.
+
+## Procedimento
 
 1. Identifique o diretório absoluto do projeto alvo. Se não estiver claro, peça
    somente o projeto; nunca peça senha, token ou chave pelo chat.
@@ -34,7 +43,7 @@ serviços nem cria acesso persistente ao ser carregada.
 6. Relacione a operação pedida ao serviço alvo. Não deduza UUIDs ou domínios de
    exemplos. Antes de uma alteração, informe o alvo e o efeito esperado.
 
-## Credenciais e informações internas
+### Credenciais e informações internas
 
 - A única referência ao token é `COOLIFY_API_TOKEN`, fornecida pelo usuário ao
   processo da operação. O JSON não aceita campos de senha, token ou chave.
@@ -48,7 +57,7 @@ serviços nem cria acesso persistente ao ser carregada.
 - Sanitizar respostas é necessário: logs, env vars, compose e saídas de inspect
   podem conter segredos mesmo quando o pedido é somente de diagnóstico.
 
-## Fluxo de trabalho
+### Fluxo de trabalho
 
 ### Diagnóstico
 
@@ -89,7 +98,7 @@ Investigue healthchecks pela porta, interface e protocolo realmente atendidos.
 Não aplique correções de IPv4/IPv6 ou prazos fixos de emissão de certificado sem
 evidência no ambiente atual. Verifique o resultado depois de uma mudança.
 
-## Encerramento
+## Saídas
 
 Informe o que foi verificado, o que mudou e o que continua pendente, sem valores
 sensíveis. Diferencie validação local, autenticação, autorização e saúde do
@@ -97,3 +106,20 @@ serviço. Não faça push, publicação ou rotação de credenciais por inferên
 
 A [proveniência e as diferenças](references/proveniencia.md) documentam a versão
 comum, as remoções e as limitações desta preparação.
+
+## Validação
+
+```sh
+python3 -B -m unittest discover -s "$SKILL_DIR/tests" -v
+```
+
+Os testes usam entradas sintéticas, sem rede. O validador não comprova validade,
+permissões ou associação do token ao servidor. A pasta inteira desta skill pode
+ser copiada; não depende de modelos ou arquivos da raiz do Bezalel.
+
+## Limites operacionais
+
+Não crie credenciais, acesso persistente ou configuração global. Não procure
+segredos em outros projetos e nunca peça valores no chat. Cada operação remota
+precisa estar no escopo autorizado. Alterações destrutivas exigem impacto e
+preservação definidos; falhas devem ser relatadas sem exposição de conteúdo.

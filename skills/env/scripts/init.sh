@@ -8,7 +8,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib.sh"
-require_tools git yq envsubst
+require_tools git yq jq envsubst python3
 
 ROOT="$(repo_root)"
 ENVSTACK="$ROOT/.envstack"
@@ -125,10 +125,6 @@ if not found:
 print("\n  Dica: '/env config' lista os placeholders ${env:...} disponiveis.")
 PY
 
-# ─── Infra do projeto: DNS wildcard + certificado *.<projeto> + Traefik global.
-# O certificado e gerado UMA vez aqui e cobre todos os ambientes/subdominios.
-require_tools docker
-ensure_infra "$(project_name)" "$(project_tld)"
-
 echo ""
-ok "Projeto pronto. Crie ambientes com '/env new <nome>' e commite .envstack/ + .gitignore."
+ok "Artefatos locais preparados; DNS, certificados e containers nao foram alterados."
+info "Revise os arquivos. O new exige autorizacao especifica para infra compartilhada."

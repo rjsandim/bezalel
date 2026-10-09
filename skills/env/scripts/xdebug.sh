@@ -14,8 +14,10 @@ require_tools git yq docker
 ACTION="${1:-}"; ENV_NAME="${2:-}"
 case "$ACTION" in on|off|status) ;; *) fail "Acao invalida: '$ACTION'. Use on|off|status." ;; esac
 validate_env_name "$ENV_NAME"
+apply_docker_engine
 
 PROJECT="$(project_name)"
+validate_state_owner "$SKILL_DIR/state/$PROJECT/$ENV_NAME"
 MANIFEST="$(manifest_path)"
 # Override do mode=off da imagem. PRECISA ordenar DEPOIS do zz-xdebug.ini da imagem
 # (o PHP carrega o conf.d em ordem alfabetica e o ultimo vence). 'zzz-' > 'zz-.'

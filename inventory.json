@@ -4,7 +4,8 @@
     "clean-code",
     "clean-architecture",
     "env",
-    "vps-deploy"
+    "vps-deploy",
+    "limpar-orbstack"
   ],
   "authorship": "User confirmed clean-code, clean-architecture and env as their created/customized skills, and authorized an adapted common vps-deploy from the local variants. No license assigned or claim over referenced works.",
   "variants": "User selected the Agents source as the single env copy in this repository. Claude copy removed; both external originals are unchanged.",
@@ -14,90 +15,57 @@
   ],
   "review": {
     "credential_scan": "No apparent real credentials in the selected preserved files. The new common VPS skill references COOLIFY_API_TOKEN without a value. Actual legacy literal and infrastructure identifiers checked for absence before committing.",
-    "internal_information": "One comment removed from the env node.Dockerfile.tpl copy; original source untouched.",
-    "execution": "Preserved skill scripts were not executed. The new vps-deploy configuration validator passed ten offline tests with synthetic inputs; no real authentication or network access was attempted.",
+    "internal_information": "Original snapshots remain unchanged outside Bezalel. Current adapted files retain source hashes and change notes.",
+    "execution": "Local static checks and fixture/mock tests only. No real infrastructure, deploy, authentication or cleanup executed.",
     "publication": "Local snapshot only; no push or publication."
   },
   "files": [
     {
-      "source": "~/.codex/skills/clean-code/SKILL.md",
-      "destination": "skills/clean-code/SKILL.md",
-      "source_sha256": "e45bb82d58a615ec47a396e20f01cb299b1676d1ec8b4269dd1597b230608d83",
-      "sha256": "e45bb82d58a615ec47a396e20f01cb299b1676d1ec8b4269dd1597b230608d83",
-      "source_bytes": 5555,
-      "bytes": 5555,
-      "mode": "0o644",
-      "changes": []
+      "destination": ".bezalel/.gitignore",
+      "sha256": "3f6df8058f42a25875178852174ca456ad9c91c62a069fcd54137149df9c8506",
+      "bytes": 23,
+      "kind": "new_or_adapted",
+      "mode": "0o644"
     },
     {
-      "source": "~/.codex/skills/clean-code/agents/openai.yaml",
-      "destination": "skills/clean-code/agents/openai.yaml",
-      "source_sha256": "6544a2b9d4b19cff2743322f90428344d95f0325b1a6530fbe2768c8a54b0e83",
-      "sha256": "6544a2b9d4b19cff2743322f90428344d95f0325b1a6530fbe2768c8a54b0e83",
-      "source_bytes": 313,
-      "bytes": 313,
-      "mode": "0o644",
-      "changes": []
+      "destination": ".gitignore",
+      "kind": "new_in_bezalel",
+      "sha256": "087f2c7978a04f2257f38349bb676cb041da6300fdde787c0dac56b9fc281655",
+      "bytes": 95,
+      "mode": "0o644"
     },
     {
-      "source": "~/.codex/skills/clean-code/references/concorrencia.md",
-      "destination": "skills/clean-code/references/concorrencia.md",
-      "source_sha256": "329c3348061fd84833d61afcf9b528e1d400656dafe7c888cf6294022d6a56d2",
-      "sha256": "329c3348061fd84833d61afcf9b528e1d400656dafe7c888cf6294022d6a56d2",
-      "source_bytes": 5721,
-      "bytes": 5721,
-      "mode": "0o644",
-      "changes": []
+      "destination": "AGENTS.md",
+      "kind": "new_in_bezalel",
+      "sha256": "0da32e7cc9111c851aa8fe8739545ea8d8ef771f7bbd47b396140d7254b744bb",
+      "bytes": 3513,
+      "mode": "0o644"
     },
     {
-      "source": "~/.codex/skills/clean-code/references/erros-e-contratos.md",
-      "destination": "skills/clean-code/references/erros-e-contratos.md",
-      "source_sha256": "1db2ef7acaeb3a95165410a4dd3299b976e52b63105e4d4263095c716326a5f9",
-      "sha256": "1db2ef7acaeb3a95165410a4dd3299b976e52b63105e4d4263095c716326a5f9",
-      "source_bytes": 4888,
-      "bytes": 4888,
-      "mode": "0o644",
-      "changes": []
+      "destination": "README.md",
+      "kind": "new_in_bezalel",
+      "sha256": "3a4060eedd21c951e89bfb4af0dde14bbda48fc846577723bd5fed21df1a9b94",
+      "bytes": 7667,
+      "mode": "0o644"
     },
     {
-      "source": "~/.codex/skills/clean-code/references/legibilidade-e-funcoes.md",
-      "destination": "skills/clean-code/references/legibilidade-e-funcoes.md",
-      "source_sha256": "24107d74497b1f7ca2fca6fff1957b568fe17e272c9ec695fabaa2ec665d21da",
-      "sha256": "24107d74497b1f7ca2fca6fff1957b568fe17e272c9ec695fabaa2ec665d21da",
-      "source_bytes": 6391,
-      "bytes": 6391,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.codex/skills/clean-code/references/refatoracao-e-testes.md",
-      "destination": "skills/clean-code/references/refatoracao-e-testes.md",
-      "source_sha256": "a5dd42283fe7184744ae125b4ccb9321e1f6940d506e751420f3924b9892e3c3",
-      "sha256": "a5dd42283fe7184744ae125b4ccb9321e1f6940d506e751420f3924b9892e3c3",
-      "source_bytes": 8786,
-      "bytes": 8786,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.codex/skills/clean-code/references/responsabilidades-e-fronteiras.md",
-      "destination": "skills/clean-code/references/responsabilidades-e-fronteiras.md",
-      "source_sha256": "ed20053094b839f25302753cfa6f4247f5212ca5c475ba505afbf366e3a265af",
-      "sha256": "ed20053094b839f25302753cfa6f4247f5212ca5c475ba505afbf366e3a265af",
-      "source_bytes": 8248,
-      "bytes": 8248,
-      "mode": "0o644",
-      "changes": []
+      "destination": "scripts/check_repository.py",
+      "kind": "new_in_bezalel",
+      "sha256": "1f9a533f080fe9048d6a5cce8520706001ae432a4fecf8ebecd39b3e4f55f453",
+      "bytes": 4589,
+      "mode": "0o644"
     },
     {
       "source": "~/.codex/skills/clean-architecture/SKILL.md",
       "destination": "skills/clean-architecture/SKILL.md",
       "source_sha256": "371811e39bb6676cc8a25619a3a19e6ff9c6d9a7a33f022d308b0886284f9544",
-      "sha256": "371811e39bb6676cc8a25619a3a19e6ff9c6d9a7a33f022d308b0886284f9544",
+      "sha256": "add86b4a47889f5d583f15a7368d79e9b48ca6ef4b952cb09b8b4f2d57f6c5ef",
       "source_bytes": 6883,
-      "bytes": 6883,
+      "bytes": 7680,
       "mode": "0o644",
-      "changes": []
+      "changes": [
+        "Adapted in Bezalel; original source hash preserved."
+      ]
     },
     {
       "source": "~/.codex/skills/clean-architecture/agents/openai.yaml",
@@ -210,6 +178,78 @@
       "changes": []
     },
     {
+      "source": "~/.codex/skills/clean-code/SKILL.md",
+      "destination": "skills/clean-code/SKILL.md",
+      "source_sha256": "e45bb82d58a615ec47a396e20f01cb299b1676d1ec8b4269dd1597b230608d83",
+      "sha256": "8d6cc9484482c0cf57c92eb851321c210c01e6c8d4916f7665797a8e10c369c1",
+      "source_bytes": 5555,
+      "bytes": 6348,
+      "mode": "0o644",
+      "changes": [
+        "Adapted in Bezalel; original source hash preserved."
+      ]
+    },
+    {
+      "source": "~/.codex/skills/clean-code/agents/openai.yaml",
+      "destination": "skills/clean-code/agents/openai.yaml",
+      "source_sha256": "6544a2b9d4b19cff2743322f90428344d95f0325b1a6530fbe2768c8a54b0e83",
+      "sha256": "6544a2b9d4b19cff2743322f90428344d95f0325b1a6530fbe2768c8a54b0e83",
+      "source_bytes": 313,
+      "bytes": 313,
+      "mode": "0o644",
+      "changes": []
+    },
+    {
+      "source": "~/.codex/skills/clean-code/references/concorrencia.md",
+      "destination": "skills/clean-code/references/concorrencia.md",
+      "source_sha256": "329c3348061fd84833d61afcf9b528e1d400656dafe7c888cf6294022d6a56d2",
+      "sha256": "329c3348061fd84833d61afcf9b528e1d400656dafe7c888cf6294022d6a56d2",
+      "source_bytes": 5721,
+      "bytes": 5721,
+      "mode": "0o644",
+      "changes": []
+    },
+    {
+      "source": "~/.codex/skills/clean-code/references/erros-e-contratos.md",
+      "destination": "skills/clean-code/references/erros-e-contratos.md",
+      "source_sha256": "1db2ef7acaeb3a95165410a4dd3299b976e52b63105e4d4263095c716326a5f9",
+      "sha256": "1db2ef7acaeb3a95165410a4dd3299b976e52b63105e4d4263095c716326a5f9",
+      "source_bytes": 4888,
+      "bytes": 4888,
+      "mode": "0o644",
+      "changes": []
+    },
+    {
+      "source": "~/.codex/skills/clean-code/references/legibilidade-e-funcoes.md",
+      "destination": "skills/clean-code/references/legibilidade-e-funcoes.md",
+      "source_sha256": "24107d74497b1f7ca2fca6fff1957b568fe17e272c9ec695fabaa2ec665d21da",
+      "sha256": "24107d74497b1f7ca2fca6fff1957b568fe17e272c9ec695fabaa2ec665d21da",
+      "source_bytes": 6391,
+      "bytes": 6391,
+      "mode": "0o644",
+      "changes": []
+    },
+    {
+      "source": "~/.codex/skills/clean-code/references/refatoracao-e-testes.md",
+      "destination": "skills/clean-code/references/refatoracao-e-testes.md",
+      "source_sha256": "a5dd42283fe7184744ae125b4ccb9321e1f6940d506e751420f3924b9892e3c3",
+      "sha256": "a5dd42283fe7184744ae125b4ccb9321e1f6940d506e751420f3924b9892e3c3",
+      "source_bytes": 8786,
+      "bytes": 8786,
+      "mode": "0o644",
+      "changes": []
+    },
+    {
+      "source": "~/.codex/skills/clean-code/references/responsabilidades-e-fronteiras.md",
+      "destination": "skills/clean-code/references/responsabilidades-e-fronteiras.md",
+      "source_sha256": "ed20053094b839f25302753cfa6f4247f5212ca5c475ba505afbf366e3a265af",
+      "sha256": "ed20053094b839f25302753cfa6f4247f5212ca5c475ba505afbf366e3a265af",
+      "source_bytes": 8248,
+      "bytes": 8248,
+      "mode": "0o644",
+      "changes": []
+    },
+    {
       "source": "~/.agents/skills/env/.gitignore",
       "destination": "skills/env/.gitignore",
       "source_sha256": "d11bdacfcbfb57c5897f9e0848becd7ba6d4c211661138f675209be64754349a",
@@ -223,51 +263,75 @@
       "source": "~/.agents/skills/env/SKILL.md",
       "destination": "skills/env/SKILL.md",
       "source_sha256": "2aa4ec128d2c5d835ec701b3bdd0db52cdb9d8d28e780a41d07a3f925aec5ca2",
-      "sha256": "2aa4ec128d2c5d835ec701b3bdd0db52cdb9d8d28e780a41d07a3f925aec5ca2",
+      "sha256": "5225c277faf5c79f44d30d2e1d081348308b9f39fe01f9158a2cfac0d4fc9440",
       "source_bytes": 16413,
-      "bytes": 16413,
+      "bytes": 4834,
       "mode": "0o644",
-      "changes": []
+      "changes": [
+        "Adapted in Bezalel; original source hash preserved."
+      ]
     },
     {
       "source": "~/.agents/skills/env/agents/openai.yaml",
       "destination": "skills/env/agents/openai.yaml",
       "source_sha256": "8cbb2afb10a101c5865d984c1f7abbc997f0d3898b52f944a6505a0c35b75384",
-      "sha256": "8cbb2afb10a101c5865d984c1f7abbc997f0d3898b52f944a6505a0c35b75384",
+      "sha256": "aa9ae9c6cda30a653c0d3c40f3ee0396e12f11cf2ba40408911aac447c19b545",
       "source_bytes": 211,
-      "bytes": 211,
+      "bytes": 261,
       "mode": "0o644",
-      "changes": []
+      "changes": [
+        "Adapted in Bezalel; original source hash preserved."
+      ]
+    },
+    {
+      "destination": "skills/env/references/operacao.md",
+      "kind": "new_in_bezalel",
+      "sha256": "ccb2ad2038b55344a0d21421184a564fa10dc316192b54002e0f39ff6865715e",
+      "bytes": 16247,
+      "mode": "0o644"
+    },
+    {
+      "destination": "skills/env/scripts/check_destroy.py",
+      "kind": "new_in_bezalel",
+      "sha256": "c410fa893ba84fe5b28c8e4887c0c1647bede68b6b1d0169fe403462cef08652",
+      "bytes": 1865,
+      "mode": "0o644"
     },
     {
       "source": "~/.agents/skills/env/scripts/ctl.sh",
       "destination": "skills/env/scripts/ctl.sh",
       "source_sha256": "1405d44dcc57b188f81079f1e12db5de23e6a8e5793891e3f2990dd581ad9a04",
-      "sha256": "1405d44dcc57b188f81079f1e12db5de23e6a8e5793891e3f2990dd581ad9a04",
+      "sha256": "85a8838976ceea056d5fe4035bfc508e62873987d7b704b715e5a7548b516707",
       "source_bytes": 1461,
-      "bytes": 1461,
+      "bytes": 1558,
       "mode": "0o755",
-      "changes": []
+      "changes": [
+        "Adapted in Bezalel; original source hash preserved."
+      ]
     },
     {
       "source": "~/.agents/skills/env/scripts/destroy.sh",
       "destination": "skills/env/scripts/destroy.sh",
       "source_sha256": "4212e79618714763c9ad8c5fbe67955d0bc402fd9f6882392d5c5c7fcd73262f",
-      "sha256": "4212e79618714763c9ad8c5fbe67955d0bc402fd9f6882392d5c5c7fcd73262f",
+      "sha256": "d531eca1433ba66666790f95ff0c9b87f4a1785b2133e5d1f8ed2595138c8339",
       "source_bytes": 1820,
-      "bytes": 1820,
+      "bytes": 2195,
       "mode": "0o755",
-      "changes": []
+      "changes": [
+        "Adapted in Bezalel; original source hash preserved."
+      ]
     },
     {
       "source": "~/.agents/skills/env/scripts/detect.sh",
       "destination": "skills/env/scripts/detect.sh",
       "source_sha256": "f8483acfd9c78ee771ea87df87e1b0ee48272abc5cfd5502d2fd24becab2057f",
-      "sha256": "f8483acfd9c78ee771ea87df87e1b0ee48272abc5cfd5502d2fd24becab2057f",
+      "sha256": "6aad61707bf82c79476bf4c1a72db4e8003aa6bd2552594ee56d7c217cec1b35",
       "source_bytes": 3098,
-      "bytes": 3098,
+      "bytes": 3529,
       "mode": "0o755",
-      "changes": []
+      "changes": [
+        "Adapted in Bezalel; original source hash preserved."
+      ]
     },
     {
       "source": "~/.agents/skills/env/scripts/ide.sh",
@@ -283,31 +347,37 @@
       "source": "~/.agents/skills/env/scripts/init.sh",
       "destination": "skills/env/scripts/init.sh",
       "source_sha256": "1bcff778e84de91733941d3e5aa99c2a9a927ced56a704bb1912285b9963691c",
-      "sha256": "1bcff778e84de91733941d3e5aa99c2a9a927ced56a704bb1912285b9963691c",
+      "sha256": "5dab8305d5a1fba9d63bc0c5400858484523bae8bb4e356cc5a20a4d45ba6e9a",
       "source_bytes": 6068,
-      "bytes": 6068,
+      "bytes": 5925,
       "mode": "0o755",
-      "changes": []
+      "changes": [
+        "Adapted in Bezalel; original source hash preserved."
+      ]
     },
     {
       "source": "~/.agents/skills/env/scripts/lib.sh",
       "destination": "skills/env/scripts/lib.sh",
       "source_sha256": "f8da96deb0e08f6372036b2ff5f87760e732d02ced86bbabe61a6b1c89d3d43d",
-      "sha256": "f8da96deb0e08f6372036b2ff5f87760e732d02ced86bbabe61a6b1c89d3d43d",
+      "sha256": "0498e63dd0b36bc357ed03dd6a6eaf42646a8fcba77bbc7c2f4a9e45b981684d",
       "source_bytes": 18075,
-      "bytes": 18075,
+      "bytes": 20132,
       "mode": "0o755",
-      "changes": []
+      "changes": [
+        "Adapted in Bezalel; original source hash preserved."
+      ]
     },
     {
       "source": "~/.agents/skills/env/scripts/new.sh",
       "destination": "skills/env/scripts/new.sh",
       "source_sha256": "b5a9e3d707eb44df38826e5f916e3522a5394d49228700afa80c95251d228226",
-      "sha256": "b5a9e3d707eb44df38826e5f916e3522a5394d49228700afa80c95251d228226",
+      "sha256": "bb310c9052df488f17c5e2bbdd0335bf637e3a078b1a980130fcc398a6a7e70d",
       "source_bytes": 8650,
-      "bytes": 8650,
+      "bytes": 9069,
       "mode": "0o755",
-      "changes": []
+      "changes": [
+        "Adapted in Bezalel; original source hash preserved."
+      ]
     },
     {
       "source": "~/.agents/skills/env/scripts/services.sh",
@@ -343,11 +413,13 @@
       "source": "~/.agents/skills/env/scripts/xdebug.sh",
       "destination": "skills/env/scripts/xdebug.sh",
       "source_sha256": "baf7cc3084301ffc6311cc5355521f2c60aaf37e44a47f700e22df3da8e22744",
-      "sha256": "baf7cc3084301ffc6311cc5355521f2c60aaf37e44a47f700e22df3da8e22744",
+      "sha256": "c4d43bacbb116591c4788a98c729b8ffa67c0e8ed50384eb6b3a72c71398cff5",
       "source_bytes": 3044,
-      "bytes": 3044,
+      "bytes": 3123,
       "mode": "0o755",
-      "changes": []
+      "changes": [
+        "Adapted in Bezalel; original source hash preserved."
+      ]
     },
     {
       "source": "~/.agents/skills/env/templates/boot.sh.tpl",
@@ -458,7 +530,8 @@
       "bytes": 1038,
       "mode": "0o644",
       "changes": [
-        "Removed one comment containing an internal project reference and measurement."
+        "Removed one comment containing an internal project reference and measurement.",
+        "Adapted in Bezalel; original source hash preserved."
       ]
     },
     {
@@ -545,11 +618,13 @@
       "source": "~/.agents/skills/env/templates/stack.yaml.tpl",
       "destination": "skills/env/templates/stack.yaml.tpl",
       "source_sha256": "9a403db4aa44f8958dac006a5d826e9877e7ec263f74cbc527e34a0401a9a62c",
-      "sha256": "9a403db4aa44f8958dac006a5d826e9877e7ec263f74cbc527e34a0401a9a62c",
+      "sha256": "9ac36602dbbd0fead0f7a981f4ecefc94721699ab97eb67f59fb6c058e9fc82e",
       "source_bytes": 901,
-      "bytes": 901,
+      "bytes": 1051,
       "mode": "0o644",
-      "changes": []
+      "changes": [
+        "Adapted in Bezalel; original source hash preserved."
+      ]
     },
     {
       "source": "~/.agents/skills/env/templates/traefik.dynamic.yml.tpl",
@@ -565,11 +640,13 @@
       "source": "~/.agents/skills/env/tests/integration_lifecycle.py",
       "destination": "skills/env/tests/integration_lifecycle.py",
       "source_sha256": "ed252669749e7e14910e7ce64056f17e7b9c80d7f6ad8417d4d3ce3bda97473b",
-      "sha256": "ed252669749e7e14910e7ce64056f17e7b9c80d7f6ad8417d4d3ce3bda97473b",
+      "sha256": "a9eadc8fa6d22364acecaf32258cfd468b2851d2196a78cad4f0d02276770963",
       "source_bytes": 9865,
-      "bytes": 9865,
+      "bytes": 10362,
       "mode": "0o644",
-      "changes": []
+      "changes": [
+        "Adapted in Bezalel; original source hash preserved."
+      ]
     },
     {
       "source": "~/.agents/skills/env/tests/test_boot.py",
@@ -582,20 +659,136 @@
       "changes": []
     },
     {
+      "destination": "skills/env/tests/test_destroy_ownership.py",
+      "kind": "new_in_bezalel",
+      "sha256": "ac63fbff95fffd0dd14ddb8c1a52466b4ac1a3d31670a76742b34075347b8115",
+      "bytes": 1525,
+      "mode": "0o644"
+    },
+    {
       "source": "~/.agents/skills/env/tests/test_lifecycle.py",
       "destination": "skills/env/tests/test_lifecycle.py",
       "source_sha256": "6c92d93e279f1528ca9f821feecec658242959638b777c0d8832276f0c93515c",
-      "sha256": "6c92d93e279f1528ca9f821feecec658242959638b777c0d8832276f0c93515c",
+      "sha256": "82eda8a3c0fc8570db44476091ad2f7ad2d9229c1954c69465b93b05a4a73959",
       "source_bytes": 8559,
-      "bytes": 8559,
+      "bytes": 16385,
       "mode": "0o644",
-      "changes": []
+      "changes": [
+        "Adapted in Bezalel; original source hash preserved."
+      ]
+    },
+    {
+      "source": "~/.codex/skills/limpar-orbstack/SKILL.md",
+      "source_sha256": "ad23b960449267030d3d03034b9b53b7c264d6368a568a1a46f00bd0e030b1a7",
+      "destination": "skills/limpar-orbstack/SKILL.md",
+      "changes": [
+        "Adapted in Bezalel; original source hash preserved."
+      ],
+      "sha256": "c616a4a6c4a8e925b7aa919641a9cd50aacbfe0ecd6e597434520b38adbade66",
+      "bytes": 3437,
+      "mode": "0o644"
+    },
+    {
+      "source": "~/.codex/skills/limpar-orbstack/agents/openai.yaml",
+      "source_sha256": "fd448b2712c0dd61c2cc027f821a1b17c89a8cb2c2636d9f84c1a7a3c7ef2d50",
+      "destination": "skills/limpar-orbstack/agents/openai.yaml",
+      "changes": [
+        "Adapted in Bezalel; original source hash preserved."
+      ],
+      "sha256": "e5bc505adc473b39f9640b04ee8fac4e22022f1cd54713630a00895055ff826b",
+      "bytes": 284,
+      "mode": "0o644"
+    },
+    {
+      "destination": "skills/limpar-orbstack/references/auditoria.md",
+      "kind": "new_in_bezalel",
+      "sha256": "05a7e54d9ea7392a31655a61271df203319b84c388fe9cc3a6480bc4c2b2a5a6",
+      "bytes": 7022,
+      "mode": "0o644"
+    },
+    {
+      "source": "~/.codex/skills/limpar-orbstack/references/remocao.md",
+      "source_sha256": "83ef6905d6eb86052062cb789899751924c266d393ddefa2860a27d529896c6d",
+      "destination": "skills/limpar-orbstack/references/remocao.md",
+      "changes": [
+        "Adapted in Bezalel; original source hash preserved."
+      ],
+      "sha256": "7b5a70275e28349ea1f3c38ed44b4c8034b42569093fac2785af1214df16e739",
+      "bytes": 8732,
+      "mode": "0o644"
+    },
+    {
+      "destination": "skills/limpar-orbstack/references/validacao.md",
+      "kind": "new_in_bezalel",
+      "sha256": "38031ac0ad03674eb4b5f87c33ef1aa155707f2bdbd8eecd7cba90ffd8158d63",
+      "bytes": 1150,
+      "mode": "0o644"
+    },
+    {
+      "destination": "skills/vps-deploy/SKILL.md",
+      "sha256": "b3d96476225222cbc5bc171c56e2bb2f9e2e182bc5cbbf3c25bc1e0180663df8",
+      "bytes": 6566,
+      "kind": "new_or_adapted",
+      "mode": "0o644"
+    },
+    {
+      "destination": "skills/vps-deploy/agents/openai.yaml",
+      "kind": "new_in_bezalel",
+      "sha256": "6c547136a809cceabe2d8b7fd03dbbd4a70073248ef56ba8407fb2333f205fe6",
+      "bytes": 273,
+      "mode": "0o644"
+    },
+    {
+      "destination": "skills/vps-deploy/references/configuracao.md",
+      "sha256": "742e70dd5f031a49150584efdd27c81fa2d18fba98ef2dd6a7b69c241a744bad",
+      "bytes": 3181,
+      "kind": "new_or_adapted",
+      "mode": "0o644"
+    },
+    {
+      "destination": "skills/vps-deploy/references/proveniencia.md",
+      "sha256": "e67e484dd0d5daa2c5c307d3f61945df5067c621bd1aa9eb94fca579ce2d62ac",
+      "bytes": 2307,
+      "kind": "new_or_adapted",
+      "mode": "0o644"
+    },
+    {
+      "destination": "skills/vps-deploy/scripts/check_config.py",
+      "sha256": "6b260ddb30ba5d50267cc8ceaadbced2d3d87cd4094ee088e893639a698fd979",
+      "bytes": 4183,
+      "kind": "new_or_adapted",
+      "mode": "0o644"
+    },
+    {
+      "destination": "skills/vps-deploy/templates/project.gitignore",
+      "kind": "new_in_bezalel",
+      "sha256": "3f6df8058f42a25875178852174ca456ad9c91c62a069fcd54137149df9c8506",
+      "bytes": 23,
+      "mode": "0o644"
+    },
+    {
+      "destination": "skills/vps-deploy/templates/vps-deploy.example.json",
+      "kind": "new_in_bezalel",
+      "sha256": "e8204ed5ff8f1cee32ffc5fc265a101044965f84230dbcbfd3e994e22077101d",
+      "bytes": 80,
+      "mode": "0o644"
+    },
+    {
+      "destination": "skills/vps-deploy/tests/test_config.py",
+      "sha256": "7be7b50b6c4f8b641ffd5b1f63974331c17b7e8895e9af4b546caf39f066c137",
+      "bytes": 5552,
+      "kind": "new_or_adapted",
+      "mode": "0o644"
     }
   ],
   "history": [
     {
       "commit": "75e65c4be946a3ae8d6ea003db0bcc6000e3ecde",
       "note": "Initial snapshot with both env variants; recoverable from this commit."
+    },
+    {
+      "commit": "c1e2398f1a81acbe5b2b37ef41506404d473b302",
+      "note": "Before portable ENV safety checks, common documentation and cleanup skill addition."
     }
   ],
   "additions": [
@@ -614,51 +807,29 @@
         }
       ],
       "differences": "skills/vps-deploy/references/proveniencia.md",
-      "files": [
+      "credential_handling": "No credential copied, filled, generated or tested; no local config instantiated. Only references, placeholders and presence checks.",
+      "current_files": "See top-level files list."
+    },
+    {
+      "skill": "limpar-orbstack",
+      "date": "2026-10-09",
+      "kind": "authorized adaptation; no cleanup executed",
+      "sources": [
         {
-          "destination": ".bezalel/.gitignore",
-          "sha256": "3f6df8058f42a25875178852174ca456ad9c91c62a069fcd54137149df9c8506",
-          "bytes": 23,
-          "kind": "new_or_adapted"
+          "source": "~/.codex/skills/limpar-orbstack/SKILL.md",
+          "source_sha256": "ad23b960449267030d3d03034b9b53b7c264d6368a568a1a46f00bd0e030b1a7"
         },
         {
-          "destination": ".bezalel/vps-deploy.example.json",
-          "sha256": "e8204ed5ff8f1cee32ffc5fc265a101044965f84230dbcbfd3e994e22077101d",
-          "bytes": 80,
-          "kind": "new_or_adapted"
+          "source": "~/.codex/skills/limpar-orbstack/references/remocao.md",
+          "source_sha256": "83ef6905d6eb86052062cb789899751924c266d393ddefa2860a27d529896c6d"
         },
         {
-          "destination": "skills/vps-deploy/SKILL.md",
-          "sha256": "30d0caed1fed99cdd0de48cdd64f0529bb77f972dd7a7f1ca9c5527b4ec551a0",
-          "bytes": 5550,
-          "kind": "new_or_adapted"
-        },
-        {
-          "destination": "skills/vps-deploy/references/configuracao.md",
-          "sha256": "da2f18b43c3ee270f386b29696a6cbb3bfd0470e9a7712e5f8dd2cf5fddfa9c1",
-          "bytes": 3082,
-          "kind": "new_or_adapted"
-        },
-        {
-          "destination": "skills/vps-deploy/references/proveniencia.md",
-          "sha256": "e67e484dd0d5daa2c5c307d3f61945df5067c621bd1aa9eb94fca579ce2d62ac",
-          "bytes": 2307,
-          "kind": "new_or_adapted"
-        },
-        {
-          "destination": "skills/vps-deploy/scripts/check_config.py",
-          "sha256": "6b260ddb30ba5d50267cc8ceaadbced2d3d87cd4094ee088e893639a698fd979",
-          "bytes": 4183,
-          "kind": "new_or_adapted"
-        },
-        {
-          "destination": "skills/vps-deploy/tests/test_config.py",
-          "sha256": "4e9015a577413d150c7faf662c8d4964df37ac686f1d8e39a322ef9808f6cabc",
-          "bytes": 4798,
-          "kind": "new_or_adapted"
+          "source": "~/.codex/skills/limpar-orbstack/agents/openai.yaml",
+          "source_sha256": "fd448b2712c0dd61c2cc027f821a1b17c89a8cb2c2636d9f84c1a7a3c7ef2d50"
         }
       ],
-      "credential_handling": "No credential copied, filled, generated or tested; no local config instantiated. Only references, placeholders and presence checks."
+      "current_files": "See top-level files list."
     }
-  ]
+  ],
+  "standardization": "Five skills share documented sections. ENV uses explicit context/state ownership, local base detection and protected destruction. VPS includes its templates. README/AGENTS describe actual capabilities and safe verification."
 }

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Limpar OrbStack"
+  short_description: "Audita ambientes e remove somente recursos autorizados"
+  default_prompt: "Use $limpar-orbstack no projeto e na operação que eu indicar, respeitando os limites da skill."
+
+policy:
+  allow_implicit_invocation: false

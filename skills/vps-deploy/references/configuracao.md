@@ -5,16 +5,17 @@ Não há configuração global, servidor padrão compartilhado nem token persist
 pelo Bezalel. `--project` é obrigatório no validador; o diretório de trabalho do
 terminal não escolhe implicitamente o destino.
 
-O modelo versionado está em `.bezalel/vps-deploy.example.json`, na raiz do
-repositório Bezalel. Ele contém somente um domínio reservado e uma opção vazia;
+O [modelo versionado](../templates/vps-deploy.example.json) acompanha esta skill,
+em `templates/vps-deploy.example.json`. Ele contém somente um domínio reservado e uma opção vazia;
 não é uma configuração válida para operar.
 
 ## Preparação pelo usuário
 
 1. No projeto alvo, copie o modelo para `.bezalel/vps-deploy.local.json` apenas
    se esse arquivo ainda não existir. Preserve configurações existentes.
-2. Inclua `.bezalel/vps-deploy.local.json` no ignore daquele projeto. O arquivo
-   `.bezalel/.gitignore` do Bezalel pode acompanhar o modelo. Confirme com
+2. Inclua `.bezalel/vps-deploy.local.json` no ignore daquele projeto. Copie também
+   `templates/project.gitignore` da skill como `.bezalel/.gitignore`, ou acrescente
+   sua regra sem sobrescrever regras existentes. Confirme com
    `git check-ignore .bezalel/vps-deploy.local.json` antes de preencher valores.
 3. Edite localmente a URL da instância; preencha `ssh_target` apenas se precisar
    de SSH e já tiver o acesso autorizado. Restrinja a leitura do arquivo a seu

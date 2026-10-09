@@ -50,7 +50,9 @@ manifest_get() {
 # Nome-base do projeto: manifesto (se setado) senao basename do repo.
 project_name() {
     local p=""; [ -f "$(manifest_path)" ] && p="$(manifest_get '.project')"
-    [ -n "$p" ] && echo "$p" || basename "$(repo_root)"
+    [ -n "$p" ] || p="$(basename "$(repo_root)")"
+    validate_env_name "$p"
+    printf '%s\n' "$p"
 }
 project_tld() {
     local t=""; [ -f "$(manifest_path)" ] && t="$(manifest_get '.tld')"
@@ -64,7 +66,8 @@ engine_to_context() {
     case "$1" in
         orbstack)       echo "orbstack" ;;
         docker-desktop) echo "desktop-linux" ;;
-        *)              echo "" ;;   # auto / desconhecido: nao force contexto
+        auto)           echo "" ;;
+        *)              fail "Engine desconhecido no manifesto." ;;
     esac
 }
 
@@ -85,17 +88,57 @@ project_engine() {
     echo "${e:-auto}"
 }
 
-# Fixa DOCKER_CONTEXT p/ todos os comandos docker desta execucao conforme o
-# engine do manifesto, SEM alterar o contexto global do usuario. No-op em 'auto'
-# ou se o contexto declarado nao existir (avisa e segue no ativo).
+# Valida um destino explicito, sem fallback para o contexto ativo.
 apply_docker_engine() {
-    local engine ctx; engine="$(project_engine)"
-    ctx="$(engine_to_context "$engine")"; [ -n "$ctx" ] || return 0
-    if docker context inspect "$ctx" >/dev/null 2>&1; then
-        export DOCKER_CONTEXT="$ctx"
-    else
-        warn "engine='$engine' no manifesto, mas o docker context '$ctx' nao existe — usando o contexto ativo."
+    local engine ctx mapped
+    engine="$(project_engine)"
+    mapped="$(engine_to_context "$engine")"
+    ctx="$(manifest_get '.docker_context')"
+    [ -z "$mapped" ] || [ -z "$ctx" ] || [ "$mapped" = "$ctx" ] || fail "engine e docker_context divergem."
+    ctx="${ctx:-$mapped}"
+    [ -n "$ctx" ] || fail "Defina docker_context; nenhum contexto sera escolhido implicitamente."
+    [[ "$ctx" =~ ^[A-Za-z0-9][A-Za-z0-9_.-]*$ ]] || fail "docker_context invalido."
+    docker context inspect "$ctx" >/dev/null 2>&1 || fail "Contexto Docker configurado indisponivel; operacao cancelada."
+    export DOCKER_CONTEXT="$ctx"
+}
+
+base_ref() {
+    local root ref="" candidate count=0
+    root="$(repo_root)"
+    [ ! -f "$(manifest_path)" ] || ref="$(manifest_get '.base_ref')"
+    if [ -z "$ref" ]; then
+        ref="$(git -C "$root" symbolic-ref --quiet refs/remotes/origin/HEAD 2>/dev/null || true)"
     fi
+    if [ -z "$ref" ]; then
+        for candidate in main master; do
+            if git -C "$root" show-ref --verify --quiet "refs/heads/$candidate"; then
+                ref="$candidate"; count=$((count + 1))
+            fi
+        done
+        [ "$count" -eq 1 ] || fail "Base ambigua ou ausente: configure base_ref no manifesto."
+    fi
+    git -C "$root" rev-parse --verify --end-of-options "${ref}^{commit}" >/dev/null 2>&1 || fail "base_ref nao resolve para um commit local."
+    printf '%s\n' "$ref"
+}
+
+validate_state_owner() {
+    local state="$1"
+    [ -f "$state/project-root" ] && [ -f "$state/docker-context" ] || fail "Estado legado sem vinculo de projeto/contexto. Audite sua origem antes de operar."
+    [ "$(cat "$state/project-root")" = "$(repo_root)" ] || fail "Estado pertence a outro repositorio."
+    [ "$(cat "$state/docker-context")" = "$DOCKER_CONTEXT" ] || fail "Contexto diverge do registrado no ambiente."
+}
+
+require_shared_infra_authorization() {
+    [ "${ENV_ALLOW_SHARED_INFRA:-0}" = 1 ] || fail "Infra compartilhada exige autorizacao explicita: ENV_ALLOW_SHARED_INFRA=1 somente para esta execucao."
+}
+
+validate_worktree() {
+    local path="$1" branch="$2" registered
+    [ -d "$path" ] && [ ! -L "$path" ] || fail "Worktree esperada ausente ou vinculada por symlink."
+    registered="$(git -C "$(repo_root)" worktree list --porcelain)"
+    printf '%s\n' "$registered" | grep -Fxq "worktree $path" || fail "Worktree nao registrada neste repositorio."
+    [ "$(git -C "$path" rev-parse --show-toplevel)" = "$path" ] || fail "Diretorio nao e a worktree esperada."
+    [ "$(git -C "$path" symbolic-ref --quiet --short HEAD)" = "$branch" ] || fail "Branch da worktree difere do ambiente."
 }
 
 validate_env_name() {
@@ -219,7 +262,11 @@ wait_healthy() {
 render_template() {
     local tpl="$TPL_DIR/$1" dst="$2"
     [ -f "$tpl" ] || fail "Template ausente: $tpl"
-    envsubst "$RENDER_VARS" < "$tpl" > "$dst"
+    if [ "$dst" = /dev/stdout ] || [ "$dst" = - ]; then
+        envsubst "$RENDER_VARS" < "$tpl"
+    else
+        envsubst "$RENDER_VARS" < "$tpl" > "$dst"
+    fi
 }
 
 # ─── Resolucao de placeholders ${env:...} nos .env ─────────────
@@ -275,12 +322,13 @@ open(os.environ["ES_DST"], "w").write(text)
 PY
 }
 
-# ─── Infra do PROJETO (DNS wildcard + certificado) — roda no `init` ────────
+# ─── Infra do PROJETO (DNS wildcard + certificado) — new/update autorizado ──
 # Por-projeto e duradoura: wildcard DNS *.<projeto>.<tld>, resolver do macOS e o
 # CERTIFICADO wildcard *.<projeto>.<tld> que cobre TODOS os ambientes/subdominios
 # do projeto. O cert vai na pasta compartilhada do Traefik global (via dynamic
 # config com watch). Requer sudo na 1a vez (dnsmasq/resolver). Idempotente.
 ensure_project_infra() {
+    require_shared_infra_authorization
     local project="$1" tld="$2"
     local domain="${project}.${tld}"
     local certs_dir="$TRAEFIK_STATE/certs" dyn_dir="$TRAEFIK_STATE/dynamic"
@@ -307,7 +355,7 @@ ensure_project_infra() {
     # dynamic e o que poe o cert no pool de SNI do Traefik (sem ele -> default cert
     # = "certificado invalido" no navegador). Generico: deriva de ${project}/${domain}.
     if [ ! -f "$certs_dir/${project}.pem" ] || [ ! -f "$dyn_dir/${project}.yml" ]; then
-        mkcert -install 2>/dev/null || true
+        mkcert -install
         [ -f "$certs_dir/${project}.pem" ] || \
             ( cd "$certs_dir" && mkcert -cert-file "${project}.pem" -key-file "${project}-key.pem" "*.${domain}" "${domain}" )
         CERT_FILE="/certs/${project}.pem" KEY_FILE="/certs/${project}-key.pem" \
@@ -317,8 +365,11 @@ ensure_project_infra() {
         # inotify (limitacao do FS de VM — vale p/ OrbStack e Docker Desktop). Se o
         # Traefik global ja estiver de pe, ele nunca carrega o cert novo -> recarrega
         # explicitamente. No-op se ainda nao existe (o ensure_traefik sobe depois e le o /dynamic no boot).
-        if docker ps --format '{{.Names}}' | grep -q "^${ENVSTACK_TRAEFIK}$"; then
-            docker restart "$ENVSTACK_TRAEFIK" >/dev/null 2>&1 && ok "Traefik recarregado (cert no pool de SNI)" || true
+        local running
+        running="$(docker ps --format '{{.Names}}')"
+        if printf '%s\n' "$running" | grep -Fxq "$ENVSTACK_TRAEFIK"; then
+            docker restart "$ENVSTACK_TRAEFIK" >/dev/null
+            ok "Traefik recarregado (cert no pool de SNI)"
         fi
     else ok "Certificado *.${domain} ja existe"; fi
 }
@@ -326,13 +377,20 @@ ensure_project_infra() {
 # ─── Traefik GLOBAL unico (rede + container) — leve, sem sudo ──────────────
 # Compartilhado por TODOS os projetos, sempre em 80/443. Criado uma unica vez.
 # Le os certs/dynamic da pasta compartilhada (watch), entao basta o cert do
-# projeto existir ali (gerado no init) para o HTTPS daquele projeto funcionar.
+# projeto existir ali para o HTTPS daquele projeto funcionar.
 ensure_traefik() {
+    require_shared_infra_authorization
     local certs_dir="$TRAEFIK_STATE/certs" dyn_dir="$TRAEFIK_STATE/dynamic"
     mkdir -p "$certs_dir" "$dyn_dir"
-    docker network create "$ENVSTACK_PROXY" >/dev/null 2>&1 && ok "Rede $ENVSTACK_PROXY criada" || true
-    if docker ps -a --format '{{.Names}}' | grep -q "^${ENVSTACK_TRAEFIK}$"; then
-        docker start "$ENVSTACK_TRAEFIK" >/dev/null 2>&1 || true
+    local networks containers
+    networks="$(docker network ls --format '{{.Name}}')"
+    if ! printf '%s\n' "$networks" | grep -Fxq "$ENVSTACK_PROXY"; then
+        docker network create "$ENVSTACK_PROXY" >/dev/null
+        ok "Rede $ENVSTACK_PROXY criada"
+    fi
+    containers="$(docker ps -a --format '{{.Names}}')"
+    if printf '%s\n' "$containers" | grep -Fxq "$ENVSTACK_TRAEFIK"; then
+        docker start "$ENVSTACK_TRAEFIK" >/dev/null
         ok "Traefik global de pe (${ENVSTACK_TRAEFIK})"
     else
         if lsof -nP -iTCP:443 -sTCP:LISTEN >/dev/null 2>&1; then
@@ -352,14 +410,5 @@ ensure_traefik() {
     fi
 }
 
-# Infra completa (projeto + traefik). Usado pelo `init`.
+# Infra completa, somente sob autorizacao explicita.
 ensure_infra() { ensure_project_infra "$1" "$2"; ensure_traefik; }
-
-# ─── Aplica o engine do manifesto a TODA acao que carregar este lib ────────────
-# So age dentro de um projeto ja iniciado (manifesto presente) e com docker/yq.
-# Guardas evitam abortar quando rodado fora de um repo (ex.: detect.sh no 1o init).
-if command -v docker >/dev/null 2>&1 && command -v yq >/dev/null 2>&1; then
-    _es_manifest="$(manifest_path 2>/dev/null || true)"
-    [ -n "${_es_manifest:-}" ] && [ -f "$_es_manifest" ] && apply_docker_engine || true
-    unset _es_manifest
-fi
