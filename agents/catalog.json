@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "execution": "definitions_only",
+  "roles": {
+    "produto": {
+      "file": "roles/produto.md",
+      "kind": "delivery",
+      "skills": []
+    },
+    "coordenador": {
+      "file": "roles/coordenador.md",
+      "kind": "delivery",
+      "skills": [
+        "clean-architecture",
+        "clean-code"
+      ]
+    },
+    "dev-fullstack": {
+      "file": "roles/dev-fullstack.md",
+      "kind": "delivery",
+      "skills": [
+        "clean-code",
+        "clean-architecture"
+      ]
+    },
+    "backend": {
+      "file": "roles/backend.md",
+      "kind": "delivery",
+      "skills": [
+        "clean-code",
+        "clean-architecture"
+      ]
+    },
+    "frontend-web": {
+      "file": "roles/frontend-web.md",
+      "kind": "delivery",
+      "skills": [
+        "clean-code",
+        "clean-architecture"
+      ]
+    },
+    "mobile": {
+      "file": "roles/mobile.md",
+      "kind": "delivery",
+      "skills": [
+        "clean-code",
+        "clean-architecture"
+      ]
+    },
+    "qa": {
+      "file": "roles/qa.md",
+      "kind": "delivery",
+      "skills": []
+    },
+    "infraestrutura": {
+      "file": "roles/infraestrutura.md",
+      "kind": "delivery",
+      "skills": [
+        "env",
+        "vps-deploy",
+        "limpar-orbstack"
+      ]
+    },
+    "observador-confiabilidade": {
+      "file": "roles/observador-confiabilidade.md",
+      "kind": "observer",
+      "skills": []
+    },
+    "observador-negocio": {
+      "file": "roles/observador-negocio.md",
+      "kind": "observer",
+      "skills": []
+    }
+  }
+}

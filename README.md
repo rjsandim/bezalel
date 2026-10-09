@@ -1,7 +1,8 @@
 # Bezalel
 
-Coleção de cinco skills pessoais: instruções, referências e automações locais.
-Não há runtime de agentes, serviço hospedado ou instalador automático.
+Base versionável de papéis de agentes, processo de entrega e cinco skills
+pessoais. Há definições e validadores locais; não há runtime que inicie agentes,
+monitoramento, serviço hospedado ou instalador automático.
 
 | Skill | Finalidade | Implementação |
 |---|---|---|
@@ -10,6 +11,36 @@ Não há runtime de agentes, serviço hospedado ou instalador automático.
 | [env](skills/env/SKILL.md) | Gerenciar ambientes locais por worktree e Docker | Bash, Python auxiliar e templates |
 | [vps-deploy](skills/vps-deploy/SKILL.md) | Orientar operações de VPS com configuração por projeto | Markdown e validador Python |
 | [limpar-orbstack](skills/limpar-orbstack/SKILL.md) | Auditar e limpar ambientes explicitamente autorizados | Markdown e roteiros de preservação |
+
+## Agentes e entrega por user story
+
+A [base de agentes](agents/README.md) define produto, coordenador/arquiteto,
+dev fullstack, backend, frontend web, mobile, QA independente e infraestrutura.
+São papéis opcionais conforme risco; cada história mantém um responsável pela
+entrega integrada. Os dois observadores futuros (confiabilidade e negócio) estão
+somente definidos, desativados e limitados a propor demandas.
+
+O fluxo é isolamento → análise → proposta/aprovação de banco quando aplicável →
+implementação → QA independente/integração → preparação da PR e roteiro manual.
+Mudanças estruturais de banco exigem decisão humana sobre a proposta exata antes
+de implementar; sem alteração, registre não aplicável com razão.
+
+Use o [modelo de projeto](.bezalel/project.example.json) em `.bezalel/project.json`
+para apontar arquitetura, regras de negócio e verificações. Uma
+[história curta](agents/templates/user-story.md) contém necessidade, critérios
+observáveis e dependências; [handoffs](agents/templates/handoff.md) transportam
+evidências e bloqueios. O [contrato de registro](agents/record-contract.md) explica
+a validação local e suas limitações.
+
+```sh
+python3 <Bezalel>/scripts/check_delivery.py --project <projeto> --record .bezalel/deliveries/US-001.local.json --stage plan
+```
+
+O CLI valida declarações locais; não comprova a veracidade das evidências nem
+aprovação humana. Não delega trabalho, não executa testes e não publica PR. Um runtime futuro
+precisa executar ferramentas e aplicar gates; os Markdown não impõem bloqueios.
+Prepare a PR localmente quando publicação não estiver autorizada. Arquivos de
+configuração e papéis nunca concedem autorização permanente de acesso.
 
 ## Estrutura comum
 
@@ -110,12 +141,15 @@ Execute a partir da raiz do Bezalel:
 
 ```sh
 python3 -B scripts/check_repository.py
+python3 -B -m unittest discover -s tests -v
 python3 -B -m unittest discover -s skills/env/tests -v
 python3 -B -m unittest discover -s skills/vps-deploy/tests -v
 ```
 
-O checker verifica estrutura, links locais e metadados essenciais, sem alterar
-arquivos ou exigir atualização de hashes a cada edição.
+O checker verifica estrutura, catálogo de papéis, configuração de exemplo, links
+locais e metadados essenciais, sem alterar arquivos ou exigir atualização de
+hashes a cada edição. Os testes de entrega
+usam histórias e decisões inteiramente sintéticas, sem autorização real.
 Os testes usam repositórios temporários e simulam operações Docker, brew, sudo
 e mkcert; o CLI real só valida Compose estaticamente, sem acessar o daemon.
 Os testes Python de VPS usam entradas sintéticas, sem rede. As skills documentais

@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "story": "stories/US-001.md",
+  "owner": "",
+  "implementers": [],
+  "roles": [
+    "dev-fullstack",
+    "qa"
+  ],
+  "isolation": {
+    "files": {
+      "status": "pending",
+      "evidence": ""
+    },
+    "database": {
+      "status": "pending",
+      "evidence": ""
+    },
+    "queues": {
+      "status": "pending",
+      "evidence": ""
+    },
+    "ports": {
+      "status": "pending",
+      "evidence": ""
+    },
+    "storage": {
+      "status": "pending",
+      "evidence": ""
+    }
+  },
+  "database": {
+    "change": "none",
+    "reason": "A história de exemplo compõe leitura sobre o modelo existente, sem schema, índice ou restrição novos."
+  },
+  "checks": [],
+  "qa": {
+    "reviewer": "",
+    "criteria": [],
+    "additional_scenarios": []
+  },
+  "integration": {
+    "owner": "",
+    "status": "pending",
+    "evidence": ""
+  },
+  "manual_test": "",
+  "pr_draft": ""
+}

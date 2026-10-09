@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 import re
 import sys
+from check_delivery import ContractError, read_json, validate_config
 
 ROOT = Path(__file__).resolve().parents[1]
 SECTIONS = ["Objetivo e escopo", "Entradas e pré-requisitos", "Procedimento", "Saídas", "Validação", "Limites operacionais"]
@@ -11,8 +12,8 @@ EXCLUDED = {".git", ".DS_Store", "__pycache__", "state", "backups", ".local-revi
 
 
 def package_files():
-    candidates = [ROOT / name for name in ["README.md", "AGENTS.md", ".gitignore", ".bezalel/.gitignore"]]
-    for directory in [ROOT / "skills", ROOT / "scripts"]:
+    candidates = [ROOT / name for name in ["README.md", "AGENTS.md", ".gitignore", ".bezalel/.gitignore", ".bezalel/project.example.json"]]
+    for directory in [ROOT / "skills", ROOT / "scripts", ROOT / "agents", ROOT / "tests"]:
         candidates.extend(directory.rglob("*"))
     return sorted(p for p in candidates if p.is_file()
                   and not any(part in EXCLUDED for part in p.relative_to(ROOT).parts)
@@ -46,16 +47,49 @@ def validate_structure(files):
     return errors
 
 
+def validate_agents():
+    errors = []
+    headings = ["Objetivo", "Entradas", "Saídas", "Ferramentas necessárias", "Limites e permissões", "Critérios de pronto", "Seleção de skills", "Contrato de handoff"]
+    try:
+        catalog = read_json(ROOT / "agents/catalog.json")
+        if not isinstance(catalog, dict) or type(catalog.get("schema_version")) is not int or catalog.get("schema_version") != 1 or catalog.get("execution") != "definitions_only" or not isinstance(catalog.get("roles"), dict):
+            return ["Catálogo de papéis inválido ou declara execução não implementada."]
+        declared = set()
+        for role, entry in catalog["roles"].items():
+            if not isinstance(entry, dict) or entry.get("kind") not in {"delivery", "observer"}:
+                errors.append("Tipo de papel inválido no catálogo.")
+                continue
+            path = (ROOT / "agents" / entry.get("file", "")).resolve()
+            if path.parent != ROOT / "agents/roles" or not path.is_file():
+                errors.append("Arquivo de papel ausente ou fora de agents/roles.")
+                continue
+            declared.add(path)
+            content = path.read_text()
+            if not re.search(r"^role: " + re.escape(role) + r"$", content, re.M) or not re.search(r"^kind: " + entry["kind"] + r"$", content, re.M):
+                errors.append("Metadados do papel divergem do catálogo: " + role)
+            if re.findall(r"^## (.+)$", content, re.M) != headings:
+                errors.append("Seções de papel incompletas: " + role)
+            skills = entry.get("skills")
+            if not isinstance(skills, list) or any(not isinstance(skill, str) or not (ROOT / "skills" / skill / "SKILL.md").is_file() for skill in skills):
+                errors.append("Seleção de skills inválida: " + role)
+        if declared != set((ROOT / "agents/roles").glob("*.md")):
+            errors.append("Há papéis fora do catálogo ou referências duplicadas/incompletas.")
+        validate_config(read_json(ROOT / ".bezalel/project.example.json"))
+    except (ContractError, OSError, UnicodeError, TypeError, ValueError):
+        errors.append("Não foi possível validar catálogo/configuração de exemplo.")
+    return errors
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.parse_args()
     files = package_files()
-    errors = validate_structure(files)
+    errors = validate_structure(files) + validate_agents()
     if errors:
         for error in errors:
             print(error, file=sys.stderr)
         return 1
-    print("Estrutura, metadados essenciais e links locais verificados.")
+    print("Estrutura, catálogo de papéis, configuração de exemplo, metadados e links locais verificados.")
     return 0
 
 

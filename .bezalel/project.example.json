@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "project": "exemplo-sem-servicos-conectados",
+  "context": {
+    "architecture": "docs/architecture.md",
+    "business": "docs/business.md"
+  },
+  "interfaces": [
+    "api",
+    "web"
+  ],
+  "checks": {
+    "test": [],
+    "lint": [],
+    "build": []
+  },
+  "observers": {
+    "reliability": {
+      "enabled": false,
+      "mode": "proposal_only",
+      "source": null,
+      "window_minutes": 30,
+      "signals": [
+        "errors",
+        "availability",
+        "slow_queries"
+      ]
+    },
+    "business": {
+      "enabled": false,
+      "mode": "proposal_only",
+      "source": null,
+      "timezone": "CONFIGURAR_FUSO_DO_PROJETO",
+      "metric": "check_ins",
+      "requires_scheduled_activity": true,
+      "grace_minutes": 15,
+      "window_minutes": 30,
+      "minimum_expected": 1,
+      "observed_threshold": 0
+    }
+  }
+}

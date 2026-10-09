@@ -1,7 +1,7 @@
 # Instruções de contribuição do Bezalel
 
-Este arquivo atende ao pedido de instruções do repositório (`AGENTS.md`). Não
-implementa agentes, orquestração, instalações ou integrações com aplicativos.
+Este arquivo instrui contribuições no repositório. Papéis e contratos ficam em
+`agents/`; são definições, não um runtime de delegação ou autorização.
 
 ## Escopo e estrutura
 
@@ -15,6 +15,32 @@ implementa agentes, orquestração, instalações ou integrações com aplicativ
   caminhos fixos de usuário/agente ou dependências ocultas da raiz do Bezalel.
 - Metadados `agents/openai.yaml` são adaptadores opcionais. Não prometa suporte
   de um aplicativo sem validá-lo. Invocação implícita não autoriza efeitos externos.
+
+## Papéis e contratos de entrega
+
+- Agente define papel/processo; `.bezalel/project.json` aponta instruções de
+  arquitetura/negócio do projeto; skills definem procedimentos. Não misture as três
+  responsabilidades nem crie gerenciador de pacotes ou runtime implícito.
+- Papéis em `agents/roles/` constam do catálogo e descrevem objetivo, entradas,
+  saídas, ferramentas, limites, pronto, seleção de skills e handoff. Não alegue
+  que um Markdown delega, executa ferramentas ou impõe gates.
+- User story deve ser curta e compreensível, com necessidade, critérios observáveis,
+  dependências e responsável pela integração inteira. Especialistas são opcionais.
+- Gates exigem evidência de isolamento de arquivos/banco/filas/portas/storage;
+  mudança estrutural de banco exige proposta revisável e aprovação humana anterior
+  à implementação, vinculada à versão exata. Sem mudança, registre não aplicável.
+- Não fabrique aprovações ou resultados para satisfazer validadores. JSON não prova
+  identidade nem autorização; um runtime deve conferir a interação humana real.
+- QA independente amplia cenários e confronta comportamento, não só a suíte do dev.
+  Mantenha responsabilidade pela integração de API/web/mobile e serviços envolvidos.
+- Produto aponta desvios e alternativas; o usuário decide mudanças. Contratos,
+  fachadas e reutilização devem resolver problemas concretos, sem refatorar fora
+  do escopo ou concentrar regras/SQLs de todos os módulos num arquivo gigante.
+- Observadores permanecem desativados e somente propositivos. Não ative coleta,
+  leia produção ou faça correções como teste dessa base. Calendário, janela e
+  tolerância importam para métricas; ausência de dados não é zero eventos.
+- PR é etapa prevista de entrega, mas publicação/merge/deploy exigem autorização
+  concreta da tarefa. Quando ausente, prepare rascunho local e registre a pendência.
 
 ## Configuração e segurança
 
@@ -35,6 +61,9 @@ implementa agentes, orquestração, instalações ou integrações com aplicativ
 - Para toda mudança, execute `python3 -B scripts/check_repository.py` e confira
   `git diff --check`. O checker é somente leitura e valida estrutura, metadados
   essenciais e links locais; não exige regenerar inventários ou hashes.
+- Mudanças em agentes/contratos/checkers: `python3 -B -m unittest discover -s tests -v`.
+  Use fixtures sintéticas; não execute comandos declarados na configuração para
+  testar sua leitura.
 - Mudanças em ENV: `python3 -B -m unittest discover -s skills/env/tests -v` e
   `bash -n` nos scripts shell alterados. Os testes usam Docker simulado; o CLI
   real só pode ser usado por eles para `compose config`, sem daemon.
