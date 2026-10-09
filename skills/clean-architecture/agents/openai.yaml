@@ -1,0 +1,7 @@
+interface:
+  display_name: "Clean Architecture"
+  short_description: "Revise e corrija arquitetura, fronteiras e dependências"
+  default_prompt: "Use $clean-architecture para revisar e corrigir a arquitetura deste desenvolvimento, preservando os contratos e verificando os princípios aplicáveis."
+
+policy:
+  allow_implicit_invocation: true

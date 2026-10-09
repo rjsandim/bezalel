@@ -1,0 +1,10 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+/.local-review/
+**/state/
+**/backups/
+.env
+.env.*
+*.pem
+*.key

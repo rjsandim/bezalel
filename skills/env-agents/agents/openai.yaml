@@ -1,0 +1,4 @@
+interface:
+  display_name: "Env"
+  short_description: "Create isolated worktree and Docker environments"
+  default_prompt: "Use $env to create or manage an isolated development environment for this repository."
