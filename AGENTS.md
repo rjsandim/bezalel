@@ -33,8 +33,8 @@ implementa agentes, orquestração, instalações ou integrações com aplicativ
 ## Validação proporcional
 
 - Para toda mudança, execute `python3 -B scripts/check_repository.py` e confira
-  `git diff --check`. Após editar arquivos, atualize hashes com
-  `python3 -B scripts/check_repository.py --refresh` e revise o diff do inventário.
+  `git diff --check`. O checker é somente leitura e valida estrutura, metadados
+  essenciais e links locais; não exige regenerar inventários ou hashes.
 - Mudanças em ENV: `python3 -B -m unittest discover -s skills/env/tests -v` e
   `bash -n` nos scripts shell alterados. Os testes usam Docker simulado; o CLI
   real só pode ser usado por eles para `compose config`, sem daemon.
@@ -47,9 +47,10 @@ implementa agentes, orquestração, instalações ou integrações com aplicativ
 - Antes do commit, revise arquivos rastreados, diferenças, credenciais e alvos
   internos; adicione somente arquivos da tarefa. Não enfraqueça testes para obter verde.
 
-## Inventário e entrega
+## Histórico e entrega
 
-Preserve os hashes/fontes históricas de `inventory.json`; atualize os hashes
-atuais quando adaptar arquivos. Registre adições e motivos sem valores privados.
+Registre adições e motivos nos commits, sem valores privados. Os registros
+da migração inicial permanecem no histórico Git; não crie um inventário mutável
+ou checksums de toda a árvore para cada edição cotidiana.
 Informe o que mudou, testes executados, limites, commit e eventual bloqueio.
 Não descreva presença de token como autenticação ou testes locais como deploy.

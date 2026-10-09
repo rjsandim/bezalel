@@ -114,7 +114,8 @@ python3 -B -m unittest discover -s skills/env/tests -v
 python3 -B -m unittest discover -s skills/vps-deploy/tests -v
 ```
 
-O checker verifica estrutura, links locais, metadados essenciais e hashes.
+O checker verifica estrutura, links locais e metadados essenciais, sem alterar
+arquivos ou exigir atualização de hashes a cada edição.
 Os testes usam repositórios temporários e simulam operações Docker, brew, sudo
 e mkcert; o CLI real só valida Compose estaticamente, sem acessar o daemon.
 Os testes Python de VPS usam entradas sintéticas, sem rede. As skills documentais
@@ -133,10 +134,11 @@ pode deixar etapas parcialmente concluídas. O estado é preservado para diagnó
 não repita a ação ampliando força ou alcance. Mudanças concorrentes ainda exigem
 revalidação humana. Outras plataformas não estão certificadas.
 
-`inventory.json` mantém proveniência e hashes de origem, além do conjunto atual.
-`SHA256SUMS` verifica os arquivos entregues. Alterações autorizadas no Bezalel
-podem divergir dos originais; isso é registrado. A antiga variante Claude de ENV
-é recuperável no commit `75e65c4be946a3ae8d6ea003db0bcc6000e3ecde`.
+A proveniência detalhada da migração e seus hashes estão preservados no histórico
+Git, até o commit `cf94dec22f628a26d337fe22076fabffe973eed6`. Esses registros não
+fazem parte da manutenção diária; mudanças atuais são acompanhadas pelo Git.
+A antiga variante Claude de ENV é recuperável no commit
+`75e65c4be946a3ae8d6ea003db0bcc6000e3ecde`.
 Arquivos locais, estado de execução, backups e rascunhos não integram o Git.
 Referências bibliográficas foram mantidas; nenhuma nova licença foi atribuída.
 

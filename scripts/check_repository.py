@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
-"""Check the skill package contract and integrity; --refresh updates local manifests."""
+"""Check skill structure, essential metadata and local links without changing files."""
 import argparse
-import hashlib
-import json
 from pathlib import Path
 import re
-import stat
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,10 +17,6 @@ def package_files():
     return sorted(p for p in candidates if p.is_file()
                   and not any(part in EXCLUDED for part in p.relative_to(ROOT).parts)
                   and not p.name.endswith((".pyc", ".local.json")))
-
-
-def checksum(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def validate_structure(files):
@@ -55,43 +48,14 @@ def validate_structure(files):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--refresh", action="store_true", help="Update current hashes; keep original provenance.")
-    args = parser.parse_args()
+    parser.parse_args()
     files = package_files()
     errors = validate_structure(files)
-    inventory_path = ROOT / "inventory.json"
-    inventory = json.loads(inventory_path.read_text())
-    prior = {record["destination"]: record for record in inventory["files"]}
-    if args.refresh and not errors:
-        records = []
-        for path in files:
-            name = path.relative_to(ROOT).as_posix()
-            record = dict(prior.get(name, {"destination": name, "kind": "new_in_bezalel"}))
-            record.update(sha256=checksum(path), bytes=path.stat().st_size,
-                          mode=oct(stat.S_IMODE(path.stat().st_mode)))
-            if record.get("source_sha256") and record["sha256"] != record["source_sha256"]:
-                note = "Adapted in Bezalel; original source hash preserved."
-                record["changes"] = list(dict.fromkeys(record.get("changes", []) + [note]))
-            records.append(record)
-        inventory["files"] = records
-        inventory_path.write_text(json.dumps(inventory, ensure_ascii=False, indent=2) + "\n")
-    actual = {path.relative_to(ROOT).as_posix(): checksum(path) for path in files}
-    expected = {record["destination"]: record["sha256"] for record in inventory["files"]}
-    if actual != expected:
-        errors.append("Current files differ from inventory; review changes before --refresh.")
-    # Include the inventory itself in SHA256SUMS; exclude only the checksum file.
-    checksum_text = "".join(f"{value}  {name}\n" for name, value in sorted(actual.items()))
-    checksum_text += f"{checksum(inventory_path)}  inventory.json\n"
-    sums_path = ROOT / "SHA256SUMS"
-    if args.refresh and not errors:
-        sums_path.write_text(checksum_text)
-    elif not sums_path.exists() or sums_path.read_text() != checksum_text:
-        errors.append("SHA256SUMS differs from package contents.")
     if errors:
         for error in errors:
             print(error, file=sys.stderr)
         return 1
-    print(f"Structure, local links and hashes verified: {len(actual)} files.")
+    print("Estrutura, metadados essenciais e links locais verificados.")
     return 0
 
 

@@ -20,8 +20,9 @@ registro. O literal antigo foi tratado como segredo por instrução do usuário;
 sua validade não foi testada. Não houve cópia de credenciais, rotação, criação
 de acesso, conexão com servidores, deploy ou push.
 
-Os hashes de origem no `inventory.json` da raiz permitem identificar os arquivos
-consultados sem reproduzir seu conteúdo. Os testes da nova versão cobrem apenas
+O registro detalhado de origem da migração permanece no histórico Git do Bezalel
+(até o commit `cf94dec22f628a26d337fe22076fabffe973eed6`), sem ser necessário para
+instalar ou validar esta skill. Os testes desta versão cobrem apenas
 a configuração local e a prevenção de exposição acidental nas mensagens. Não
 atestam autenticação, permissões, disponibilidade ou compatibilidade operacional
 com uma instalação real do Coolify.
