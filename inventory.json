@@ -3,18 +3,19 @@
   "scope": [
     "clean-code",
     "clean-architecture",
-    "env"
+    "env",
+    "vps-deploy"
   ],
-  "authorship": "User confirmed these three skills as created or customized by them; no license added and no claim over referenced works.",
+  "authorship": "User confirmed clean-code, clean-architecture and env as their created/customized skills, and authorized an adapted common vps-deploy from the local variants. No license assigned or claim over referenced works.",
   "variants": "User selected the Agents source as the single env copy in this repository. Claude copy removed; both external originals are unchanged.",
   "exclusions": [
     "OS metadata (.DS_Store), Git history/metadata (.git), IDE metadata (.idea), caches, runtime state, and backup archives were not copied.",
-    "All other skills, including vps-deploy, are outside this commit."
+    "All other skills and the old local VPS review drafts remain outside the tracked set."
   ],
   "review": {
-    "credential_scan": "No apparent real credentials detected in selected useful files; variable placeholders and synthetic local development credentials retained.",
+    "credential_scan": "No apparent real credentials in the selected preserved files. The new common VPS skill references COOLIFY_API_TOKEN without a value. Actual legacy literal and infrastructure identifiers checked for absence before committing.",
     "internal_information": "One comment removed from the env node.Dockerfile.tpl copy; original source untouched.",
-    "execution": "Skill scripts and tests were not executed; this task preserves files, not runtime behavior.",
+    "execution": "Preserved skill scripts were not executed. The new vps-deploy configuration validator passed ten offline tests with synthetic inputs; no real authentication or network access was attempted.",
     "publication": "Local snapshot only; no push or publication."
   },
   "files": [
@@ -595,6 +596,69 @@
     {
       "commit": "75e65c4be946a3ae8d6ea003db0bcc6000e3ecde",
       "note": "Initial snapshot with both env variants; recoverable from this commit."
+    }
+  ],
+  "additions": [
+    {
+      "skill": "vps-deploy",
+      "date": "2026-10-09",
+      "kind": "adapted common version, configuration per project",
+      "sources": [
+        {
+          "source": "~/.agents/skills/vps-deploy/SKILL.md",
+          "sha256": "440c27a6370bfbf2b97f38669dcdfd8eb5b779d3c018bb1b4c85f1a9224c4228"
+        },
+        {
+          "source": "~/.claude/skills/vps-deploy/SKILL.md",
+          "sha256": "89f8a992f99270a6cbec46b9f91cafc70a982ba2ad1c70766273295c52bec206"
+        }
+      ],
+      "differences": "skills/vps-deploy/references/proveniencia.md",
+      "files": [
+        {
+          "destination": ".bezalel/.gitignore",
+          "sha256": "3f6df8058f42a25875178852174ca456ad9c91c62a069fcd54137149df9c8506",
+          "bytes": 23,
+          "kind": "new_or_adapted"
+        },
+        {
+          "destination": ".bezalel/vps-deploy.example.json",
+          "sha256": "e8204ed5ff8f1cee32ffc5fc265a101044965f84230dbcbfd3e994e22077101d",
+          "bytes": 80,
+          "kind": "new_or_adapted"
+        },
+        {
+          "destination": "skills/vps-deploy/SKILL.md",
+          "sha256": "30d0caed1fed99cdd0de48cdd64f0529bb77f972dd7a7f1ca9c5527b4ec551a0",
+          "bytes": 5550,
+          "kind": "new_or_adapted"
+        },
+        {
+          "destination": "skills/vps-deploy/references/configuracao.md",
+          "sha256": "da2f18b43c3ee270f386b29696a6cbb3bfd0470e9a7712e5f8dd2cf5fddfa9c1",
+          "bytes": 3082,
+          "kind": "new_or_adapted"
+        },
+        {
+          "destination": "skills/vps-deploy/references/proveniencia.md",
+          "sha256": "e67e484dd0d5daa2c5c307d3f61945df5067c621bd1aa9eb94fca579ce2d62ac",
+          "bytes": 2307,
+          "kind": "new_or_adapted"
+        },
+        {
+          "destination": "skills/vps-deploy/scripts/check_config.py",
+          "sha256": "6b260ddb30ba5d50267cc8ceaadbced2d3d87cd4094ee088e893639a698fd979",
+          "bytes": 4183,
+          "kind": "new_or_adapted"
+        },
+        {
+          "destination": "skills/vps-deploy/tests/test_config.py",
+          "sha256": "4e9015a577413d150c7faf662c8d4964df37ac686f1d8e39a322ef9808f6cabc",
+          "bytes": 4798,
+          "kind": "new_or_adapted"
+        }
+      ],
+      "credential_handling": "No credential copied, filled, generated or tested; no local config instantiated. Only references, placeholders and presence checks."
     }
   ]
 }
