@@ -6,14 +6,14 @@
     "env"
   ],
   "authorship": "User confirmed these three skills as created or customized by them; no license added and no claim over referenced works.",
-  "variants": "Both env variants retained separately. Neither is designated canonical. Original internal skill names and paths are unchanged.",
+  "variants": "User selected the Agents source as the single env copy in this repository. Claude copy removed; both external originals are unchanged.",
   "exclusions": [
     "OS metadata (.DS_Store), Git history/metadata (.git), IDE metadata (.idea), caches, runtime state, and backup archives were not copied.",
     "All other skills, including vps-deploy, are outside this commit."
   ],
   "review": {
     "credential_scan": "No apparent real credentials detected in selected useful files; variable placeholders and synthetic local development credentials retained.",
-    "internal_information": "One comment removed from each env node.Dockerfile.tpl copy; original sources untouched.",
+    "internal_information": "One comment removed from the env node.Dockerfile.tpl copy; original source untouched.",
     "execution": "Skill scripts and tests were not executed; this task preserves files, not runtime behavior.",
     "publication": "Local snapshot only; no push or publication."
   },
@@ -210,7 +210,7 @@
     },
     {
       "source": "~/.agents/skills/env/.gitignore",
-      "destination": "skills/env-agents/.gitignore",
+      "destination": "skills/env/.gitignore",
       "source_sha256": "d11bdacfcbfb57c5897f9e0848becd7ba6d4c211661138f675209be64754349a",
       "sha256": "d11bdacfcbfb57c5897f9e0848becd7ba6d4c211661138f675209be64754349a",
       "source_bytes": 102,
@@ -220,7 +220,7 @@
     },
     {
       "source": "~/.agents/skills/env/SKILL.md",
-      "destination": "skills/env-agents/SKILL.md",
+      "destination": "skills/env/SKILL.md",
       "source_sha256": "2aa4ec128d2c5d835ec701b3bdd0db52cdb9d8d28e780a41d07a3f925aec5ca2",
       "sha256": "2aa4ec128d2c5d835ec701b3bdd0db52cdb9d8d28e780a41d07a3f925aec5ca2",
       "source_bytes": 16413,
@@ -230,7 +230,7 @@
     },
     {
       "source": "~/.agents/skills/env/agents/openai.yaml",
-      "destination": "skills/env-agents/agents/openai.yaml",
+      "destination": "skills/env/agents/openai.yaml",
       "source_sha256": "8cbb2afb10a101c5865d984c1f7abbc997f0d3898b52f944a6505a0c35b75384",
       "sha256": "8cbb2afb10a101c5865d984c1f7abbc997f0d3898b52f944a6505a0c35b75384",
       "source_bytes": 211,
@@ -240,7 +240,7 @@
     },
     {
       "source": "~/.agents/skills/env/scripts/ctl.sh",
-      "destination": "skills/env-agents/scripts/ctl.sh",
+      "destination": "skills/env/scripts/ctl.sh",
       "source_sha256": "1405d44dcc57b188f81079f1e12db5de23e6a8e5793891e3f2990dd581ad9a04",
       "sha256": "1405d44dcc57b188f81079f1e12db5de23e6a8e5793891e3f2990dd581ad9a04",
       "source_bytes": 1461,
@@ -250,7 +250,7 @@
     },
     {
       "source": "~/.agents/skills/env/scripts/destroy.sh",
-      "destination": "skills/env-agents/scripts/destroy.sh",
+      "destination": "skills/env/scripts/destroy.sh",
       "source_sha256": "4212e79618714763c9ad8c5fbe67955d0bc402fd9f6882392d5c5c7fcd73262f",
       "sha256": "4212e79618714763c9ad8c5fbe67955d0bc402fd9f6882392d5c5c7fcd73262f",
       "source_bytes": 1820,
@@ -260,7 +260,7 @@
     },
     {
       "source": "~/.agents/skills/env/scripts/detect.sh",
-      "destination": "skills/env-agents/scripts/detect.sh",
+      "destination": "skills/env/scripts/detect.sh",
       "source_sha256": "f8483acfd9c78ee771ea87df87e1b0ee48272abc5cfd5502d2fd24becab2057f",
       "sha256": "f8483acfd9c78ee771ea87df87e1b0ee48272abc5cfd5502d2fd24becab2057f",
       "source_bytes": 3098,
@@ -270,7 +270,7 @@
     },
     {
       "source": "~/.agents/skills/env/scripts/ide.sh",
-      "destination": "skills/env-agents/scripts/ide.sh",
+      "destination": "skills/env/scripts/ide.sh",
       "source_sha256": "1f23addd018562ffaf1ba2c8c8a0911defb9dd93993cf547138ceba3eee9e402",
       "sha256": "1f23addd018562ffaf1ba2c8c8a0911defb9dd93993cf547138ceba3eee9e402",
       "source_bytes": 5722,
@@ -280,7 +280,7 @@
     },
     {
       "source": "~/.agents/skills/env/scripts/init.sh",
-      "destination": "skills/env-agents/scripts/init.sh",
+      "destination": "skills/env/scripts/init.sh",
       "source_sha256": "1bcff778e84de91733941d3e5aa99c2a9a927ced56a704bb1912285b9963691c",
       "sha256": "1bcff778e84de91733941d3e5aa99c2a9a927ced56a704bb1912285b9963691c",
       "source_bytes": 6068,
@@ -290,7 +290,7 @@
     },
     {
       "source": "~/.agents/skills/env/scripts/lib.sh",
-      "destination": "skills/env-agents/scripts/lib.sh",
+      "destination": "skills/env/scripts/lib.sh",
       "source_sha256": "f8da96deb0e08f6372036b2ff5f87760e732d02ced86bbabe61a6b1c89d3d43d",
       "sha256": "f8da96deb0e08f6372036b2ff5f87760e732d02ced86bbabe61a6b1c89d3d43d",
       "source_bytes": 18075,
@@ -300,7 +300,7 @@
     },
     {
       "source": "~/.agents/skills/env/scripts/new.sh",
-      "destination": "skills/env-agents/scripts/new.sh",
+      "destination": "skills/env/scripts/new.sh",
       "source_sha256": "b5a9e3d707eb44df38826e5f916e3522a5394d49228700afa80c95251d228226",
       "sha256": "b5a9e3d707eb44df38826e5f916e3522a5394d49228700afa80c95251d228226",
       "source_bytes": 8650,
@@ -310,7 +310,7 @@
     },
     {
       "source": "~/.agents/skills/env/scripts/services.sh",
-      "destination": "skills/env-agents/scripts/services.sh",
+      "destination": "skills/env/scripts/services.sh",
       "source_sha256": "5b11c8d1b6a1c2d1f100c1fd3e941a90364e49509f9ca141290430918055e8ba",
       "sha256": "5b11c8d1b6a1c2d1f100c1fd3e941a90364e49509f9ca141290430918055e8ba",
       "source_bytes": 2372,
@@ -320,7 +320,7 @@
     },
     {
       "source": "~/.agents/skills/env/scripts/update.sh",
-      "destination": "skills/env-agents/scripts/update.sh",
+      "destination": "skills/env/scripts/update.sh",
       "source_sha256": "fa3818a8ad9ffaa5341d77dacc10c70fb9017a0524dd8c34c4af9d241871834a",
       "sha256": "fa3818a8ad9ffaa5341d77dacc10c70fb9017a0524dd8c34c4af9d241871834a",
       "source_bytes": 693,
@@ -330,7 +330,7 @@
     },
     {
       "source": "~/.agents/skills/env/scripts/vars.sh",
-      "destination": "skills/env-agents/scripts/vars.sh",
+      "destination": "skills/env/scripts/vars.sh",
       "source_sha256": "073e9d768d98dec2a92221b40d17deee4c8f80865371ab61f495c6f264c96626",
       "sha256": "073e9d768d98dec2a92221b40d17deee4c8f80865371ab61f495c6f264c96626",
       "source_bytes": 4648,
@@ -340,7 +340,7 @@
     },
     {
       "source": "~/.agents/skills/env/scripts/xdebug.sh",
-      "destination": "skills/env-agents/scripts/xdebug.sh",
+      "destination": "skills/env/scripts/xdebug.sh",
       "source_sha256": "baf7cc3084301ffc6311cc5355521f2c60aaf37e44a47f700e22df3da8e22744",
       "sha256": "baf7cc3084301ffc6311cc5355521f2c60aaf37e44a47f700e22df3da8e22744",
       "source_bytes": 3044,
@@ -350,7 +350,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/boot.sh.tpl",
-      "destination": "skills/env-agents/templates/boot.sh.tpl",
+      "destination": "skills/env/templates/boot.sh.tpl",
       "source_sha256": "050de8b02203c585b8b5feaf5bec3ed54c7942dee09f7a9e3c27ca88ffc317e2",
       "sha256": "050de8b02203c585b8b5feaf5bec3ed54c7942dee09f7a9e3c27ca88ffc317e2",
       "source_bytes": 2044,
@@ -360,7 +360,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/compose.head.tpl",
-      "destination": "skills/env-agents/templates/compose.head.tpl",
+      "destination": "skills/env/templates/compose.head.tpl",
       "source_sha256": "0750650f565a6d2361c494c31c5b32ec11fb0fca4cb1d5bd4e3e2b6f9d5cd069",
       "sha256": "0750650f565a6d2361c494c31c5b32ec11fb0fca4cb1d5bd4e3e2b6f9d5cd069",
       "source_bytes": 184,
@@ -370,7 +370,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/compose.mysql.tpl",
-      "destination": "skills/env-agents/templates/compose.mysql.tpl",
+      "destination": "skills/env/templates/compose.mysql.tpl",
       "source_sha256": "10d5f19cf41aadc47fee20afd1368f96a79e8861b3cd19d7d46424d67cd3344f",
       "sha256": "10d5f19cf41aadc47fee20afd1368f96a79e8861b3cd19d7d46424d67cd3344f",
       "source_bytes": 674,
@@ -380,7 +380,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/compose.postgres.tpl",
-      "destination": "skills/env-agents/templates/compose.postgres.tpl",
+      "destination": "skills/env/templates/compose.postgres.tpl",
       "source_sha256": "5b2f98c54ec8832a5b3073966523f6e720bbae56e54b9bcf428e204d7f3e448c",
       "sha256": "5b2f98c54ec8832a5b3073966523f6e720bbae56e54b9bcf428e204d7f3e448c",
       "source_bytes": 624,
@@ -390,7 +390,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/compose.redis.tpl",
-      "destination": "skills/env-agents/templates/compose.redis.tpl",
+      "destination": "skills/env/templates/compose.redis.tpl",
       "source_sha256": "08e2131d369bde6887e2970e22b1ad648209e63897f750fde39ad02f5cafc2d2",
       "sha256": "08e2131d369bde6887e2970e22b1ad648209e63897f750fde39ad02f5cafc2d2",
       "source_bytes": 137,
@@ -400,7 +400,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/compose.service.tpl",
-      "destination": "skills/env-agents/templates/compose.service.tpl",
+      "destination": "skills/env/templates/compose.service.tpl",
       "source_sha256": "9aa8dc5149d68a8939b2add7537bc1d4f563c5828e48ccc24d309c2aa194ce55",
       "sha256": "9aa8dc5149d68a8939b2add7537bc1d4f563c5828e48ccc24d309c2aa194ce55",
       "source_bytes": 1600,
@@ -410,7 +410,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/compose.tail.tpl",
-      "destination": "skills/env-agents/templates/compose.tail.tpl",
+      "destination": "skills/env/templates/compose.tail.tpl",
       "source_sha256": "8c4b54fe21eef908476454f9b941de560edfc56e36f81cefbc4f4c3b6a0dd8ce",
       "sha256": "8c4b54fe21eef908476454f9b941de560edfc56e36f81cefbc4f4c3b6a0dd8ce",
       "source_bytes": 134,
@@ -420,7 +420,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/env.next.tpl",
-      "destination": "skills/env-agents/templates/env.next.tpl",
+      "destination": "skills/env/templates/env.next.tpl",
       "source_sha256": "a286ee8efeddab59d54abccdf6685dae53a7bd9886503821d19b71e02961a654",
       "sha256": "a286ee8efeddab59d54abccdf6685dae53a7bd9886503821d19b71e02961a654",
       "source_bytes": 208,
@@ -430,7 +430,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/env.node.tpl",
-      "destination": "skills/env-agents/templates/env.node.tpl",
+      "destination": "skills/env/templates/env.node.tpl",
       "source_sha256": "460fa4275bb2e69a964e8b680dfe7c63564767bd7fa73f238646f4586e2d1a7e",
       "sha256": "460fa4275bb2e69a964e8b680dfe7c63564767bd7fa73f238646f4586e2d1a7e",
       "source_bytes": 550,
@@ -440,7 +440,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/env.php.tpl",
-      "destination": "skills/env-agents/templates/env.php.tpl",
+      "destination": "skills/env/templates/env.php.tpl",
       "source_sha256": "694cefd0152af3c2299bb9df5e95b9b9c130ac89be719ebe8524bc4ed8924e88",
       "sha256": "694cefd0152af3c2299bb9df5e95b9b9c130ac89be719ebe8524bc4ed8924e88",
       "source_bytes": 671,
@@ -450,7 +450,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/node.Dockerfile.tpl",
-      "destination": "skills/env-agents/templates/node.Dockerfile.tpl",
+      "destination": "skills/env/templates/node.Dockerfile.tpl",
       "source_sha256": "71ebf1b1a19224614500fc022e1c13a137a5d9194266a45a6c7fc3d2c8c288aa",
       "sha256": "c1feb17572d627a9830c963dd5cddf0da57739b3b4552dd697bae2bc8930ebe3",
       "source_bytes": 1115,
@@ -462,7 +462,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/php.Dockerfile.tpl",
-      "destination": "skills/env-agents/templates/php.Dockerfile.tpl",
+      "destination": "skills/env/templates/php.Dockerfile.tpl",
       "source_sha256": "bf586fe510db05517184c3cea50be932315ea64999df159f844856d159163204",
       "sha256": "bf586fe510db05517184c3cea50be932315ea64999df159f844856d159163204",
       "source_bytes": 1812,
@@ -472,7 +472,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/phpstorm.datasource.head.tpl",
-      "destination": "skills/env-agents/templates/phpstorm.datasource.head.tpl",
+      "destination": "skills/env/templates/phpstorm.datasource.head.tpl",
       "source_sha256": "785f0a298f1654c267b167ef1cdd0aa2f5f10afea2e815dfaaf7dc04ebccbfc0",
       "sha256": "785f0a298f1654c267b167ef1cdd0aa2f5f10afea2e815dfaaf7dc04ebccbfc0",
       "source_bytes": 140,
@@ -482,7 +482,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/phpstorm.datasource.tail.tpl",
-      "destination": "skills/env-agents/templates/phpstorm.datasource.tail.tpl",
+      "destination": "skills/env/templates/phpstorm.datasource.tail.tpl",
       "source_sha256": "70a12352b285fedc116cde85804b3655fb8d75e8e3cf3160bc5d2e3555d4ee71",
       "sha256": "70a12352b285fedc116cde85804b3655fb8d75e8e3cf3160bc5d2e3555d4ee71",
       "source_bytes": 26,
@@ -492,7 +492,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/phpstorm.datasource.tpl",
-      "destination": "skills/env-agents/templates/phpstorm.datasource.tpl",
+      "destination": "skills/env/templates/phpstorm.datasource.tpl",
       "source_sha256": "a249e228c8c804cc24b63734ff518d19e2ca6d4c040ea25682f16ca207316206",
       "sha256": "a249e228c8c804cc24b63734ff518d19e2ca6d4c040ea25682f16ca207316206",
       "source_bytes": 348,
@@ -502,7 +502,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/phpstorm.php.tpl",
-      "destination": "skills/env-agents/templates/phpstorm.php.tpl",
+      "destination": "skills/env/templates/phpstorm.php.tpl",
       "source_sha256": "7a930ef0745dd86be4266643f753c3fd59defaf572b4efaf052b6212ed600922",
       "sha256": "7a930ef0745dd86be4266643f753c3fd59defaf572b4efaf052b6212ed600922",
       "source_bytes": 159,
@@ -512,7 +512,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/phpstorm.server.tpl",
-      "destination": "skills/env-agents/templates/phpstorm.server.tpl",
+      "destination": "skills/env/templates/phpstorm.server.tpl",
       "source_sha256": "a791d2a3743bbca18048a70dcb4207e2a310c8174f60db83a4a3a14a28b5f293",
       "sha256": "a791d2a3743bbca18048a70dcb4207e2a310c8174f60db83a4a3a14a28b5f293",
       "source_bytes": 253,
@@ -522,7 +522,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/phpstorm.servers.head.tpl",
-      "destination": "skills/env-agents/templates/phpstorm.servers.head.tpl",
+      "destination": "skills/env/templates/phpstorm.servers.head.tpl",
       "source_sha256": "1739fe7085685e6240009c63bb8edc3150244552a4167886d86accf31d6fe0ae",
       "sha256": "1739fe7085685e6240009c63bb8edc3150244552a4167886d86accf31d6fe0ae",
       "source_bytes": 46,
@@ -532,7 +532,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/phpstorm.servers.tail.tpl",
-      "destination": "skills/env-agents/templates/phpstorm.servers.tail.tpl",
+      "destination": "skills/env/templates/phpstorm.servers.tail.tpl",
       "source_sha256": "a4ba3ddd13bf01ad7baf4869dec80c9b910be94296fc07d08d719884b9b98b60",
       "sha256": "a4ba3ddd13bf01ad7baf4869dec80c9b910be94296fc07d08d719884b9b98b60",
       "source_bytes": 30,
@@ -542,7 +542,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/stack.yaml.tpl",
-      "destination": "skills/env-agents/templates/stack.yaml.tpl",
+      "destination": "skills/env/templates/stack.yaml.tpl",
       "source_sha256": "9a403db4aa44f8958dac006a5d826e9877e7ec263f74cbc527e34a0401a9a62c",
       "sha256": "9a403db4aa44f8958dac006a5d826e9877e7ec263f74cbc527e34a0401a9a62c",
       "source_bytes": 901,
@@ -552,7 +552,7 @@
     },
     {
       "source": "~/.agents/skills/env/templates/traefik.dynamic.yml.tpl",
-      "destination": "skills/env-agents/templates/traefik.dynamic.yml.tpl",
+      "destination": "skills/env/templates/traefik.dynamic.yml.tpl",
       "source_sha256": "65d60ddc61de9a94a2d7291412048dbdf0b8a78cab82dadad66a310f9bdf8b68",
       "sha256": "65d60ddc61de9a94a2d7291412048dbdf0b8a78cab82dadad66a310f9bdf8b68",
       "source_bytes": 77,
@@ -562,7 +562,7 @@
     },
     {
       "source": "~/.agents/skills/env/tests/integration_lifecycle.py",
-      "destination": "skills/env-agents/tests/integration_lifecycle.py",
+      "destination": "skills/env/tests/integration_lifecycle.py",
       "source_sha256": "ed252669749e7e14910e7ce64056f17e7b9c80d7f6ad8417d4d3ce3bda97473b",
       "sha256": "ed252669749e7e14910e7ce64056f17e7b9c80d7f6ad8417d4d3ce3bda97473b",
       "source_bytes": 9865,
@@ -572,7 +572,7 @@
     },
     {
       "source": "~/.agents/skills/env/tests/test_boot.py",
-      "destination": "skills/env-agents/tests/test_boot.py",
+      "destination": "skills/env/tests/test_boot.py",
       "source_sha256": "26b9527d3d52e295ee540c9f19c8b39cbbb08341f7cd0ae295ca47a32cef291a",
       "sha256": "26b9527d3d52e295ee540c9f19c8b39cbbb08341f7cd0ae295ca47a32cef291a",
       "source_bytes": 3662,
@@ -582,335 +582,19 @@
     },
     {
       "source": "~/.agents/skills/env/tests/test_lifecycle.py",
-      "destination": "skills/env-agents/tests/test_lifecycle.py",
+      "destination": "skills/env/tests/test_lifecycle.py",
       "source_sha256": "6c92d93e279f1528ca9f821feecec658242959638b777c0d8832276f0c93515c",
       "sha256": "6c92d93e279f1528ca9f821feecec658242959638b777c0d8832276f0c93515c",
       "source_bytes": 8559,
       "bytes": 8559,
       "mode": "0o644",
       "changes": []
-    },
+    }
+  ],
+  "history": [
     {
-      "source": "~/.claude/skills/env/.gitignore",
-      "destination": "skills/env-claude/.gitignore",
-      "source_sha256": "d11bdacfcbfb57c5897f9e0848becd7ba6d4c211661138f675209be64754349a",
-      "sha256": "d11bdacfcbfb57c5897f9e0848becd7ba6d4c211661138f675209be64754349a",
-      "source_bytes": 102,
-      "bytes": 102,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/SKILL.md",
-      "destination": "skills/env-claude/SKILL.md",
-      "source_sha256": "f0dab1aa78fe95839c9ea9fe1de6990b13f011ad5ecf780b718390f902bb3dfe",
-      "sha256": "f0dab1aa78fe95839c9ea9fe1de6990b13f011ad5ecf780b718390f902bb3dfe",
-      "source_bytes": 13490,
-      "bytes": 13490,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/scripts/ctl.sh",
-      "destination": "skills/env-claude/scripts/ctl.sh",
-      "source_sha256": "5321a48d4af3c393fa963407ffa49a98d37ee58e47565ef558a7c5163fddcfb6",
-      "sha256": "5321a48d4af3c393fa963407ffa49a98d37ee58e47565ef558a7c5163fddcfb6",
-      "source_bytes": 2203,
-      "bytes": 2203,
-      "mode": "0o755",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/scripts/destroy.sh",
-      "destination": "skills/env-claude/scripts/destroy.sh",
-      "source_sha256": "4212e79618714763c9ad8c5fbe67955d0bc402fd9f6882392d5c5c7fcd73262f",
-      "sha256": "4212e79618714763c9ad8c5fbe67955d0bc402fd9f6882392d5c5c7fcd73262f",
-      "source_bytes": 1820,
-      "bytes": 1820,
-      "mode": "0o755",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/scripts/detect.sh",
-      "destination": "skills/env-claude/scripts/detect.sh",
-      "source_sha256": "f8483acfd9c78ee771ea87df87e1b0ee48272abc5cfd5502d2fd24becab2057f",
-      "sha256": "f8483acfd9c78ee771ea87df87e1b0ee48272abc5cfd5502d2fd24becab2057f",
-      "source_bytes": 3098,
-      "bytes": 3098,
-      "mode": "0o755",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/scripts/ide.sh",
-      "destination": "skills/env-claude/scripts/ide.sh",
-      "source_sha256": "1f23addd018562ffaf1ba2c8c8a0911defb9dd93993cf547138ceba3eee9e402",
-      "sha256": "1f23addd018562ffaf1ba2c8c8a0911defb9dd93993cf547138ceba3eee9e402",
-      "source_bytes": 5722,
-      "bytes": 5722,
-      "mode": "0o755",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/scripts/init.sh",
-      "destination": "skills/env-claude/scripts/init.sh",
-      "source_sha256": "2cb5f31d43d84b2a4bbf5c04d065c0810cf7eb33bffe067c1492456026dfa8b3",
-      "sha256": "2cb5f31d43d84b2a4bbf5c04d065c0810cf7eb33bffe067c1492456026dfa8b3",
-      "source_bytes": 5977,
-      "bytes": 5977,
-      "mode": "0o755",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/scripts/lib.sh",
-      "destination": "skills/env-claude/scripts/lib.sh",
-      "source_sha256": "f8da96deb0e08f6372036b2ff5f87760e732d02ced86bbabe61a6b1c89d3d43d",
-      "sha256": "f8da96deb0e08f6372036b2ff5f87760e732d02ced86bbabe61a6b1c89d3d43d",
-      "source_bytes": 18075,
-      "bytes": 18075,
-      "mode": "0o755",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/scripts/new.sh",
-      "destination": "skills/env-claude/scripts/new.sh",
-      "source_sha256": "dd7e6f810170bb4057a350f832fc0c49b93616e1d5307bbea91acd00c249538f",
-      "sha256": "dd7e6f810170bb4057a350f832fc0c49b93616e1d5307bbea91acd00c249538f",
-      "source_bytes": 8228,
-      "bytes": 8228,
-      "mode": "0o755",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/scripts/update.sh",
-      "destination": "skills/env-claude/scripts/update.sh",
-      "source_sha256": "45ecc70d98ded228dead1081394a39e05ae7ea47c20ec2690e6c50457a3ee79a",
-      "sha256": "45ecc70d98ded228dead1081394a39e05ae7ea47c20ec2690e6c50457a3ee79a",
-      "source_bytes": 641,
-      "bytes": 641,
-      "mode": "0o755",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/scripts/vars.sh",
-      "destination": "skills/env-claude/scripts/vars.sh",
-      "source_sha256": "073e9d768d98dec2a92221b40d17deee4c8f80865371ab61f495c6f264c96626",
-      "sha256": "073e9d768d98dec2a92221b40d17deee4c8f80865371ab61f495c6f264c96626",
-      "source_bytes": 4648,
-      "bytes": 4648,
-      "mode": "0o755",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/scripts/xdebug.sh",
-      "destination": "skills/env-claude/scripts/xdebug.sh",
-      "source_sha256": "baf7cc3084301ffc6311cc5355521f2c60aaf37e44a47f700e22df3da8e22744",
-      "sha256": "baf7cc3084301ffc6311cc5355521f2c60aaf37e44a47f700e22df3da8e22744",
-      "source_bytes": 3044,
-      "bytes": 3044,
-      "mode": "0o755",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/compose.head.tpl",
-      "destination": "skills/env-claude/templates/compose.head.tpl",
-      "source_sha256": "0ddf6988b4910dab0e5a6256b0e41819d9d01e03f88fadb92a4ef37dc7b488cb",
-      "sha256": "0ddf6988b4910dab0e5a6256b0e41819d9d01e03f88fadb92a4ef37dc7b488cb",
-      "source_bytes": 132,
-      "bytes": 132,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/compose.mysql.tpl",
-      "destination": "skills/env-claude/templates/compose.mysql.tpl",
-      "source_sha256": "10d5f19cf41aadc47fee20afd1368f96a79e8861b3cd19d7d46424d67cd3344f",
-      "sha256": "10d5f19cf41aadc47fee20afd1368f96a79e8861b3cd19d7d46424d67cd3344f",
-      "source_bytes": 674,
-      "bytes": 674,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/compose.postgres.tpl",
-      "destination": "skills/env-claude/templates/compose.postgres.tpl",
-      "source_sha256": "5b2f98c54ec8832a5b3073966523f6e720bbae56e54b9bcf428e204d7f3e448c",
-      "sha256": "5b2f98c54ec8832a5b3073966523f6e720bbae56e54b9bcf428e204d7f3e448c",
-      "source_bytes": 624,
-      "bytes": 624,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/compose.redis.tpl",
-      "destination": "skills/env-claude/templates/compose.redis.tpl",
-      "source_sha256": "08e2131d369bde6887e2970e22b1ad648209e63897f750fde39ad02f5cafc2d2",
-      "sha256": "08e2131d369bde6887e2970e22b1ad648209e63897f750fde39ad02f5cafc2d2",
-      "source_bytes": 137,
-      "bytes": 137,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/compose.service.tpl",
-      "destination": "skills/env-claude/templates/compose.service.tpl",
-      "source_sha256": "9aa8dc5149d68a8939b2add7537bc1d4f563c5828e48ccc24d309c2aa194ce55",
-      "sha256": "9aa8dc5149d68a8939b2add7537bc1d4f563c5828e48ccc24d309c2aa194ce55",
-      "source_bytes": 1600,
-      "bytes": 1600,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/compose.tail.tpl",
-      "destination": "skills/env-claude/templates/compose.tail.tpl",
-      "source_sha256": "8c4b54fe21eef908476454f9b941de560edfc56e36f81cefbc4f4c3b6a0dd8ce",
-      "sha256": "8c4b54fe21eef908476454f9b941de560edfc56e36f81cefbc4f4c3b6a0dd8ce",
-      "source_bytes": 134,
-      "bytes": 134,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/env.next.tpl",
-      "destination": "skills/env-claude/templates/env.next.tpl",
-      "source_sha256": "a286ee8efeddab59d54abccdf6685dae53a7bd9886503821d19b71e02961a654",
-      "sha256": "a286ee8efeddab59d54abccdf6685dae53a7bd9886503821d19b71e02961a654",
-      "source_bytes": 208,
-      "bytes": 208,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/env.node.tpl",
-      "destination": "skills/env-claude/templates/env.node.tpl",
-      "source_sha256": "460fa4275bb2e69a964e8b680dfe7c63564767bd7fa73f238646f4586e2d1a7e",
-      "sha256": "460fa4275bb2e69a964e8b680dfe7c63564767bd7fa73f238646f4586e2d1a7e",
-      "source_bytes": 550,
-      "bytes": 550,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/env.php.tpl",
-      "destination": "skills/env-claude/templates/env.php.tpl",
-      "source_sha256": "694cefd0152af3c2299bb9df5e95b9b9c130ac89be719ebe8524bc4ed8924e88",
-      "sha256": "694cefd0152af3c2299bb9df5e95b9b9c130ac89be719ebe8524bc4ed8924e88",
-      "source_bytes": 671,
-      "bytes": 671,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/node.Dockerfile.tpl",
-      "destination": "skills/env-claude/templates/node.Dockerfile.tpl",
-      "source_sha256": "888fc0d3a5cd0a028d57232d816989921cf3ff923232b03de9a1a42b4f0a2150",
-      "sha256": "ae517479f73c218fc51d99c30137f30d822948fcff2ec73f0732448c5e65ced3",
-      "source_bytes": 1080,
-      "bytes": 1003,
-      "mode": "0o644",
-      "changes": [
-        "Removed one comment containing an internal project reference and measurement."
-      ]
-    },
-    {
-      "source": "~/.claude/skills/env/templates/php.Dockerfile.tpl",
-      "destination": "skills/env-claude/templates/php.Dockerfile.tpl",
-      "source_sha256": "9c29b4aa6ec2730b7d274b7a8bb94cc520e506b91c84f0aa46910661a459eb83",
-      "sha256": "9c29b4aa6ec2730b7d274b7a8bb94cc520e506b91c84f0aa46910661a459eb83",
-      "source_bytes": 1791,
-      "bytes": 1791,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/phpstorm.datasource.head.tpl",
-      "destination": "skills/env-claude/templates/phpstorm.datasource.head.tpl",
-      "source_sha256": "785f0a298f1654c267b167ef1cdd0aa2f5f10afea2e815dfaaf7dc04ebccbfc0",
-      "sha256": "785f0a298f1654c267b167ef1cdd0aa2f5f10afea2e815dfaaf7dc04ebccbfc0",
-      "source_bytes": 140,
-      "bytes": 140,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/phpstorm.datasource.tail.tpl",
-      "destination": "skills/env-claude/templates/phpstorm.datasource.tail.tpl",
-      "source_sha256": "70a12352b285fedc116cde85804b3655fb8d75e8e3cf3160bc5d2e3555d4ee71",
-      "sha256": "70a12352b285fedc116cde85804b3655fb8d75e8e3cf3160bc5d2e3555d4ee71",
-      "source_bytes": 26,
-      "bytes": 26,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/phpstorm.datasource.tpl",
-      "destination": "skills/env-claude/templates/phpstorm.datasource.tpl",
-      "source_sha256": "a249e228c8c804cc24b63734ff518d19e2ca6d4c040ea25682f16ca207316206",
-      "sha256": "a249e228c8c804cc24b63734ff518d19e2ca6d4c040ea25682f16ca207316206",
-      "source_bytes": 348,
-      "bytes": 348,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/phpstorm.php.tpl",
-      "destination": "skills/env-claude/templates/phpstorm.php.tpl",
-      "source_sha256": "7a930ef0745dd86be4266643f753c3fd59defaf572b4efaf052b6212ed600922",
-      "sha256": "7a930ef0745dd86be4266643f753c3fd59defaf572b4efaf052b6212ed600922",
-      "source_bytes": 159,
-      "bytes": 159,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/phpstorm.server.tpl",
-      "destination": "skills/env-claude/templates/phpstorm.server.tpl",
-      "source_sha256": "a791d2a3743bbca18048a70dcb4207e2a310c8174f60db83a4a3a14a28b5f293",
-      "sha256": "a791d2a3743bbca18048a70dcb4207e2a310c8174f60db83a4a3a14a28b5f293",
-      "source_bytes": 253,
-      "bytes": 253,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/phpstorm.servers.head.tpl",
-      "destination": "skills/env-claude/templates/phpstorm.servers.head.tpl",
-      "source_sha256": "1739fe7085685e6240009c63bb8edc3150244552a4167886d86accf31d6fe0ae",
-      "sha256": "1739fe7085685e6240009c63bb8edc3150244552a4167886d86accf31d6fe0ae",
-      "source_bytes": 46,
-      "bytes": 46,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/phpstorm.servers.tail.tpl",
-      "destination": "skills/env-claude/templates/phpstorm.servers.tail.tpl",
-      "source_sha256": "a4ba3ddd13bf01ad7baf4869dec80c9b910be94296fc07d08d719884b9b98b60",
-      "sha256": "a4ba3ddd13bf01ad7baf4869dec80c9b910be94296fc07d08d719884b9b98b60",
-      "source_bytes": 30,
-      "bytes": 30,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/stack.yaml.tpl",
-      "destination": "skills/env-claude/templates/stack.yaml.tpl",
-      "source_sha256": "9a403db4aa44f8958dac006a5d826e9877e7ec263f74cbc527e34a0401a9a62c",
-      "sha256": "9a403db4aa44f8958dac006a5d826e9877e7ec263f74cbc527e34a0401a9a62c",
-      "source_bytes": 901,
-      "bytes": 901,
-      "mode": "0o644",
-      "changes": []
-    },
-    {
-      "source": "~/.claude/skills/env/templates/traefik.dynamic.yml.tpl",
-      "destination": "skills/env-claude/templates/traefik.dynamic.yml.tpl",
-      "source_sha256": "65d60ddc61de9a94a2d7291412048dbdf0b8a78cab82dadad66a310f9bdf8b68",
-      "sha256": "65d60ddc61de9a94a2d7291412048dbdf0b8a78cab82dadad66a310f9bdf8b68",
-      "source_bytes": 77,
-      "bytes": 77,
-      "mode": "0o644",
-      "changes": []
+      "commit": "75e65c4be946a3ae8d6ea003db0bcc6000e3ecde",
+      "note": "Initial snapshot with both env variants; recoverable from this commit."
     }
   ]
 }

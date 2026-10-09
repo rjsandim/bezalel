@@ -1,41 +1,36 @@
 # Bezalel
 
-Preservação local das skills confirmadas pelo usuário em 9 de outubro de 2026.
+Preservação das skills pessoais confirmadas pelo usuário.
 
-| Skill | Pasta preservada | Origem |
+| Skill | Pasta | Origem |
 |---|---|---|
 | clean-code | `skills/clean-code/` | `~/.codex/skills/clean-code/` |
 | clean-architecture | `skills/clean-architecture/` | `~/.codex/skills/clean-architecture/` |
-| env — variante Agents | `skills/env-agents/` | `~/.agents/skills/env/` |
-| env — variante Claude | `skills/env-claude/` | `~/.claude/skills/env/` |
+| env | `skills/env/` | `~/.agents/skills/env/` |
 
-São três skills, em quatro pastas, com 89 arquivos úteis. As variantes de `env`
-divergem e foram mantidas separadas; nenhuma foi escolhida como canônica.
-Os nomes internos, referências e caminhos de instalação foram preservados.
-Esta cópia não instala nem ativa as skills.
+A versão mais recente de `env`, proveniente de Agents, foi escolhida pelo usuário
+como a única cópia no repositório. A duplicata Claude foi removida desta árvore;
+continua recuperável no commit `75e65c4be946a3ae8d6ea003db0bcc6000e3ecde`.
+Os originais externos em `.agents` e `.claude` não foram alterados.
 
-87 arquivos são idênticos aos originais. Em cada variante de `env`, foi removida
-uma linha de comentário de `templates/node.Dockerfile.tpl` que identificava um
-projeto interno e uma medição. Não houve mudança de instruções executáveis.
-Os originais permanecem intactos.
+São 57 arquivos úteis: 56 idênticos aos originais e um com a remoção de uma linha
+de comentário que continha uma referência interna e uma medição, em
+`skills/env/templates/node.Dockerfile.tpl`. Nenhuma instrução executável mudou.
+Os caminhos internos de instalação foram preservados; este repositório não
+instala ou ativa as skills nem certifica compatibilidade com ferramentas.
 
-`inventory.json` registra a proveniência, os tamanhos, as permissões, os hashes
-SHA-256 de origem e destino e as duas sanitizações. Para conferir as cópias:
+`inventory.json` registra proveniência, permissões, tamanhos, hashes de origem e
+destino e a sanitização. Confira as cópias com:
 
 ```sh
 shasum -a 256 -c SHA256SUMS
 ```
 
 Metadados do sistema, histórico Git, configurações do IDE, caches, estado de
-execução e backups não fazem parte da cópia. Outras skills ficaram fora do
-escopo. A proposta de `vps-deploy`, quando presente em `.local-review/`, é local,
-ignorada pelo Git e não integra este snapshot.
+execução e backups não foram copiados. Nenhum script das skills foi executado
+para validar funcionamento. A revisão encontrou apenas placeholders e dados
+sintéticos de desenvolvimento no conjunto preservado.
 
-A revisão procurou credenciais, chaves privadas, autenticação literal e
-referências internas. Permaneceram placeholders e dados sintéticos de
-desenvolvimento. Nenhum script das skills foi executado. A preservação foi
-verificada por hashes e comparação dos arquivos, sem testes de execução.
-
-As referências bibliográficas das skills foram mantidas. Nenhuma licença foi
-atribuída nesta etapa. Este registro não reivindica direitos sobre obras citadas.
-Nenhum push ou publicação foi feito.
+As propostas antigas de `vps-deploy` em `.local-review/` estão ignoradas pelo Git.
+As referências bibliográficas foram mantidas, sem atribuir uma nova licença ou
+reivindicar direitos sobre obras citadas. Nenhum push foi feito.
