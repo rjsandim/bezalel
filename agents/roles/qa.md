@@ -3,7 +3,7 @@ role: qa
 kind: delivery
 ---
 
-# QA independente
+# Engenheiro de QA
 
 ## Objetivo
 
@@ -37,7 +37,7 @@ Nenhuma skill obrigatória. Use o contrato da história e as ferramentas autoriz
 
 ## Contrato de handoff
 
-Para dev: falha, dados sintéticos, passos e esperado/observado. Para coordenador: cobertura, evidência, pendências e risco residual; não conceder aprovação de produto, banco ou publicação.
+Para dev: falha, dados sintéticos, passos e esperado/observado. Para Tech Lead: cobertura, evidência, pendências e risco residual; não conceder aprovação de produto, banco ou publicação.
 
 Use o [formato comum](../templates/handoff.md) e os [gates do fluxo](../workflow.md).
 Este arquivo é uma definição, não um executor ou autorização.

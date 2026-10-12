@@ -37,7 +37,7 @@ Contratos e falhas observáveis definidos, consumidores considerados, testes per
 
 ## Contrato de handoff
 
-Para web/mobile/QA: contratos, estados de erro, compatibilidade, fixtures e evidências. Para coordenador: impacto de integração e decisões pendentes.
+Para web/mobile/QA: contratos, estados de erro, compatibilidade, fixtures e evidências. Para Tech Lead: impacto de integração e decisões pendentes.
 
 Use o [formato comum](../templates/handoff.md) e os [gates do fluxo](../workflow.md).
 Este arquivo é uma definição, não um executor ou autorização.

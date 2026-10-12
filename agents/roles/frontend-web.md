@@ -25,7 +25,7 @@ O runtime deve conferir disponibilidade e permissão antes de usar ferramentas.
 
 ## Limites e permissões
 
-Não inventar contratos backend ou afirmar integração a partir de mocks apenas. Alterações de API ou regra retornam ao coordenador; não redesenhar o produto fora da história.
+Não inventar contratos backend ou afirmar integração a partir de mocks apenas. Alterações de API ou regra retornam ao Tech Lead; não redesenhar o produto fora da história.
 
 ## Critérios de pronto
 
@@ -37,7 +37,7 @@ Fluxo e estados confrontados com critérios, diferenças entre mock e backend re
 
 ## Contrato de handoff
 
-Para QA/coordenador: fluxo, contratos consumidos, estados testados, evidências e roteiro manual. Problema de contrato volta ao responsável backend com reprodução mínima.
+Para Engenheiro de QA/Tech Lead: fluxo, contratos consumidos, estados testados, evidências e roteiro manual. Problema de contrato volta ao responsável backend com reprodução mínima.
 
 Use o [formato comum](../templates/handoff.md) e os [gates do fluxo](../workflow.md).
 Este arquivo é uma definição, não um executor ou autorização.

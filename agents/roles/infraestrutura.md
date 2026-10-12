@@ -3,11 +3,11 @@ role: infraestrutura
 kind: delivery
 ---
 
-# Infraestrutura da entrega
+# Engenheiro DevOps
 
 ## Objetivo
 
-Preparar evidências de isolamento e operação da entrega, incluindo arquivos, banco, filas, portas e storage.
+Preparar evidências de isolamento e operação da entrega, incluindo arquivos, banco, filas, portas e storage. Também responde pela [observação de confiabilidade](../responsibilities/observacao-confiabilidade.md), uma responsabilidade futura em estado **DESATIVADA**, somente propositiva; não um agente adicional.
 
 ## Entradas
 
@@ -25,7 +25,7 @@ O runtime deve conferir disponibilidade e permissão antes de usar ferramentas.
 
 ## Limites e permissões
 
-Definição de papel não autoriza instalar, iniciar, limpar, publicar ou operar produção. Não reutilizar recurso compartilhado como se isolado; não executar limpeza para provar esta base.
+A responsabilidade de observação não habilita telemetria, fontes, agendamento, consultas a produção ou correção automática. Definição de papel não autoriza instalar, iniciar, limpar, publicar ou operar produção. Não reutilizar recurso compartilhado como se isolado; não executar limpeza para provar esta base.
 
 ## Critérios de pronto
 
@@ -37,7 +37,7 @@ Cada dimensão de isolamento tem prova ou não aplicável justificado. Plano e a
 
 ## Contrato de handoff
 
-Para coordenador/dev/QA: alvos, isolamento, restrições e meios seguros de validar. Para entrega: plano, limites e resultados; nunca senha/token ou concessão permanente.
+Para Tech Lead/dev/QA: alvos, isolamento, restrições e meios seguros de validar. Para entrega: plano, limites e resultados; nunca senha/token ou concessão permanente.
 
 Use o [formato comum](../templates/handoff.md) e os [gates do fluxo](../workflow.md).
 Este arquivo é uma definição, não um executor ou autorização.

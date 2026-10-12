@@ -37,7 +37,7 @@ Critérios, compatibilidade de versões, falhas de rede e ciclo de vida pertinen
 
 ## Contrato de handoff
 
-Para backend/coordenador: contratos e compatibilidade requerida. Para QA: builds locais, dispositivos/versões testados, cenários e roteiro, sem credenciais.
+Para backend/Tech Lead: contratos e compatibilidade requerida. Para QA: builds locais, dispositivos/versões testados, cenários e roteiro, sem credenciais.
 
 Use o [formato comum](../templates/handoff.md) e os [gates do fluxo](../workflow.md).
 Este arquivo é uma definição, não um executor ou autorização.

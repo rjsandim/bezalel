@@ -24,7 +24,8 @@
         "errors",
         "availability",
         "slow_queries"
-      ]
+      ],
+      "owner_role": "infraestrutura"
     },
     "business": {
       "enabled": false,
@@ -36,7 +37,8 @@
       "grace_minutes": 15,
       "window_minutes": 30,
       "minimum_expected": 1,
-      "observed_threshold": 0
+      "observed_threshold": 0,
+      "owner_role": "observador-negocio"
     }
   }
 }

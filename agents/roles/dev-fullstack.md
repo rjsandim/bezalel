@@ -37,7 +37,7 @@ Critérios implementados, verificações próprias registradas, contratos preser
 
 ## Contrato de handoff
 
-Para QA/coordenador: diff/revisão, critérios atendidos, testes e limitações, situação de banco e passos manuais. Retomar a implementação quando houver evidência de falha.
+Para Engenheiro de QA/Tech Lead: diff/revisão, critérios atendidos, testes e limitações, situação de banco e passos manuais. Retomar a implementação quando houver evidência de falha.
 
 Use o [formato comum](../templates/handoff.md) e os [gates do fluxo](../workflow.md).
 Este arquivo é uma definição, não um executor ou autorização.

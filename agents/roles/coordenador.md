@@ -3,7 +3,7 @@ role: coordenador
 kind: delivery
 ---
 
-# Coordenador e arquiteto
+# Tech Lead
 
 ## Objetivo
 
@@ -37,7 +37,7 @@ Cada critério tem responsável/evidência; mudanças de banco têm decisão hum
 
 ## Contrato de handoff
 
-Para dev/especialistas: história, contratos, dependências, risco e situação dos gates. Receber QA e infraestrutura; declarar lacunas de integração e encaminhar correções.
+Para dev/especialistas: história, contratos, dependências, risco e situação dos gates. Receber Engenheiro de QA e Engenheiro DevOps; declarar lacunas de integração e encaminhar correções.
 
 Use o [formato comum](../templates/handoff.md) e os [gates do fluxo](../workflow.md).
 Este arquivo é uma definição, não um executor ou autorização.

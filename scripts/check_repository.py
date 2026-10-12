@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 import re
 import sys
-from check_delivery import ContractError, read_json, validate_config
+from check_delivery import ContractError, local_file, read_json, require, text, validate_config
 
 ROOT = Path(__file__).resolve().parents[1]
 SECTIONS = ["Objetivo e escopo", "Entradas e pré-requisitos", "Procedimento", "Saídas", "Validação", "Limites operacionais"]
@@ -65,6 +65,8 @@ def validate_agents():
                 continue
             declared.add(path)
             content = path.read_text()
+            if not text(entry.get("display_name")) or not re.search(r"^# " + re.escape(entry["display_name"]) + r"$", content, re.M):
+                errors.append("Nome de apresentação diverge do contrato: " + role)
             if not re.search(r"^role: " + re.escape(role) + r"$", content, re.M) or not re.search(r"^kind: " + entry["kind"] + r"$", content, re.M):
                 errors.append("Metadados do papel divergem do catálogo: " + role)
             if re.findall(r"^## (.+)$", content, re.M) != headings:
@@ -74,7 +76,21 @@ def validate_agents():
                 errors.append("Seleção de skills inválida: " + role)
         if declared != set((ROOT / "agents/roles").glob("*.md")):
             errors.append("Há papéis fora do catálogo ou referências duplicadas/incompletas.")
-        validate_config(read_json(ROOT / ".bezalel/project.example.json"))
+        config = read_json(ROOT / ".bezalel/project.example.json")
+        validate_config(config)
+        responsibilities = catalog.get("responsibilities")
+        require(isinstance(responsibilities, dict) and set(responsibilities) == {"reliability", "business"}, "Declare as responsabilidades de observação.")
+        for name, entry in responsibilities.items():
+            require(isinstance(entry, dict) and entry.get("enabled") is False and entry.get("mode") == "proposal_only", "Responsabilidade de observação deve permanecer desativada e propositiva.")
+            require(isinstance(entry.get("owner_role"), str) and entry["owner_role"] in catalog["roles"], "Responsabilidade sem papel proprietário válido.")
+            local_file(ROOT / "agents", entry.get("file"), "Responsabilidade")
+            require(config["observers"][name].get("owner_role") == entry["owner_role"], "Dono da observação diverge entre catálogo e exemplo de projeto.")
+        actors = catalog.get("external_actors")
+        require(isinstance(actors, dict) and "aprovador-humano" in actors, "Declare o aprovador humano externo.")
+        for actor, entry in actors.items():
+            require(actor not in catalog["roles"] and isinstance(entry, dict) and entry.get("kind") == "human", "Ator humano não pode ser papel de agente.")
+            require(text(entry.get("display_name")), "Ator externo sem nome.")
+            local_file(ROOT / "agents", entry.get("file"), "Ator externo")
     except (ContractError, OSError, UnicodeError, TypeError, ValueError):
         errors.append("Não foi possível validar catálogo/configuração de exemplo.")
     return errors

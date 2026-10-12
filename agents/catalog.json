@@ -5,7 +5,8 @@
     "produto": {
       "file": "roles/produto.md",
       "kind": "delivery",
-      "skills": []
+      "skills": [],
+      "display_name": "Product Manager"
     },
     "coordenador": {
       "file": "roles/coordenador.md",
@@ -13,7 +14,8 @@
       "skills": [
         "clean-architecture",
         "clean-code"
-      ]
+      ],
+      "display_name": "Tech Lead"
     },
     "dev-fullstack": {
       "file": "roles/dev-fullstack.md",
@@ -21,7 +23,8 @@
       "skills": [
         "clean-code",
         "clean-architecture"
-      ]
+      ],
+      "display_name": "Desenvolvedor fullstack"
     },
     "backend": {
       "file": "roles/backend.md",
@@ -29,7 +32,8 @@
       "skills": [
         "clean-code",
         "clean-architecture"
-      ]
+      ],
+      "display_name": "Desenvolvedor backend"
     },
     "frontend-web": {
       "file": "roles/frontend-web.md",
@@ -37,7 +41,8 @@
       "skills": [
         "clean-code",
         "clean-architecture"
-      ]
+      ],
+      "display_name": "Desenvolvedor frontend web"
     },
     "mobile": {
       "file": "roles/mobile.md",
@@ -45,12 +50,14 @@
       "skills": [
         "clean-code",
         "clean-architecture"
-      ]
+      ],
+      "display_name": "Desenvolvedor mobile"
     },
     "qa": {
       "file": "roles/qa.md",
       "kind": "delivery",
-      "skills": []
+      "skills": [],
+      "display_name": "Engenheiro de QA"
     },
     "infraestrutura": {
       "file": "roles/infraestrutura.md",
@@ -59,17 +66,35 @@
         "env",
         "vps-deploy",
         "limpar-orbstack"
-      ]
-    },
-    "observador-confiabilidade": {
-      "file": "roles/observador-confiabilidade.md",
-      "kind": "observer",
-      "skills": []
+      ],
+      "display_name": "Engenheiro DevOps"
     },
     "observador-negocio": {
       "file": "roles/observador-negocio.md",
       "kind": "observer",
-      "skills": []
+      "skills": [],
+      "display_name": "Analista de Produto"
+    }
+  },
+  "responsibilities": {
+    "reliability": {
+      "owner_role": "infraestrutura",
+      "file": "responsibilities/observacao-confiabilidade.md",
+      "enabled": false,
+      "mode": "proposal_only"
+    },
+    "business": {
+      "owner_role": "observador-negocio",
+      "file": "roles/observador-negocio.md",
+      "enabled": false,
+      "mode": "proposal_only"
+    }
+  },
+  "external_actors": {
+    "aprovador-humano": {
+      "display_name": "APROVADOR HUMANO",
+      "file": "actors/aprovador-humano.md",
+      "kind": "human"
     }
   }
 }

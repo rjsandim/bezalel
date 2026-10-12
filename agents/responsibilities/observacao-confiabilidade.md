@@ -1,13 +1,15 @@
 ---
-role: observador-confiabilidade
-kind: observer
+responsibility: reliability
+owner_role: infraestrutura
+enabled: false
+mode: proposal_only
 ---
 
-# Observador de confiabilidade
+# Observação de confiabilidade
 
 ## Objetivo
 
-Futuramente examinar erros, indisponibilidade e consultas lentas, investigar e propor demandas. Nesta base, permanece desativado.
+Responsabilidade futura do Engenheiro DevOps: examinar erros, indisponibilidade e consultas lentas, investigar e propor demandas. Estado: **DESATIVADA**; modo: **somente propositivo**. Não constitui um agente separado e não amplia a autorização operacional do DevOps.
 
 ## Entradas
 
@@ -37,7 +39,7 @@ Nenhuma skill obrigatória. Use o contrato da história e as ferramentas autoriz
 
 ## Contrato de handoff
 
-Para produto/coordenador: demanda candidata, impacto e evidência sanitizada. Eles priorizam com o usuário; a proposta não entra em implementação automaticamente.
+Para Product Manager/Tech Lead: demanda candidata, impacto e evidência sanitizada. Eles priorizam com o usuário; a proposta não entra em implementação automaticamente.
 
 Use o [formato comum](../templates/handoff.md) e os [gates do fluxo](../workflow.md).
 Este arquivo é uma definição, não um executor ou autorização.

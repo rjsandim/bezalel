@@ -9,16 +9,27 @@ agentes, delega trabalho, conecta serviços ou concede permissões.
 
 | Papel | Quando usar | Responsabilidade principal |
 |---|---|---|
-| [Produto](roles/produto.md) | Dúvida de necessidade, prioridade ou desvio de visão | Explicitar escolhas; o usuário decide mudanças de produto |
-| [Coordenador/arquiteto](roles/coordenador.md) | Integrações, risco arquitetural ou múltiplos responsáveis | Impacto, contratos, estratégia e entrega inteira integrada |
+| [Product Manager](roles/produto.md) | Dúvida de necessidade, prioridade ou desvio de visão | Explicitar escolhas; o usuário decide mudanças de produto |
+| [Tech Lead](roles/coordenador.md) | Integrações, risco arquitetural ou múltiplos responsáveis | Impacto, contratos, estratégia e entrega inteira integrada |
 | [Dev fullstack](roles/dev-fullstack.md) | História pequena que atravessa camadas | Implementar uma entrega vertical pequena |
 | [Backend](roles/backend.md) | Regras, persistência ou contratos de serviços relevantes | Backend e compatibilidade com consumidores |
 | [Frontend web](roles/frontend-web.md) | Interação web exige especialização | Fluxos web, estados de interface e acessibilidade |
 | [Mobile](roles/mobile.md) | Apps, versões distribuídas ou comportamento móvel | Contratos, conectividade, versões e plataforma |
-| [QA independente](roles/qa.md) | Validação da entrega | Ampliar cenários e confrontar comportamento com a história |
-| [Infraestrutura](roles/infraestrutura.md) | Isolamento ou preparação operacional da entrega | Evidenciar isolamento e preparar execução autorizada |
-| [Observador de confiabilidade](roles/observador-confiabilidade.md) | Futuro; sempre desativado nesta base | Investigar sinais e propor demandas, sem corrigir |
-| [Observador de negócio](roles/observador-negocio.md) | Futuro; sempre desativado nesta base | Investigar anomalias no contexto de negócio, sem corrigir |
+| [Engenheiro de QA](roles/qa.md) | Validação da entrega | Ampliar cenários e confrontar comportamento com a história |
+| [Engenheiro DevOps](roles/infraestrutura.md) | Isolamento ou preparação operacional da entrega | Evidenciar isolamento e preparar execução autorizada |
+| [Analista de Produto](roles/observador-negocio.md) | Futuro; sempre desativado nesta base | Investigar anomalias no contexto de negócio, sem corrigir |
+
+São **nove papéis de agentes**, mais o [APROVADOR HUMANO](actors/aprovador-humano.md)
+externo. O Tech Lead reúne arquitetura, coordenação e integração. A independência
+do Engenheiro de QA permanece obrigatória. O Engenheiro DevOps também responde
+pela [observação de confiabilidade](responsibilities/observacao-confiabilidade.md).
+Essa responsabilidade e a observação de negócio do Analista de Produto permanecem
+**desativadas**, separadamente dos nomes dos cargos; nenhuma coleta é habilitada.
+
+Os IDs e caminhos existentes dos nove papéis foram preservados para não quebrar
+registros. `display_name` no catálogo define o nome de apresentação. O antigo
+`observador-confiabilidade` deixou de ser papel; sua responsabilidade pertence a
+`infraestrutura`. Veja a [correspondência com Company Flow](company-flow.md).
 
 Não forme uma equipe completa por padrão. Para uma história simples, um dev e
 uma revisão independente podem bastar; um deles ou o usuário é identificado como

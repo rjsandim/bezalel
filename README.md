@@ -14,11 +14,14 @@ monitoramento, serviço hospedado ou instalador automático.
 
 ## Agentes e entrega por user story
 
-A [base de agentes](agents/README.md) define produto, coordenador/arquiteto,
-dev fullstack, backend, frontend web, mobile, QA independente e infraestrutura.
+A [base de agentes](agents/README.md) define nove papéis: Product Manager, Tech
+Lead, Engenheiro DevOps, desenvolvedores fullstack/backend/frontend web/mobile,
+Engenheiro de QA e Analista de Produto. O APROVADOR HUMANO é um ator externo.
 São papéis opcionais conforme risco; cada história mantém um responsável pela
-entrega integrada. Os dois observadores futuros (confiabilidade e negócio) estão
-somente definidos, desativados e limitados a propor demandas.
+entrega integrada. As responsabilidades futuras de observação de confiabilidade
+(DevOps) e negócio (Analista de Produto) permanecem desativadas e somente
+propositivas. A [correspondência com Company Flow](agents/company-flow.md) registra
+IDs, responsabilidades e limites da sincronização manual.
 
 O fluxo é isolamento → análise → proposta/aprovação de banco quando aplicável →
 implementação → QA independente/integração → preparação da PR e roteiro manual.

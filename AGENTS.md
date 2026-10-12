@@ -33,14 +33,22 @@ Este arquivo instrui contribuições no repositório. Papéis e contratos ficam 
   identidade nem autorização; um runtime deve conferir a interação humana real.
 - QA independente amplia cenários e confronta comportamento, não só a suíte do dev.
   Mantenha responsabilidade pela integração de API/web/mobile e serviços envolvidos.
-- Produto aponta desvios e alternativas; o usuário decide mudanças. Contratos,
+- Product Manager aponta desvios e alternativas; o usuário decide mudanças. Contratos,
   fachadas e reutilização devem resolver problemas concretos, sem refatorar fora
   do escopo ou concentrar regras/SQLs de todos os módulos num arquivo gigante.
-- Observadores permanecem desativados e somente propositivos. Não ative coleta,
+- Preserve os nove papéis do catálogo e o APROVADOR HUMANO externo, que não é
+  agente. IDs são estáveis; `display_name` define a nomenclatura. Confiabilidade é
+  responsabilidade do Engenheiro DevOps; negócio, do Analista de Produto.
+- Responsabilidades de observação permanecem desativadas e somente propositivas. Não ative coleta,
   leia produção ou faça correções como teste dessa base. Calendário, janela e
   tolerância importam para métricas; ausência de dados não é zero eventos.
 - PR é etapa prevista de entrega, mas publicação/merge/deploy exigem autorização
   concreta da tarefa. Quando ausente, prepare rascunho local e registre a pendência.
+
+- Em mudanças que afetem o Company Flow, use a [correspondência](agents/company-flow.md):
+  arquivos são a fonte canônica; releia a revisão visual, preserve alterações
+  concorrentes e confira etapas/decisões/condições nos dois sentidos. Diferencie
+  checker estrutural de revisão semântica e registre divergências preexistentes.
 
 ## Configuração e segurança
 

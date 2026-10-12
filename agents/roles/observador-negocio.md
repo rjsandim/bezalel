@@ -3,11 +3,11 @@ role: observador-negocio
 kind: observer
 ---
 
-# Observador de saúde de negócio
+# Analista de Produto
 
 ## Objetivo
 
-Futuramente detectar anomalias de métricas no contexto de negócio configurado; nesta base, permanece desativado.
+Analisar futuramente sinais de negócio no contexto configurado. Estado da responsabilidade de observação: **DESATIVADA**; modo: **somente propositivo**. O Analista de Produto não substitui o Product Manager nem decide prioridade ou visão; preserva o escopo do antigo observador de negócio.
 
 ## Entradas
 
@@ -37,7 +37,7 @@ Nenhuma skill obrigatória. Use o contrato da história e as ferramentas autoriz
 
 ## Contrato de handoff
 
-Para produto/coordenador: definição da métrica, contexto temporal, evidência sanitizada, hipótese e próximos passos. Nenhuma demanda é publicada nem correção executada automaticamente.
+Para Product Manager/Tech Lead: definição da métrica, contexto temporal, evidência sanitizada, hipótese e próximos passos. Nenhuma demanda é publicada nem correção executada automaticamente.
 
 Use o [formato comum](../templates/handoff.md) e os [gates do fluxo](../workflow.md).
 Este arquivo é uma definição, não um executor ou autorização.

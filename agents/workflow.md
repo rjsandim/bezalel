@@ -17,9 +17,9 @@ correspondente. Não reutilize produção como fixture.
 ## 2. Analisar a história e os impactos
 
 Leia necessidade, critérios, dependências e regras específicas do projeto.
-Selecione somente os papéis necessários. O coordenador identifica alterações de
+Selecione somente os papéis necessários. O Tech Lead identifica alterações de
 contratos API/web/mobile, versões consumidoras, migração de dados, integração e
-riscos. Produto aponta desvios de visão; o usuário decide mudança de requisito.
+riscos. Product Manager aponta desvios de visão; o usuário decide mudança de requisito.
 
 Use responsabilidades claras: consultas por responsabilidade, contratos e
 fachadas quando reduzirem acoplamento. No caso de um professor, uma fachada pode

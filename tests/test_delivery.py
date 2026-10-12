@@ -235,6 +235,39 @@ class DeliveryContractTests(unittest.TestCase):
         self.assertEqual(repository.validate_agents(), [])
         self.assertEqual(repository.validate_structure(repository.package_files()), [])
 
+    def test_nine_named_agents_preserve_observation_owners_and_human_boundary(self):
+        catalog = delivery.read_json(ROOT / "agents/catalog.json")
+        self.assertEqual({entry["display_name"] for entry in catalog["roles"].values()}, {
+            "Product Manager", "Tech Lead", "Engenheiro DevOps", "Desenvolvedor fullstack",
+            "Desenvolvedor backend", "Desenvolvedor frontend web", "Desenvolvedor mobile",
+            "Engenheiro de QA", "Analista de Produto",
+        })
+        self.assertEqual(len(catalog["roles"]), 9)
+        self.assertNotIn("observador-confiabilidade", catalog["roles"])
+        self.assertEqual(catalog["responsibilities"]["reliability"]["owner_role"], "infraestrutura")
+        self.assertEqual(catalog["responsibilities"]["business"]["owner_role"], "observador-negocio")
+        self.assertNotIn("aprovador-humano", catalog["roles"])
+        self.record["roles"] = ["aprovador-humano"]
+        with self.assertRaises(delivery.ContractError):
+            self.validate("plan")
+
+    def test_checker_rejects_active_or_orphaned_observation_responsibility(self):
+        baseline = delivery.read_json(ROOT / "agents/catalog.json")
+        original_read = repository.read_json
+        for key, value in [("enabled", True), ("owner_role", "missing-role")]:
+            with self.subTest(key=key):
+                catalog = deepcopy(baseline)
+                catalog["responsibilities"]["reliability"][key] = value
+                with patch.object(repository, "read_json", side_effect=lambda path: catalog if path.name == "catalog.json" else original_read(path)):
+                    self.assertTrue(repository.validate_agents())
+
+    def test_checker_rejects_presentation_name_different_from_role_contract(self):
+        catalog = delivery.read_json(ROOT / "agents/catalog.json")
+        catalog["roles"]["qa"]["display_name"] = "Outro cargo"
+        original_read = repository.read_json
+        with patch.object(repository, "read_json", side_effect=lambda path: catalog if path.name == "catalog.json" else original_read(path)):
+            self.assertTrue(repository.validate_agents())
+
     def test_malformed_catalog_reports_failure_without_traceback(self):
         self.write("agents/catalog.json", "[]")
         with patch.object(repository, "ROOT", self.project):

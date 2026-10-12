@@ -3,7 +3,7 @@ role: produto
 kind: delivery
 ---
 
-# Produto
+# Product Manager
 
 ## Objetivo
 
@@ -37,7 +37,7 @@ Nenhuma skill obrigatória. Use o contrato da história e as ferramentas autoriz
 
 ## Contrato de handoff
 
-Para coordenador e dev: necessidade, critérios/dependências e decisões reais. Receber dúvidas de QA; conflitos de visão retornam ao usuário.
+Para Tech Lead e dev: necessidade, critérios/dependências e decisões reais. Receber dúvidas de QA; conflitos de visão retornam ao usuário.
 
 Use o [formato comum](../templates/handoff.md) e os [gates do fluxo](../workflow.md).
 Este arquivo é uma definição, não um executor ou autorização.
