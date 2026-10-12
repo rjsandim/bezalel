@@ -4,6 +4,8 @@ import argparse
 from pathlib import Path
 import re
 import sys
+import zipfile
+from xml.etree import ElementTree
 from check_delivery import ContractError, local_file, read_json, require, text, validate_config
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -96,16 +98,41 @@ def validate_agents():
     return errors
 
 
+def validate_workbook_template(path=None):
+    """Check the packaged empty template without requiring a spreadsheet runtime."""
+    path = path or ROOT / "skills/development-test-workbook/assets/test-plan-template.xlsx"
+    expected = ["Resumo", "Guia de execução", "Casos de teste", "Dados do ambiente", "Consultas SQL", "Backlog"]
+    namespace = {"s": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
+    try:
+        with zipfile.ZipFile(path) as archive:
+            if archive.testzip() is not None:
+                return ["Template Excel corrompido."]
+            workbook = ElementTree.fromstring(archive.read("xl/workbook.xml"))
+            sheets = workbook.findall("s:sheets/s:sheet", namespace)
+            if [sheet.get("name") for sheet in sheets] != expected:
+                return ["Abas do template Excel divergem do contrato."]
+            for name in archive.namelist():
+                if "vbaProject" in name or name.startswith("xl/externalLinks/"):
+                    return ["Template Excel contém macro ou vínculo externo."]
+                if name.endswith(".rels"):
+                    relationships = ElementTree.fromstring(archive.read(name))
+                    if any(rel.get("TargetMode") == "External" for rel in relationships):
+                        return ["Template Excel contém relacionamento externo."]
+    except (OSError, KeyError, zipfile.BadZipFile, ElementTree.ParseError):
+        return ["Template Excel ausente ou inválido."]
+    return []
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.parse_args()
     files = package_files()
-    errors = validate_structure(files) + validate_agents()
+    errors = validate_structure(files) + validate_agents() + validate_workbook_template()
     if errors:
         for error in errors:
             print(error, file=sys.stderr)
         return 1
-    print("Estrutura, catálogo de papéis, configuração de exemplo, metadados e links locais verificados.")
+    print("Estrutura, catálogo de papéis, configuração de exemplo, metadados, links locais e template Excel verificados.")
     return 0
 
 

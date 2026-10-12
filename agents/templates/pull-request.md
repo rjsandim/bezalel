@@ -12,7 +12,9 @@ Informe falhas ou verificações não executadas. Identifique os responsáveis.
 ## Roteiro manual
 
 Pré-condições/ambiente isolado, passos e resultados esperados por critério.
-Não inclua segredos ou dados privados.
+Se o roteiro solicitado for Excel, referencie o `.xlsx` local pelo campo
+`manual_test`, conforme o [contrato](../record-contract.md). Gerar a planilha não
+executa testes e não autoriza anexá-la à PR. Não inclua segredos ou dados privados.
 
 ## Banco, contratos e operação
 

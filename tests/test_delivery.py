@@ -268,6 +268,17 @@ class DeliveryContractTests(unittest.TestCase):
         with patch.object(repository, "read_json", side_effect=lambda path: catalog if path.name == "catalog.json" else original_read(path)):
             self.assertTrue(repository.validate_agents())
 
+    def test_manual_test_accepts_local_xlsx_without_claiming_execution(self):
+        self.ready_to_deliver()
+        self.record["manual_test"] = "outputs/fixture.xlsx"
+        output = self.project / self.record["manual_test"]
+        output.parent.mkdir(parents=True)
+        output.write_bytes((ROOT / "skills/development-test-workbook/assets/test-plan-template.xlsx").read_bytes())
+        self.validate("deliver")
+        self.record["qa"]["criteria"][0]["status"] = "blocked"
+        with self.assertRaises(delivery.ContractError):
+            self.validate("deliver")
+
     def test_malformed_catalog_reports_failure_without_traceback(self):
         self.write("agents/catalog.json", "[]")
         with patch.object(repository, "ROOT", self.project):

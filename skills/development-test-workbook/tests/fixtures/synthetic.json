@@ -1,0 +1,18 @@
+{
+  "title": "Fixture sintética — teste do gerador",
+  "subtitle": "Sem aplicação, cliente ou ambiente real",
+  "warning": "Resultados fictícios para verificar exportação; nenhum caso executado",
+  "generalAcceptance": "Preservar vínculos e resultados sintéticos",
+  "guide": [{"section":"Fixture","item":"Dados sintéticos","guidance":"Não executar contra um produto","required":"Sim"}],
+  "coverage": [{"dimension":"Exportação sintética","uiApi":"T001","dataSetup":"T002"}],
+  "cases": [
+    {"id":"T001","priority":"Alta","fixture":"FIX-01 sintética","steps":"Exemplo fictício","expectedSurface":"Valor esperado fictício","expectedDatabase":"Não aplicável: exportação","sqlIds":"Q01","result":"Falhou","observed":"Resultado fictício","date":"2026-01-01","executor":"Executor sintético","backlogId":"B01"},
+    {"id":"T002","priority":"Média","result":"Bloqueado","backlogId":"B02"}
+  ],
+  "environmentData": [{"code":"FIX-01","use":"Teste sintético do gerador","unit":"tenant-ficticio","notes":"Não provém de ambiente real"}],
+  "queries": [{"id":"Q01","objective":"Texto SQL sintético; nunca executado","sql":"SELECT 1 AS synthetic_value","care":"Apenas conteúdo da planilha"}],
+  "backlog": [
+    {"id":"B01","testId":"T001","severity":"Alta","summary":"Falha sintética","status":"Novo","retest":"Não retestado"},
+    {"id":"B02","testId":"T002","severity":"Média","summary":"Bloqueio sintético","status":"Em análise","retest":"Bloqueado"}
+  ]
+}

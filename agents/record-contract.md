@@ -29,6 +29,21 @@ referenciados precisam existir no projeto; nenhuma fonte remota é consultada.
 validador executa. Listas vazias significam que o projeto ainda deve decidir seus
 comandos. Configuração não concede acesso ou aprovação.
 
+## Roteiro manual em Excel
+
+Quando o usuário pedir Excel, `manual_test` pode referenciar o `.xlsx` produzido
+pela [skill development-test-workbook](../skills/development-test-workbook/SKILL.md),
+com seis abas, passos, expectativas, evidências e backlog. Use caminho relativo
+dentro do projeto, por exemplo `outputs/US-001/roteiro.xlsx`, e mantenha o artefato
+local fora do Git quando contiver dados de execução. O JSON privado da entrega
+também permanece fora do Git. Formatos anteriores de roteiro continuam aceitos.
+
+O CLI verifica apenas existência, contenção no projeto e tamanho não vazio;
+não abre Excel, recalcula fórmulas, avalia conteúdo ou comprova execução dos casos.
+Gerar um template vazio não atende semanticamente um roteiro executável, mesmo
+que passe nessa verificação estrutural. QA e integração continuam exigidos.
+O responsável confere o conteúdo e registra limitações antes de entregar.
+
 ## Etapas verificadas pelo CLI
 
 - `plan`: formato básico, história, critérios, papéis e configuração. Isolamento,

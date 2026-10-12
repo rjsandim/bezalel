@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plano de Testes em Excel"
+  short_description: "Cria planos de teste executáveis em Excel"
+  default_prompt: "Use $development-test-workbook para criar um Excel de testes completo para este desenvolvimento."

@@ -1,6 +1,6 @@
 # Bezalel
 
-Base versionável de papéis de agentes, processo de entrega e seis skills
+Base versionável de papéis de agentes, processo de entrega e sete skills
 pessoais. Há definições e validadores locais; não há runtime que inicie agentes,
 monitoramento, serviço hospedado ou instalador automático.
 
@@ -12,6 +12,7 @@ monitoramento, serviço hospedado ou instalador automático.
 | [vps-deploy](skills/vps-deploy/SKILL.md) | Orientar operações de VPS com configuração por projeto | Markdown e validador Python |
 | [limpar-orbstack](skills/limpar-orbstack/SKILL.md) | Auditar e limpar ambientes explicitamente autorizados | Markdown e roteiros de preservação |
 | [implementar-snapshots](skills/implementar-snapshots/SKILL.md) | Construir snapshots full/tiny com sanitização, integridade e destino isolado | Markdown, modelo de política e fixture sintética |
+| [development-test-workbook](skills/development-test-workbook/SKILL.md) | Criar roteiros manuais em Excel com casos, evidências e backlog | Python/openpyxl, template vazio e fixtures sintéticas |
 
 ## Agentes e entrega por user story
 
@@ -53,7 +54,7 @@ entradas/pré-requisitos, procedimento, saídas, validação e limites operacion
 `references/`, `scripts/`, `templates/` e `tests/` aparecem quando necessários.
 `agents/openai.yaml` é um adaptador opcional de interface, não um agente em
 execução. As skills operacionais usam invocação explícita nesse metadado; as duas
-Clean e implementar-snapshots podem ser usadas implicitamente em tarefas compatíveis. A interpretação
+Clean, implementar-snapshots e development-test-workbook podem ser usadas implicitamente em tarefas compatíveis. A interpretação
 pelo aplicativo deve ser conferida nele; este repositório não certifica loaders.
 
 ## Instalação e uso
@@ -149,6 +150,18 @@ comportamento observado das melhorias propostas. A skill não contém um motor d
 backup nem executa snapshots ao ser instalada. Implementação não autoriza ler
 produção, sobrescrever destinos, habilitar agenda ou alterar infraestrutura ENV.
 
+### Roteiro manual em Excel
+
+Use [development-test-workbook](skills/development-test-workbook/SKILL.md) quando o
+roteiro pedido for Excel. A pasta é portátil e contém o template vazio, contrato
+JSON e gerador Python; requer `openpyxl` 3.1.x já disponível. Não depende do loader
+Codex, não consulta banco nem executa os casos. Fórmulas exigem recálculo em um
+aplicativo de planilhas. O gerador recusa sobrescrever arquivos existentes.
+
+O campo `manual_test` da entrega pode apontar para esse `.xlsx` local, conforme o
+[contrato](agents/record-contract.md). Formatos já usados continuam aceitos;
+a skill não cria nova etapa de QA, code review ou autorização.
+
 ## Verificação local segura
 
 Requisitos: Python 3.9+ e Bash; para os testes de ciclo de vida da ENV, Git,
@@ -163,11 +176,13 @@ python3 -B scripts/check_repository.py
 python3 -B -m unittest discover -s tests -v
 python3 -B -m unittest discover -s skills/env/tests -v
 python3 -B -m unittest discover -s skills/vps-deploy/tests -v
+# Requer openpyxl 3.1.x; não instala dependências:
+python3 -B -m unittest discover -s skills/development-test-workbook/tests -v
 ```
 
 O checker verifica estrutura, catálogo de papéis, configuração de exemplo, links
-locais e metadados essenciais, sem alterar arquivos ou exigir atualização de
-hashes a cada edição. Os testes de entrega
+locais, metadados essenciais e integridade/abas/vínculos do template Excel, sem
+alterar arquivos ou exigir atualização de hashes a cada edição. Os testes de entrega
 usam histórias e decisões inteiramente sintéticas, sem autorização real.
 Os testes usam repositórios temporários e simulam operações Docker, brew, sudo
 e mkcert; o CLI real só valida Compose estaticamente, sem acessar o daemon.
