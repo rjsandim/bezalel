@@ -1,0 +1,7 @@
+interface:
+  display_name: "Implementar snapshots"
+  short_description: "Constrói snapshots full e tiny seguros por projeto"
+  default_prompt: "Use $implementar-snapshots para construir criação e restauração de snapshots neste projeto, com dados sanitizados, integridade relacional e destino isolado."
+
+policy:
+  allow_implicit_invocation: true

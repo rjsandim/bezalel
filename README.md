@@ -1,6 +1,6 @@
 # Bezalel
 
-Base versionável de papéis de agentes, processo de entrega e cinco skills
+Base versionável de papéis de agentes, processo de entrega e seis skills
 pessoais. Há definições e validadores locais; não há runtime que inicie agentes,
 monitoramento, serviço hospedado ou instalador automático.
 
@@ -11,6 +11,7 @@ monitoramento, serviço hospedado ou instalador automático.
 | [env](skills/env/SKILL.md) | Gerenciar ambientes locais por worktree e Docker | Bash, Python auxiliar e templates |
 | [vps-deploy](skills/vps-deploy/SKILL.md) | Orientar operações de VPS com configuração por projeto | Markdown e validador Python |
 | [limpar-orbstack](skills/limpar-orbstack/SKILL.md) | Auditar e limpar ambientes explicitamente autorizados | Markdown e roteiros de preservação |
+| [implementar-snapshots](skills/implementar-snapshots/SKILL.md) | Construir snapshots full/tiny com sanitização, integridade e destino isolado | Markdown, configuração Laravel e fixture sintética |
 
 ## Agentes e entrega por user story
 
@@ -52,7 +53,7 @@ entradas/pré-requisitos, procedimento, saídas, validação e limites operacion
 `references/`, `scripts/`, `templates/` e `tests/` aparecem quando necessários.
 `agents/openai.yaml` é um adaptador opcional de interface, não um agente em
 execução. As skills operacionais usam invocação explícita nesse metadado; as duas
-Clean podem ser usadas implicitamente em tarefas compatíveis. A interpretação
+Clean e implementar-snapshots podem ser usadas implicitamente em tarefas compatíveis. A interpretação
 pelo aplicativo deve ser conferida nele; este repositório não certifica loaders.
 
 ## Instalação e uso
@@ -132,6 +133,20 @@ ambiente/critério delimitado, contexto `orbstack` validado, prova de integraç�
 preservação de dados e propriedade exclusiva dos recursos. Não faz prune global,
 não reinicia OrbStack e não remove infraestrutura compartilhada. Um pedido de
 instalar, copiar ou editar a skill não autoriza executá-la.
+
+### Implementar snapshots
+
+Use [a skill](skills/implementar-snapshots/SKILL.md) para construir a funcionalidade
+no projeto alvo, com política própria de dados, relações e destinos. Ela inclui
+[configuração Laravel inativa](skills/implementar-snapshots/templates/snapshots.php),
+[fixture relacional sintética](skills/implementar-snapshots/templates/tiny-relations.json)
+e [cenários de validação](skills/implementar-snapshots/references/testes.md).
+
+A referência veio da leitura dos comandos full/tiny de uma aplicação real;
+[origem e diferenças](skills/implementar-snapshots/references/origem.md) separam o
+comportamento observado das melhorias propostas. A skill não contém um motor de
+backup nem executa snapshots ao ser instalada. Implementação não autoriza ler
+produção, sobrescrever destinos, habilitar agenda ou alterar infraestrutura ENV.
 
 ## Verificação local segura
 
