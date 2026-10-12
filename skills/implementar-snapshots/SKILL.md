@@ -17,6 +17,11 @@ A referência inicial é uma implementação Laravel/MySQL real. Seus mecanismos
 Não copie nomes de tabelas, SQL de domínio, credenciais ou infraestrutura da
 origem. Snapshot de desenvolvimento não substitui backup de recuperação.
 
+O núcleo é independente de linguagem e framework. Adapte interfaces, formato,
+configuração e testes ao stack real do projeto; não instale nem converta o projeto
+para a tecnologia de origem. O [exemplo Laravel](references/exemplo-laravel.md)
+é opcional e só deve ser lido quando esse for o stack escolhido.
+
 ## Entradas e pré-requisitos
 
 - Projeto alvo, instruções do repositório e escopo autorizado de implementação.
@@ -41,13 +46,14 @@ origem. Snapshot de desenvolvimento não substitui backup de recuperação.
    [Implementação e configuração](references/implementacao.md). Classifique
    tabelas e colunas, defina recorte, relações, tratamento de anexos, formato,
    compatibilidade e critérios observáveis. Não converta configuração ausente
-   em exportação completa. A [configuração Laravel](templates/snapshots.php)
-   é um ponto de partida inativo, a adaptar ao schema e às convenções locais.
+   em exportação completa. O [modelo de política](templates/snapshot-policy.example.json)
+   ilustra as decisões a adaptar ao schema e às convenções locais; não exige
+   JSON, nomes de classes, comandos específicos ou um loader próprio.
 3. **Prepare proteção e isolamento antes dos efeitos.** Siga
    [Integridade e isolamento](references/seguranca.md). Valide a identidade real
-   de origem, destino e storage. `APP_ENV`, um hostname local e `--force` não
+   de origem, destino e storage. Um rótulo de ambiente, hostname local ou flag de força não
    demonstram isolamento. Não restaure no banco corrente por fallback.
-4. **Implemente criação e restauração.** Use comandos finos e funções/serviços
+4. **Implemente criação e restauração.** Use pontos de entrada pequenos e funções/serviços
    coesos conforme a arquitetura existente. Separe seleção/sanitização de I/O
    para testá-las sem banco. Reaproveite bibliotecas e adaptadores presentes;
    não crie uma plataforma de backups, uma camada por classe ou múltiplos

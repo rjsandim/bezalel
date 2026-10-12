@@ -1,0 +1,51 @@
+{
+  "purpose": "Modelo conceitual a adaptar ao stack; não é configuração executável ou schema obrigatório",
+  "enabled": false,
+  "project_id": null,
+  "policy_version": null,
+  "source": {
+    "resource_ref": null,
+    "allowed_environments": []
+  },
+  "artifacts": {
+    "store_ref": null,
+    "namespace": "development-snapshots",
+    "format_version": 1,
+    "publish_only_when_complete": true
+  },
+  "tables": {
+    "unclassified": "reject",
+    "full_data": ["accounts", "users"],
+    "schema_only": ["sessions"],
+    "tiny_recent": {
+      "orders": {"date_columns": ["updated_at", "created_at"]},
+      "order_items": {"date_columns": ["updated_at", "created_at"]}
+    }
+  },
+  "tiny": {
+    "days": 30,
+    "timezone": "UTC",
+    "missing_date_column": "reject",
+    "null_date": "reject",
+    "include_required_parents": true,
+    "required_children": [{"parent": "orders", "child": "order_items", "foreign_key": "order_id"}],
+    "row_limit": 100000
+  },
+  "sanitization": {
+    "policy_version": null,
+    "unclassified_fields": "reject",
+    "field_rules": [],
+    "transform_before_serialization": true
+  },
+  "application_files": {"mode": "exclude"},
+  "restore": {
+    "allowed_environments": ["local", "testing"],
+    "allowed_targets": [],
+    "require_expected_identity": true,
+    "require_manifest": true,
+    "require_sha256": true,
+    "require_isolated_target": true,
+    "max_uncompressed_bytes": 536870912,
+    "max_frame_bytes": 4194304
+  }
+}

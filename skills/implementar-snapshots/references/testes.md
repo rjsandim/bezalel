@@ -40,8 +40,8 @@ ausência de uma amostra não certifica toda a política de privacidade.
 | Criação | Exceção na leitura, escrita curta, disco cheio, falha de compressão/upload | Artefato não elegível; último snapshot bom preservado; cleanup restrito à execução. |
 | Concorrência | Duas criações mesma origem, dois restores mesmo destino | Lock evita concorrência indevida; nomes temporários únicos; locks liberados em erro. |
 | Publicação | Falha entre payload, manifesto e ponteiro opcional | Consumidor não observa versão parcial nem mistura execuções. |
-| Produção | `APP_ENV=production` com confirmação/force | Bloqueio antes de qualquer escrita. |
-| Destino | `APP_ENV=local` mas identidade aponta produção, alias errado, contexto divergente, túnel, alvo ausente | Bloqueio; não usar conexão padrão nem confiar só no host. |
+| Produção | Ambiente declarado como produção com confirmação/force | Bloqueio antes de qualquer escrita. |
+| Destino | Ambiente declarado como local, mas identidade aponta produção, alias errado, contexto divergente, túnel, alvo ausente | Bloqueio; não usar conexão padrão nem confiar só no host. |
 | Corrida | Alvo muda após preview/obtenção do lock | Revalidação bloqueia antes da mutação. |
 | Arquivo | Ausente, vazio, gzip truncado, hash divergente, manifesto de outro projeto, versão incompatível, path traversal | Nenhum DDL/DML no destino, mesmo com confirmação. |
 | Confiança | Payload/manifesto de produtor não autorizado com hashes coerentes | Origem rejeitada; checksum isolado não concede confiança. |
@@ -62,7 +62,7 @@ Registre o que permanece não ensaiado. Um ensaio com engine real exige nova eta
 explicitamente autorizada, base descartável exclusiva e dados sintéticos; não
 faça parte da validação segura automática desta skill.
 
-O template PHP pode ser validado com `php -l` sem bootstrap do projeto. Confira
-que o executável é um binário local, não um wrapper que inicia infraestrutura.
-JSON pode ser lido por parser local. Checks de estrutura/links/frontmatter validam apenas
+Use linters e verificações de tipos apropriados à linguagem efetivamente alterada,
+com executáveis já disponíveis e sem wrappers que iniciem infraestrutura.
+O modelo JSON e a fixture podem ser lidos por parser local. Checks de estrutura/links/frontmatter validam apenas
 o pacote, não a funcionalidade que a skill ensinará a construir.

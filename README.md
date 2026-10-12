@@ -11,7 +11,7 @@ monitoramento, serviço hospedado ou instalador automático.
 | [env](skills/env/SKILL.md) | Gerenciar ambientes locais por worktree e Docker | Bash, Python auxiliar e templates |
 | [vps-deploy](skills/vps-deploy/SKILL.md) | Orientar operações de VPS com configuração por projeto | Markdown e validador Python |
 | [limpar-orbstack](skills/limpar-orbstack/SKILL.md) | Auditar e limpar ambientes explicitamente autorizados | Markdown e roteiros de preservação |
-| [implementar-snapshots](skills/implementar-snapshots/SKILL.md) | Construir snapshots full/tiny com sanitização, integridade e destino isolado | Markdown, configuração Laravel e fixture sintética |
+| [implementar-snapshots](skills/implementar-snapshots/SKILL.md) | Construir snapshots full/tiny com sanitização, integridade e destino isolado | Markdown, modelo de política e fixture sintética |
 
 ## Agentes e entrega por user story
 
@@ -137,10 +137,11 @@ instalar, copiar ou editar a skill não autoriza executá-la.
 ### Implementar snapshots
 
 Use [a skill](skills/implementar-snapshots/SKILL.md) para construir a funcionalidade
-no projeto alvo, com política própria de dados, relações e destinos. Ela inclui
-[configuração Laravel inativa](skills/implementar-snapshots/templates/snapshots.php),
+na linguagem e no framework do projeto alvo, com política própria de dados,
+relações e destinos. Ela inclui um [modelo de política independente de stack](skills/implementar-snapshots/templates/snapshot-policy.example.json),
 [fixture relacional sintética](skills/implementar-snapshots/templates/tiny-relations.json)
 e [cenários de validação](skills/implementar-snapshots/references/testes.md).
+Laravel aparece apenas em um [exemplo opcional](skills/implementar-snapshots/references/exemplo-laravel.md).
 
 A referência veio da leitura dos comandos full/tiny de uma aplicação real;
 [origem e diferenças](skills/implementar-snapshots/references/origem.md) separam o

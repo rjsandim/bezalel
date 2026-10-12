@@ -2,20 +2,25 @@
 
 ## Decisões antes do código
 
-Use as convenções do projeto. Em Laravel, uma forma suficiente costuma ser dois
-comandos Artisan, configuração `config/snapshots.php` e serviços/funções para
-selecionar dados, sanitizar, gravar o artefato e restaurá-lo. Reaproveite conexões,
-storage, relógio, logger e mecanismos de lock existentes. Só introduza contratos
-onde separam uma política de I/O ou permitem simular um efeito necessário.
+Use a linguagem, o framework, o banco e as convenções presentes no projeto.
+Exponha criação e restauração pelo mecanismo apropriado: comando, serviço de
+aplicação, tarefa administrativa ou API com autorização. Não é necessário criar
+todos esses pontos de entrada. Separe seleção/sanitização dos efeitos de leitura,
+gravação e publicação para testar as regras sem infraestrutura real. Reaproveite
+conexões, storage, relógio, logger e locks existentes. Só introduza contratos
+onde resolvam uma fronteira concreta; não crie um runtime universal de snapshots.
 
-Leia as instruções e versões do projeto antes de escolher APIs do framework.
-O [template](../templates/snapshots.php) não implementa a feature: seus campos
-precisam de consumidores e validação no projeto. Mantenha somente os campos que
-esses consumidores usam. Não carregue PHP recebido de um snapshot como config.
+Leia as instruções e versões do projeto antes de escolher APIs ou ferramentas.
+O [modelo de política](../templates/snapshot-policy.example.json) é uma referência
+de decisões, não um schema obrigatório nem uma feature pronta. Traduza as regras
+para a configuração idiomática do projeto e implemente seus consumidores e
+validações. Não crie parser/loader só para preservar esse JSON. Não execute código
+ou configuração recebidos de um snapshot. Para um projeto Laravel já existente,
+consulte apenas se necessário o [exemplo opcional](exemplo-laravel.md).
 
 | Decisão | Contrato a implementar |
 |---|---|
-| Origem | Conexão explícita e somente leitura para exportação; sem fallback para `database.default`. Engine/versão e capacidades suportadas. |
+| Origem | Recurso/conexão explícitos e acesso somente de leitura para exportação; sem fallback para o banco corrente. Engine/versão e capacidades suportadas. |
 | Conteúdo `full` | Todos os dados classificados como permitidos, inclusive das tabelas que serão recortadas apenas no `tiny`; tabelas operacionais/sensíveis só com estrutura. |
 | Conteúdo `tiny` | Sementes recentes/de domínio e relações necessárias, com limites de volume; pode incluir pais mais antigos que a janela. |
 | Tabela nova | Falhar até classificação explícita, para impedir vazamento silencioso. Listas sobrepostas, tabela/coluna desconhecida ou política sem versão também falham. |
@@ -91,7 +96,7 @@ Fluxo sugerido, adaptável ao stack:
    entre a conexão de metadata e a de streaming. Se a consistência não puder ser
    sustentada, falhar ou exigir uma estratégia aprovada para essa origem.
 3. Selecionar/sanitizar em lotes. Não carregar tabelas inteiras em memória nem
-   executar consultas aninhadas na mesma conexão com cursor não bufferizado aberto.
+   executar consultas aninhadas incompatíveis com o cursor/driver em uso.
    Calcular dependências e contagens na mesma visão consistente; evitar N+1 por linha.
 4. Gravar em arquivo exclusivo e privado, com caminho gerado pelo programa.
    Contar bytes antes de adicionar a próxima linha ao statement, incluindo
@@ -116,8 +121,8 @@ limites, escaping e teste de round-trip. Se implementar SQL próprio, não use
 `split(';')` nem uma linha marcadora que possa ocorrer em valores. Um formato
 versionado com frames de comprimento explícito é uma alternativa pequena;
 teste newline, aspas, barras, NUL, Unicode, bytes binários e marcador literal.
-Uma implementação PDO precisa tratar campos binários, colunas geradas e charset
-explicitamente; `SELECT *` mais cast de tudo para string não comprova fidelidade.
+Qualquer adaptador precisa tratar campos binários, colunas geradas e charset
+explicitamente; converter todos os valores para strings não comprova fidelidade.
 
 O manifesto acompanha a execução e contém apenas metadados necessários:
 
@@ -132,27 +137,28 @@ pessoais. O manifesto deve ser validado por schema e limites antes de seus campo
 serem usados como caminhos. Hash prova correspondência de bytes; autenticidade
 depende da origem confiável e do controle de escrita, ou assinatura quando exigida.
 
-## Contrato Laravel sugerido
+## Contrato independente de interface
 
-Adapte nomes/flags à convenção existente. Este é um contrato a implementar, não
-uma lista de comandos disponíveis em qualquer projeto:
+Implemente os comportamentos abaixo na interface escolhida. Os nomes são
+conceituais e não prescrevem assinatura, comando, linguagem ou biblioteca:
 
 ```text
-snapshot:create {full|tiny} --source=<alias> [--days=<n>] [--dry-run]
-snapshot:restore {snapshot-id} --target=<alias> --expect-target=<identidade> [--dry-run] [--yes]
+criar(modo, origem, política, apenas_planejar) -> artefato e manifesto
+restaurar(artefato, destino, identidade_esperada, apenas_planejar) -> resultado validado
 ```
 
-`--dry-run` resolve o plano e os bloqueios sem DDL/DML, upload, limpeza, abertura
+O modo de planejamento resolve o plano e os bloqueios sem DDL/DML, upload, limpeza, abertura
 de writers, alteração de config ou consumo de filas; pode usar apenas metadata
-explicitamente autorizada. `--yes` suprime somente a pergunta interativa.
+explicitamente autorizada. Um mecanismo de confirmação não interativa suprime
+somente a pergunta, nunca as validações ou a autorização necessária à operação.
 
-`allowed_targets` no template começa vazio. Cada alvo cadastrado pelo projeto
-aponta uma conexão local existente, ambiente permitido e identidade esperada do
-recurso. As credenciais continuam no mecanismo de configuração local já usado.
+Os destinos permitidos no modelo começam vazios. Cada alvo cadastrado pelo projeto
+aponta um recurso existente, ambiente permitido e identidade esperada.
+As credenciais continuam no mecanismo de configuração local já usado.
 O código deve verificar a identidade observada da conexão antes de executar o
 primeiro efeito; configurar uma allowlist não prova que ela corresponde ao servidor.
 
-Antes de habilitar `enabled`, implemente e teste todos os consumidores usados:
+Antes de habilitar a funcionalidade, implemente e teste todos os consumidores usados:
 um booleano de proteção sem efeito no código é uma falsa garantia. Não ative
 agendamento automaticamente; se solicitado, use origem e namespace exclusivos,
 lock no serviço e falha observável. Não rode testes apontando para o banco padrão.
