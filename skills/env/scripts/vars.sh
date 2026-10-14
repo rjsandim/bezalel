@@ -56,9 +56,25 @@ p '${env:db.db}'          "$DB_NAME_EXAMPLE"
 p '${env:db.user}'        "$DB_USER_EXAMPLE"
 p '${env:db.password}'    "$DB_PASS_EXAMPLE"
 p '${env:db.url}'         "$DB_URL"
-p '${env:redis.host}'     "redis"
-p '${env:redis.port}'     "6379"
-p '${env:redis.url}'      "redis://redis:6379"
+if [ "$(manifest_get '.redis_mode')" = 'shared' ]; then
+    p '${env:redis.host}'     '<host do pool salvo no estado local>'
+    p '${env:redis.port}'     '6379'
+    p '${env:redis.url}'      '<URL autenticada gerada localmente; nunca exibida>'
+    p '${env:redis.user}'     '<usuario exclusivo do servico>'
+    p '${env:redis.password}' '<gerada localmente; nunca exibida>'
+    p '${env:redis.db}'       '<indice reservado para filas/sessoes>'
+    p '${env:redis.cache_db}' '<indice reservado para cache>'
+else
+    p '${env:redis.host}'     'redis'
+    p '${env:redis.port}'     '6379'
+    p '${env:redis.url}'      'redis://redis:6379'
+    p '${env:redis.user}'     'default'
+    p '${env:redis.password}' '<vazia no modo exclusivo>'
+    p '${env:redis.db}'       '0'
+    p '${env:redis.cache_db}' '1'
+fi
+p '${env:redis.prefix}'       '<prefixo exclusivo de projeto/ambiente/servico>'
+p '${env:redis.cache_prefix}' 'cache:'
 
 echo -e "\n${BOLD}Este servico (self)${NC}"
 p '${env:url.self}'       "https://<env>-<pasta>.${DOMAIN}"

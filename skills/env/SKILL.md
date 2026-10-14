@@ -12,7 +12,8 @@ proxy e worktrees. A implementação usa Bash, templates e auxiliares Python.
 Não é uma ferramenta de deploy ou limpeza global de Docker.
 
 MySQL/PostgreSQL podem usar instância compartilhada com database e usuário próprios
-por ambiente/serviço. Redis permanece exclusivo. Para configurar ou migrar, leia
+por ambiente/serviço. Redis 7 pode compartilhar o servidor com usuário, prefixo e
+dois bancos lógicos por serviço. Para configurar ou migrar, leia
 [bancos compartilhados](references/bancos-compartilhados.md).
 
 ## Entradas e pré-requisitos
@@ -62,6 +63,9 @@ por ambiente/serviço. Redis permanece exclusivo. Para configurar ou migrar, lei
 - Status, URLs e códigos de saída; falha não é anunciada como sucesso.
 - Pools em `state/_databases/`, separados do ciclo de vida das features. Estado e
   credenciais são privados; preserve-os junto dos backups dos bancos.
+- Pools Redis em `state/_redis/`, com alocações persistentes de bancos lógicos,
+  ACLs e dados. O banco zero é reservado; esse modo atende desenvolvimento local
+  confiável, não separação entre clientes hostis nem Redis Cluster.
 
 ## Validação
 
@@ -80,7 +84,7 @@ DNS, CA de certificados, Traefik, rede proxy e portas 80/443 são compartilhados
 New/update podem afetá-los somente com autorização explícita. A limpeza de um
 ambiente não remove essa infraestrutura nem imagens compartilhadas.
 
-Destroy também preserva os databases/usuários dos pools compartilhados. Não
+Destroy também preserva databases, bancos lógicos, usuários e alocações dos pools. Não
 anuncie exclusão SQL nem economia de memória medida sem evidência correspondente.
 
 Destroy recusa estado desconhecido, contexto divergente, volumes de outro

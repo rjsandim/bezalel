@@ -299,6 +299,8 @@ flat = {
     "mysql.user": pg_user, "mysql.password": pg_pass,
     "mysql.url": f"mysql://{pg_user}:{pg_pass}@mysql:3306/{folder}",
     "redis.host": "redis", "redis.port": "6379", "redis.url": "redis://redis:6379",
+    "redis.user": "default", "redis.password": "", "redis.db": "0", "redis.cache_db": "1",
+    "redis.prefix": f"{project}:{name}:{folder}:", "redis.cache_prefix": "cache:",
     "url.self": url(folder), "host.self": host(folder), "internal.self": folder,
 }
 shared_file = os.environ.get("ES_SHARED_DB_FILE", "")
@@ -311,6 +313,15 @@ if shared_file and os.path.isfile(shared_file):
         scheme = "mysql" if engine == "mysql" else "postgresql"
         flat[f"{engine}.url"] = f"{scheme}://{connection['user']}:{connection['password']}@{connection['host']}:{connection['port']}/{connection['db']}"
 # db.* generico = espelho do engine selecionado (db.connection no formato Laravel).
+redis_connection = None
+redis_file = os.environ.get("ES_SHARED_REDIS_FILE", "")
+if redis_file and os.path.isfile(redis_file):
+    sys.path.insert(0, os.environ["ES_SCRIPT_DIR"])
+    from shared_redis import connection_values
+    redis_connection = json.load(open(redis_file))["connections"].get(folder)
+    if redis_connection:
+        for key, value in connection_values(redis_connection).items():
+            flat[f"redis.{key}"] = value
 _engine = "mysql" if engine == "mysql" else "postgres"
 flat["db.connection"] = "mysql" if _engine == "mysql" else "pgsql"
 for k in ("host", "port", "db", "user", "password", "url"):
@@ -339,6 +350,16 @@ if shared_file and os.path.isfile(shared_file) and connection:
         for variable in ("DB_URL", "DATABASE_URL"):
             if re.search(r"^" + variable + "=", text, flags=re.M):
                 updates[variable] = flat[f"{engine}.url"]
+    for variable, value in updates.items():
+        pattern = r"^" + variable + r"=.*$"
+        if re.search(pattern, text, flags=re.M):
+            text = re.sub(pattern, lambda m: variable + "=" + value, text, flags=re.M)
+        else:
+            text = text.rstrip("\n") + "\n" + variable + "=" + value + "\n"
+if redis_connection:
+    updates = {variable: flat[f"redis.{field}"] for field, variable in redis_connection["env_fields"].items()}
+    if re.search(r"^REDIS_URL=", text, flags=re.M):
+        updates["REDIS_URL"] = flat["redis.url"]
     for variable, value in updates.items():
         pattern = r"^" + variable + r"=.*$"
         if re.search(pattern, text, flags=re.M):

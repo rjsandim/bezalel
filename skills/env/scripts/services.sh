@@ -64,6 +64,7 @@ start_services() {
     shift
     select_services "$@"
     python3 "$SKILL_DIR/scripts/shared_db.py" ensure "$STATE_DIR" "$COMPOSE" "${SELECTED_SERVICES[@]}"
+    python3 "$SKILL_DIR/scripts/shared_redis.py" ensure "$STATE_DIR" "$COMPOSE" "${SELECTED_SERVICES[@]}"
     step "Iniciando: ${SELECTED_SERVICES[*]} (e dependencias)"
     if [ "$mode" = 'update' ]; then
         dc up -d --build --wait --wait-timeout 420 "${SELECTED_SERVICES[@]}"

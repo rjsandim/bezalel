@@ -1,7 +1,7 @@
 # Bancos compartilhados de desenvolvimento
 
-Vários ambientes podem reutilizar a mesma versão de MySQL ou PostgreSQL. Redis
-continua exclusivo por ambiente, preservando filas, cache e sessões.
+Vários ambientes podem reutilizar a mesma versão de MySQL, PostgreSQL ou Redis.
+Cada recurso tem configuração, estado e ciclo de vida independentes da feature.
 
 ## Configuração versionada
 
@@ -90,6 +90,72 @@ Compose, containers e worktree antes de registrar a identidade, conforme `SKILL.
 Copiar a skill não migra esses estados.
 
 ## Limites e validação
+
+### Redis compartilhado
+
+```yaml
+redis_mode: shared
+redis_shared:
+  pool: redis-7-4
+  image: redis:7.4-alpine
+  port: 35379
+  databases: 256
+services:
+  - folder: api
+    type: php
+    redis: true
+```
+
+Mescle esses campos ao manifesto existente; não substitua a lista de serviços.
+`redis_mode` ausente ou `isolated` mantém o comportamento anterior. Somente
+consumidores `redis: true` entram na rede externa. Versão e porta são imutáveis
+para um pool; são aceitas imagens oficiais `redis:7.<minor>[.<patch>]-alpine`.
+Redis 8/Cluster não está certificado por esse contrato.
+
+Cada serviço recebe um usuário, senha aleatória, prefixo exclusivo e dois índices
+distintos: um para filas/sessões e outro para cache. A reserva é persistente em
+`state/_redis/<contexto>/<pool>/allocations.json` e não é reciclada por `destroy`.
+O padrão de 256 bancos comporta 127 pares. Quando esgotado, crie outro pool.
+Novos `.env` PHP recebem `REDIS_HOST`, `REDIS_PORT`, `REDIS_USERNAME`,
+`REDIS_PASSWORD`, `REDIS_DB`, `REDIS_CACHE_DB`, `REDIS_PREFIX` e `CACHE_PREFIX`.
+Se já houver `REDIS_URL` no template, ela é substituída por URL autenticada sem
+path, para não sobrepor os dois índices no Laravel. Os placeholders
+`${env:redis.*}` seguem os nomes `host`, `port`, `user`, `password`, `db`,
+`cache_db`, `prefix`, `cache_prefix` e `url`. `.env` existente continua preservado
+e a conexão é conferida antes de iniciar.
+
+Node/outros clientes precisam declarar `redis_env` com os campos correspondentes,
+incluindo `prefix` e `url`, ou `host/port/user/password/db`. A aplicação deve aplicar
+o prefixo às chaves/canais e usar autenticação ACL; o gerador não adapta bibliotecas.
+Teste os consumidores reais antes de migrar.
+
+As ACLs permitem `SELECT` somente para o par reservado e acesso a chaves/canais
+do prefixo. Comandos globais e de cópia/movimentação entre bancos são bloqueados.
+`FLUSHDB` fica disponível para a limpeza nativa do Laravel no banco selecionado,
+sem alcançar os bancos de outro ambiente. O início confere todas as seleções
+proibidas por `ACL DRYRUN` e autentica as duas conexões; versão incompatível ou
+permissão divergente causa erro. Scripts Lua da aplicação continuam sujeitos às ACLs.
+
+**Limite do Redis 7:** a permissão por primeiro argumento de `SELECT` é um recurso
+legado/depreciado. Toda conexão nasce no banco zero; por isso zero fica reservado,
+sem dados de aplicação. Uma conexão que ignore o índice configurado pode operar
+nesse banco. Isso é isolamento operacional para desenvolvimento local confiável,
+não segurança para clientes hostis. Nunca reutilize conexões entre usuários.
+Instâncias exclusivas continuam disponíveis quando esse contrato não servir.
+
+O pool usa AOF, volume próprio, ACLs persistidas e porta somente em localhost.
+`stop`, `restart` e `destroy` não removem o servidor, usuários ou dados do pool.
+Backup deve preservar dados, ACLs, credenciais administrativas e alocações.
+
+Para migrar Redis existente, preserve Compose, `.env`, estado e um RDB consistente;
+pause todos os escritores. `ENV_REDIS_MIGRATION=<projeto>/<ambiente>` libera apenas
+a preparação dos metadados desse alvo, não copia dados. Importe chaves para os
+índices atribuídos, traduza prefixos e preserve tipos, valores e vencimentos
+absolutos. Não recrie como permanentes chaves expiradas. Confira acesso cruzado,
+limpeza de cache, operações de filas/locks e a configuração efetiva do aplicativo.
+Mantenha os servidores e volumes originais parados para recuperação.
+
+### Recursos e evidências
 
 Permissões separam dados, mas CPU, memória, I/O e disponibilidade são compartilhados.
 Use instância exclusiva para carga, mudanças globais e configurações incompatíveis.

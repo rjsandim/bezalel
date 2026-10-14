@@ -8,6 +8,7 @@ docker_context: ${DOCKER_CONTEXT_NAME} # contexto capturado no detect; revisar a
 base_ref: ${BASE_REF}    # referencia local usada para criar novas branches
 database: postgres        # banco compartilhado do ambiente
 database_mode: isolated   # shared exige database_shared; ver references/bancos-compartilhados.md
+redis_mode: isolated      # shared exige redis_shared e redis:true em cada consumidor
 services: []             # preenchido pelo detect; cada item: {folder, type, version, port, database}
 # Campo opcional por servico: aliases. Gera dominios extras p/ o mesmo container
 # (ex.: aliases: [unidades, admin] -> <env>-<pasta>-unidades e <env>-<pasta>-admin).

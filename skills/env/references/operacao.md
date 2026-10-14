@@ -34,7 +34,8 @@ Dois momentos distintos:
 ## Bancos compartilhados entre ambientes
 
 O modo opcional `database_mode: shared` reutiliza MySQL/PostgreSQL com databases
-e usuários separados. Redis permanece por ambiente. Leia [configuração e migração](bancos-compartilhados.md)
+e usuários separados. `redis_mode: shared` habilita um pool Redis com bancos
+lógicos e usuários por serviço. Leia [configuração e migração](bancos-compartilhados.md)
 antes de habilitar. As convenções de banco abaixo descrevem o modo `isolated`.
 
 ## Convencoes
@@ -87,7 +88,7 @@ services:
   - folder: docs
     depends_on: []
 ```
-`depends_on` é opcional e aceita a sintaxe de dependências do Compose. Ausente preserva DB + Redis para compatibilidade; `[]` declara independência. Mantenha todas as pastas no manifesto. O banco permanece isolado por ambiente; não ajuste caches ou imponha limites de RAM baixos sem medir o workload.
+`depends_on` é opcional e aceita a sintaxe de dependências do Compose. Ausente preserva DB + Redis para compatibilidade; `[]` declara independência. Mantenha todas as pastas no manifesto. Nos modos compartilhados, dependências do servidor local são retiradas e somente consumidores declarados entram na rede do pool. Não ajuste caches ou imponha limites de RAM baixos sem medir o workload.
 
 ## Roteiro: `config` (lista os placeholders `${env:...}`)
 - `bash "$SK/vars.sh"` — imprime os placeholders disponiveis ja resolvidos com os nomes reais do projeto (project, db engine, pastas, backend, aliases). Use para saber o que pode escrever nos `.env.example` antes de commitar/rodar o `new`.

@@ -108,9 +108,10 @@ def save_pool(spec):
             raise SharedDatabaseError("Credencial administrativa do pool ausente; recupere o arquivo original.")
         return
     # Não reutilize uma porta já atribuída a outro pool no mesmo contexto.
-    for other in directory.parent.glob("*/pool.json"):
-        if read_json(other)["port"] == spec["port"]:
-            raise SharedDatabaseError("Porta já registrada para outro pool neste contexto.")
+    for family in ("_databases", "_redis"):
+        for other in (SKILL / "state" / family / spec["context"]).glob("*/pool.json"):
+            if read_json(other)["port"] == spec["port"]:
+                raise SharedDatabaseError("Porta já registrada para outro pool neste contexto.")
     password = secrets.token_hex(32)
     key = "MYSQL_ROOT_PASSWORD" if spec["engine"] == "mysql" else "POSTGRES_PASSWORD"
     write_private(directory / "admin.env", f"{key}={password}\n")
@@ -144,7 +145,7 @@ def prepare(manifest_path, root, project, name, context, state):
     if not saved.exists() and (state / "docker-compose.yml").exists():
         if os.environ.get("ENV_DATABASE_MIGRATION") != f"{project}/{name}":
             raise SharedDatabaseError("Ambiente existente requer backup e migração explícita; update não troca seu banco automaticamente.")
-    with locked(pool_dir(spec).parent):
+    with locked(SKILL / "state" / "_pools" / context):
         save_pool(spec)
         if saved.exists():
             data = read_json(saved)

@@ -87,7 +87,8 @@ constituem autorização para criar infraestrutura ou descartar dados.
 ### ENV
 
 MySQL e PostgreSQL podem usar pools locais compartilhados com database e usuário
-por ambiente/serviço; Redis permanece exclusivo. O modo é opcional e ambientes
+por ambiente/serviço. Redis 7 também pode compartilhar o servidor, com pares de
+bancos lógicos e usuários restritos por serviço. Os modos são opcionais e ambientes
 existentes exigem migração explícita. Veja [configuração e limites](skills/env/references/bancos-compartilhados.md).
 
 O manifesto por projeto continua em `.envstack/stack.yaml`; não foi migrado para

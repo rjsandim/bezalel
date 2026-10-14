@@ -48,5 +48,8 @@ fi
 if [ -f "$STATE_DIR/shared-database.json" ]; then
     info "Database/usuário compartilhados preservados no registro do pool; nenhuma exclusão SQL executada."
 fi
+if [ -f "$STATE_DIR/shared-redis.json" ]; then
+    info "Redis compartilhado, dados, usuários e alocações preservados no pool."
+fi
 rm -rf "$STATE_DIR"
 ok "Ambiente removido; todas as etapas solicitadas concluiram sem erro."

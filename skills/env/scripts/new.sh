@@ -44,6 +44,9 @@ printf '%s\n' "$ROOT" > "$STATE_DIR/project-root"
 printf '%s\n' "$DOCKER_CONTEXT" > "$STATE_DIR/docker-context"
 python3 "$SCRIPT_DIR/shared_db.py" prepare "$MANIFEST" "$ROOT" "$PROJECT" "$ENV_NAME" "$DOCKER_CONTEXT" "$STATE_DIR"
 export ES_SHARED_DB_FILE="$STATE_DIR/shared-database.json"
+python3 "$SCRIPT_DIR/shared_redis.py" prepare "$MANIFEST" "$ROOT" "$PROJECT" "$ENV_NAME" "$DOCKER_CONTEXT" "$STATE_DIR"
+export ES_SHARED_REDIS_FILE="$STATE_DIR/shared-redis.json"
+export ES_SCRIPT_DIR="$SCRIPT_DIR"
 
 # Lista "folder:type" de todos os servicos (para placeholders cruzados)
 SERVICES=""
@@ -144,6 +147,7 @@ done
 
 RENDER_VARS="$COMMON_VARS" render_template compose.tail.tpl /dev/stdout >> "$COMPOSE"
 python3 "$SCRIPT_DIR/shared_db.py" configure "$COMPOSE" "$STATE_DIR"
+python3 "$SCRIPT_DIR/shared_redis.py" configure "$COMPOSE" "$STATE_DIR"
 ok "Compose preparado para validacao"
 
 # ─── 4. Resolver .env de cada pasta ────────────────────────────
