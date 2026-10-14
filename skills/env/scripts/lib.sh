@@ -134,6 +134,9 @@ require_shared_infra_authorization() {
 
 validate_worktree() {
     local path="$1" branch="$2" registered
+    if [ -n "${STATE_DIR:-}" ] && [ -f "$STATE_DIR/worktree-branch" ]; then
+        branch="$(cat "$STATE_DIR/worktree-branch")"
+    fi
     [ -d "$path" ] && [ ! -L "$path" ] || fail "Worktree esperada ausente ou vinculada por symlink."
     registered="$(git -C "$(repo_root)" worktree list --porcelain)"
     printf '%s\n' "$registered" | grep -Fxq "worktree $path" || fail "Worktree nao registrada neste repositorio."
@@ -276,7 +279,7 @@ render_template() {
 resolve_env() {
     local src="$1" dst="$2" folder="$3" ftype="$4" aliases="${5:-}"
     ES_FOLDER="$folder" ES_FTYPE="$ftype" ES_ALIASES="$aliases" ES_SRC="$src" ES_DST="$dst" python3 - <<'PY'
-import os, re, sys
+import os, re, sys, json
 project = os.environ["ES_PROJECT"]; name = os.environ["ES_NAME"]; tld = os.environ["ES_TLD"]
 folder = os.environ["ES_FOLDER"]; pg_user = os.environ["ES_PG_USER"]; pg_pass = os.environ["ES_PG_PASS"]
 engine = os.environ.get("ES_DB_ENGINE", "postgres")
@@ -298,6 +301,15 @@ flat = {
     "redis.host": "redis", "redis.port": "6379", "redis.url": "redis://redis:6379",
     "url.self": url(folder), "host.self": host(folder), "internal.self": folder,
 }
+shared_file = os.environ.get("ES_SHARED_DB_FILE", "")
+if shared_file and os.path.isfile(shared_file):
+    shared = json.load(open(shared_file))
+    connection = shared["connections"].get(folder)
+    if connection:
+        for key in ("host", "port", "db", "user", "password"):
+            flat[f"{engine}.{key}"] = connection[key]
+        scheme = "mysql" if engine == "mysql" else "postgresql"
+        flat[f"{engine}.url"] = f"{scheme}://{connection['user']}:{connection['password']}@{connection['host']}:{connection['port']}/{connection['db']}"
 # db.* generico = espelho do engine selecionado (db.connection no formato Laravel).
 _engine = "mysql" if engine == "mysql" else "postgres"
 flat["db.connection"] = "mysql" if _engine == "mysql" else "pgsql"
@@ -318,7 +330,23 @@ def repl(m):
     if k in flat: return flat[k]
     sys.stderr.write(f"[WARN] placeholder desconhecido: ${{env:{k}}} (mantido)\n"); return m.group(0)
 text = re.sub(r"\$\{env:([^}]+)\}", repl, open(os.environ["ES_SRC"]).read())
+# Somente arquivos NOVOS chegam ao resolver. Conexões compartilhadas sempre
+# recebem as variáveis declaradas, mesmo quando o exemplo ainda usa localhost.
+if shared_file and os.path.isfile(shared_file) and connection:
+    updates = {variable: flat[f"{engine}.{field}"] for field, variable in connection["env_fields"].items()}
+    if "DB_HOST" in updates:
+        updates["DB_CONNECTION"] = "mysql" if engine == "mysql" else "pgsql"
+        for variable in ("DB_URL", "DATABASE_URL"):
+            if re.search(r"^" + variable + "=", text, flags=re.M):
+                updates[variable] = flat[f"{engine}.url"]
+    for variable, value in updates.items():
+        pattern = r"^" + variable + r"=.*$"
+        if re.search(pattern, text, flags=re.M):
+            text = re.sub(pattern, lambda m: variable + "=" + value, text, flags=re.M)
+        else:
+            text = text.rstrip("\n") + "\n" + variable + "=" + value + "\n"
 open(os.environ["ES_DST"], "w").write(text)
+os.chmod(os.environ["ES_DST"], 0o600)
 PY
 }
 

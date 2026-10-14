@@ -42,6 +42,8 @@ if args[0] != 'compose':
 file = args[2]
 command = args[3]
 rest = args[4:]
+if os.environ.get('ENV_TEST_PRIVATE_DIAGNOSTIC') == '1':
+    print('private-diagnostic-value', file=sys.stderr)
 if command == 'config':
     os.execv(os.environ['ENV_TEST_DOCKER'], [os.environ['ENV_TEST_DOCKER'], *args])
 if command == 'ps':
@@ -135,6 +137,12 @@ services:
     def observed(self):
         return json.loads(self.state.read_text())
 
+    def test_audited_renamed_worktree_branch_remains_updatable(self):
+        self.run_process(['git', '-C', str(self.worktree), 'branch', '-m', 'feature/renamed'])
+        (self.compose.parent / 'worktree-branch').write_text('feature/renamed\n')
+        self.command('update.sh', 'check', extra={'ENV_DRY_RUN': '1'})
+        self.assertEqual((self.compose.parent / 'worktree-branch').read_text(), 'feature/renamed\n')
+
     def test_default_then_documentation_then_resume_preserves_work(self):
         self.command('ctl.sh', 'start', 'check')
         self.assertEqual(set(self.observed()['running']), {'api', 'mysql', 'redis'})
@@ -171,6 +179,14 @@ services:
         self.assertIn('ausente', result.stderr)
         new_calls = self.observed()['calls'][len(before):]
         self.assertFalse(any('up' in call or call[0] == 'start' for call in new_calls))
+
+    def test_compose_failure_preserves_private_diagnostic_without_echoing_values(self):
+        result = self.command('ctl.sh', 'start', 'check', extra={'ENV_TEST_FAIL_UP': '1', 'ENV_TEST_PRIVATE_DIAGNOSTIC': '1'}, expected=7)
+        self.assertNotIn('private-diagnostic-value', result.stdout + result.stderr)
+        self.assertIn('codigo 7', result.stderr)
+        diagnostics = list(self.compose.parent.glob('compose-diagnostic.*'))
+        self.assertTrue(any('private-diagnostic-value' in file.read_text() for file in diagnostics))
+        self.assertTrue(all(file.stat().st_mode & 0o777 == 0o600 for file in diagnostics))
 
     def test_start_failure_propagates_and_does_not_report_ready(self):
         result = self.command('ctl.sh', 'start', 'check', extra={'ENV_TEST_FAIL_UP': '1'}, expected=7)

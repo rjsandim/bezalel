@@ -44,9 +44,19 @@ if [ ${#DB_FOLDERS[@]} -gt 0 ]; then
     export PG_USER DRIVER_REF JDBC_DRIVER
     RENDER_VARS='' render_template phpstorm.datasource.head.tpl /dev/stdout > "$DSXML"
     for folder in "${DB_FOLDERS[@]}"; do
+        DB_NAME="$folder"
+        shared="$SKILL_DIR/state/$PROJECT/$ENV_NAME/shared-database.json"
+        if [ -f "$shared" ]; then
+            read -r DB_HOST_PORT DB_NAME PG_USER < <(python3 - "$shared" "$folder" <<'PYSHARED'
+import json, sys
+s = json.load(open(sys.argv[1])); c = s["connections"][sys.argv[2]]
+print(s["pool"]["port"], c["db"], c["user"])
+PYSHARED
+            )
+        fi
         export DS_NAME="${ENV_NAME}-${folder}@localhost" \
                DS_UUID="$(uuidgen | tr '[:upper:]' '[:lower:]')" \
-               JDBC_URL="jdbc:${JDBC_SCHEME}://localhost:${DB_HOST_PORT}/${folder}"
+               JDBC_URL="jdbc:${JDBC_SCHEME}://localhost:${DB_HOST_PORT}/${DB_NAME}"
         RENDER_VARS='${DS_NAME} ${DS_UUID} ${DRIVER_REF} ${JDBC_DRIVER} ${JDBC_URL} ${PG_USER}' \
             render_template phpstorm.datasource.tpl /dev/stdout >> "$DSXML"
     done

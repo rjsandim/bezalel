@@ -39,6 +39,12 @@ COUNT="$(yq -r '.services | length' "$MANIFEST")"
 DB_ENGINE="$(manifest_get '.database')"
 case "$DB_ENGINE" in mysql) DB_SERVICE="mysql";; *) DB_ENGINE="postgres"; DB_SERVICE="postgres";; esac
 
+mkdir -p "$STATE_DIR"
+printf '%s\n' "$ROOT" > "$STATE_DIR/project-root"
+printf '%s\n' "$DOCKER_CONTEXT" > "$STATE_DIR/docker-context"
+python3 "$SCRIPT_DIR/shared_db.py" prepare "$MANIFEST" "$ROOT" "$PROJECT" "$ENV_NAME" "$DOCKER_CONTEXT" "$STATE_DIR"
+export ES_SHARED_DB_FILE="$STATE_DIR/shared-database.json"
+
 # Lista "folder:type" de todos os servicos (para placeholders cruzados)
 SERVICES=""
 for i in $(seq 0 $((COUNT - 1))); do
@@ -60,6 +66,8 @@ if [ ! -d "$WORKTREE_DIR" ]; then
     ok "Worktree .worktrees/$ENV_NAME (branch $ENV_NAME)"
 else ok "Worktree ja existe"; fi
 validate_worktree "$WORKTREE_DIR" "$ENV_NAME"
+mkdir -p "$STATE_DIR"
+git -C "$WORKTREE_DIR" symbolic-ref --quiet --short HEAD > "$STATE_DIR/worktree-branch"
 
 # ─── 2. Infra ──────────────────────────────────────────────────
 # DNS + certificado do projeto sao criados no `init`. Aqui so garantimos o
@@ -83,7 +91,10 @@ COMPOSE_DEST="$COMPOSE"
 COMPOSE="$(mktemp "$STATE_DIR/compose.pending.XXXXXX")"
 INITDB_PENDING="$(mktemp "$STATE_DIR/initdb.pending.XXXXXX")"
 trap 'rm -f "$COMPOSE" "$INITDB_PENDING"' EXIT
-DB_HOST_PORT="$(db_host_port "$ENV_NAME")"   # porta do banco no host (IDE conecta por aqui)
+DB_HOST_PORT="$(db_host_port "$ENV_NAME")"
+if [ -f "$ES_SHARED_DB_FILE" ]; then
+    DB_HOST_PORT="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["pool"]["port"])' "$ES_SHARED_DB_FILE")"
+fi   # porta do banco no host (IDE conecta por aqui)
 export PROJECT ENV_NAME PG_USER PG_PASS PROXY_NET STATE_DIR WORKTREE_DIR ROOT DB_SERVICE DB_HOST_PORT
 COMMON_VARS='${PROJECT} ${ENV_NAME} ${PG_USER} ${PG_PASS} ${PROXY_NET} ${STATE_DIR} ${WORKTREE_DIR} ${ROOT} ${DB_HOST_PORT}'
 export STARTUP_SERVICES="$(yq -o=json -I=0 '.startup.services // []' "$MANIFEST")"
@@ -132,6 +143,7 @@ for i in $(seq 0 $((COUNT - 1))); do
 done
 
 RENDER_VARS="$COMMON_VARS" render_template compose.tail.tpl /dev/stdout >> "$COMPOSE"
+python3 "$SCRIPT_DIR/shared_db.py" configure "$COMPOSE" "$STATE_DIR"
 ok "Compose preparado para validacao"
 
 # ─── 4. Resolver .env de cada pasta ────────────────────────────

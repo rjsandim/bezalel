@@ -2,7 +2,19 @@
 # Operacoes sobre o compose salvo: nunca regeneram .env, worktree ou volumes.
 export COMPOSE_PARALLEL_LIMIT="${COMPOSE_PARALLEL_LIMIT:-2}"
 
-dc() { docker compose -f "$COMPOSE" "$@"; }
+dc() {
+    # Compose pode incluir valores privados em avisos de interpolação. Mantenha
+    # stderr em arquivo privado; preserve o código de erro sem ecoar seu conteúdo.
+    local diagnostic result=0
+    diagnostic="$(mktemp "$STATE_DIR/compose-diagnostic.XXXXXX")"
+    docker compose -f "$COMPOSE" "$@" 2>"$diagnostic" || result=$?
+    if [ "$result" -ne 0 ]; then
+        echo "Compose falhou (codigo $result); diagnostico privado: $diagnostic" >&2
+    elif [ ! -s "$diagnostic" ]; then
+        rm "$diagnostic"
+    fi
+    return "$result"
+}
 
 running_services() { dc ps --status running --services; }
 
@@ -51,6 +63,7 @@ start_services() {
     local mode="$1"
     shift
     select_services "$@"
+    python3 "$SKILL_DIR/scripts/shared_db.py" ensure "$STATE_DIR" "$COMPOSE" "${SELECTED_SERVICES[@]}"
     step "Iniciando: ${SELECTED_SERVICES[*]} (e dependencias)"
     if [ "$mode" = 'update' ]; then
         dc up -d --build --wait --wait-timeout 420 "${SELECTED_SERVICES[@]}"

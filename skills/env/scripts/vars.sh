@@ -22,6 +22,16 @@ else
     DB_CONN="pgsql"; DB_HOST="postgres"; DB_PORT="5432"; DB_URL="postgresql://${PROJECT}:secret@postgres:5432/<pasta>"
 fi
 
+DB_NAME_EXAMPLE='<pasta>   (1 database por servico com database:true)'
+DB_USER_EXAMPLE="$PROJECT"; DB_PASS_EXAMPLE='secret'
+if [ "$(manifest_get '.database_mode')" = 'shared' ]; then
+    DB_HOST='<host do pool salvo no estado local>'
+    DB_NAME_EXAMPLE='<database exclusivo de projeto/ambiente/servico>'
+    DB_USER_EXAMPLE='<usuario exclusivo do servico>'
+    DB_PASS_EXAMPLE='<gerada localmente; nunca exibida>'
+    DB_URL='<DSN exclusiva gerada localmente; nunca exibida>'
+fi
+
 # Primeiro servico php (= backend) e lista de pastas.
 COUNT="$(yq -r '.services | length' "$MANIFEST")"
 BACKEND=""; FOLDERS=""
@@ -42,9 +52,9 @@ p '${env:name}'           "<env>"
 p '${env:db.connection}'  "$DB_CONN"
 p '${env:db.host}'        "$DB_HOST"
 p '${env:db.port}'        "$DB_PORT"
-p '${env:db.db}'          "<pasta>   (1 database por servico com database:true)"
-p '${env:db.user}'        "$PROJECT"
-p '${env:db.password}'    "secret"
+p '${env:db.db}'          "$DB_NAME_EXAMPLE"
+p '${env:db.user}'        "$DB_USER_EXAMPLE"
+p '${env:db.password}'    "$DB_PASS_EXAMPLE"
 p '${env:db.url}'         "$DB_URL"
 p '${env:redis.host}'     "redis"
 p '${env:redis.port}'     "6379"

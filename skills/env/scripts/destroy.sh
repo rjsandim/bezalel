@@ -31,8 +31,9 @@ validate_state_owner "$STATE_DIR"
 if [ "$KEEP_WT" = false ]; then
     validate_worktree "$WORKTREE_DIR" "$ENV_NAME"
     [ -z "$(git -C "$WORKTREE_DIR" status --porcelain --untracked-files=all --ignored=matching)" ] || fail "Worktree tem arquivos alterados, nao rastreados ou ignorados. Preserve-os ou use --keep-worktree."
+    WORKTREE_BRANCH="$(git -C "$WORKTREE_DIR" symbolic-ref --quiet --short HEAD)"
     BASE_REF="$(base_ref)"
-    git -C "$ROOT" merge-base --is-ancestor "$ENV_NAME" "$BASE_REF" || fail "Branch contem commits nao integrados na base. Preserve a worktree."
+    git -C "$ROOT" merge-base --is-ancestor "$WORKTREE_BRANCH" "$BASE_REF" || fail "Branch contem commits nao integrados na base. Preserve a worktree."
 fi
 docker compose -f "$COMPOSE" config --quiet
 python3 "$SCRIPT_DIR/check_destroy.py" "$COMPOSE" "$PROJECT-$ENV_NAME"
@@ -40,9 +41,12 @@ step "Removendo ambiente confirmado: $PROJECT/$ENV_NAME"
 docker compose -f "$COMPOSE" down -v
 if [ "$KEEP_WT" = false ]; then
     git -C "$ROOT" worktree remove "$WORKTREE_DIR"
-    git -C "$ROOT" branch -d "$ENV_NAME"
+    git -C "$ROOT" branch -d "$WORKTREE_BRANCH"
 else
     info "Worktree e branch preservadas; volumes do ambiente removidos."
+fi
+if [ -f "$STATE_DIR/shared-database.json" ]; then
+    info "Database/usuário compartilhados preservados no registro do pool; nenhuma exclusão SQL executada."
 fi
 rm -rf "$STATE_DIR"
 ok "Ambiente removido; todas as etapas solicitadas concluiram sem erro."

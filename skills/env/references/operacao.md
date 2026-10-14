@@ -31,6 +31,12 @@ Dois momentos distintos:
 
 > **Segredos:** os `*.env.example` em `.envstack/` podem ser preenchidos com a config real do app (copiada do `.env`), entao o `init` gera um `.envstack/.gitignore` que os ignora. Versionam-se `stack.yaml`, `boot.sh`, os `*.Dockerfile` e o proprio `.gitignore`.
 
+## Bancos compartilhados entre ambientes
+
+O modo opcional `database_mode: shared` reutiliza MySQL/PostgreSQL com databases
+e usuários separados. Redis permanece por ambiente. Leia [configuração e migração](bancos-compartilhados.md)
+antes de habilitar. As convenções de banco abaixo descrevem o modo `isolated`.
+
 ## Convencoes
 - Dominio: `https://<nome>-<pasta>.<projeto>.local` (1 subdominio por pasta)
 - Rede: `envstack-proxy` · Traefik: `envstack-traefik` (compartilhados)

@@ -11,6 +11,10 @@ Gerencie ambientes isolados por projeto, com serviços PHP/Node, bancos locais,
 proxy e worktrees. A implementação usa Bash, templates e auxiliares Python.
 Não é uma ferramenta de deploy ou limpeza global de Docker.
 
+MySQL/PostgreSQL podem usar instância compartilhada com database e usuário próprios
+por ambiente/serviço. Redis permanece exclusivo. Para configurar ou migrar, leia
+[bancos compartilhados](references/bancos-compartilhados.md).
+
 ## Entradas e pré-requisitos
 
 - Diretório do repositório alvo, com pelo menos um commit; execute os comandos
@@ -18,6 +22,8 @@ Não é uma ferramenta de deploy ou limpeza global de Docker.
 - Pasta desta skill (`SKILL_DIR`) resolvida a partir da instalação efetivamente
   carregada. Não use caminhos fixos de outro agente ou instalação antiga.
 - `.envstack/stack.yaml`: serviços, banco, `base_ref`, `engine` e `docker_context`.
+  `database_mode: shared` habilita um pool explicitamente configurado; a ausência
+  mantém o modo exclusivo. Não converta ambientes existentes sem migrar seus dados.
 - Bash; Python 3.9+; Git com `--path-format`/`--end-of-options`; `yq` de Mike Farah
   v4, `jq`, `envsubst`; Docker/Compose com `--wait --wait-timeout`.
 - Operação completa é orientada a macOS/Homebrew, mkcert, dnsmasq e Traefik.
@@ -54,6 +60,8 @@ Não é uma ferramenta de deploy ou limpeza global de Docker.
 - `state/<projeto>/<ambiente>/` dentro da skill: Compose, seleção de serviços,
   identidade do repositório e contexto Docker. É estado local ignorado pelo Git.
 - Status, URLs e códigos de saída; falha não é anunciada como sucesso.
+- Pools em `state/_databases/`, separados do ciclo de vida das features. Estado e
+  credenciais são privados; preserve-os junto dos backups dos bancos.
 
 ## Validação
 
@@ -71,6 +79,9 @@ ambiente descartável específicos; não faz parte da validação segura padrão
 DNS, CA de certificados, Traefik, rede proxy e portas 80/443 são compartilhados.
 New/update podem afetá-los somente com autorização explícita. A limpeza de um
 ambiente não remove essa infraestrutura nem imagens compartilhadas.
+
+Destroy também preserva os databases/usuários dos pools compartilhados. Não
+anuncie exclusão SQL nem economia de memória medida sem evidência correspondente.
 
 Destroy recusa estado desconhecido, contexto divergente, volumes de outro
 projeto ou usados por outros containers. Sem `--keep-worktree`, também recusa

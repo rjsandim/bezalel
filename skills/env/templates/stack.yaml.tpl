@@ -7,6 +7,7 @@ engine: ${ENGINE}        # orbstack | docker-desktop | auto (usa docker_context 
 docker_context: ${DOCKER_CONTEXT_NAME} # contexto capturado no detect; revisar antes de operar
 base_ref: ${BASE_REF}    # referencia local usada para criar novas branches
 database: postgres        # banco compartilhado do ambiente
+database_mode: isolated   # shared exige database_shared; ver references/bancos-compartilhados.md
 services: []             # preenchido pelo detect; cada item: {folder, type, version, port, database}
 # Campo opcional por servico: aliases. Gera dominios extras p/ o mesmo container
 # (ex.: aliases: [unidades, admin] -> <env>-<pasta>-unidades e <env>-<pasta>-admin).
