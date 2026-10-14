@@ -35,6 +35,13 @@ Cada dimensão de isolamento tem prova ou não aplicável justificado. Plano e a
 
 [env](../../skills/env/SKILL.md); [vps-deploy](../../skills/vps-deploy/SKILL.md); [limpar-orbstack](../../skills/limpar-orbstack/SKILL.md) — selecione apenas os procedimentos necessários à tarefa; disponibilidade não concede autorização.
 
+Na preparação local, use a instalação atual de ENV e o manifesto do projeto,
+seguindo [o procedimento de isolamento](../workflow.md). Pools compartilhados
+mantêm database/usuário SQL e usuário/prefixo/par de bancos Redis próprios por
+ambiente/serviço. Confira o `.env` e as conexões reais dos consumidores, incluindo
+workers; migração de dados existentes é uma operação explícita. Instância
+compartilhada não dispensa evidência de isolamento.
+
 ## Contrato de handoff
 
 Para Tech Lead/dev/QA: alvos, isolamento, restrições e meios seguros de validar. Para entrega: plano, limites e resultados; nunca senha/token ou concessão permanente.

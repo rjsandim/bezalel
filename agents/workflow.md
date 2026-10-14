@@ -8,9 +8,27 @@ banco, filas, portas e storage**. Para cada dimensão, registre verificação e
 referência da evidência, ou `not_applicable` com razão concreta. Container ou
 worktree, isoladamente, não comprovam isolamento das demais dimensões.
 
-A skill ENV pode preparar parte do ambiente; o responsável ainda precisa
-confrontar o que o aplicativo realmente usa. Um banco em outro host, uma fila
-compartilhada ou uploads fora do diretório local continuam exigindo análise.
+Use a [skill ENV atual](../skills/env/SKILL.md) para preparar o ambiente local,
+resolvendo `SKILL_DIR` pela instalação carregada. Leia o manifesto
+`.envstack/stack.yaml`, confira base e contexto Docker explícitos e siga o
+[contrato de bancos compartilhados](../skills/env/references/bancos-compartilhados.md).
+Quando o projeto adotar pools compatíveis, configure `database_mode: shared` e
+`redis_mode: shared` para os serviços consumidores; ausência dessas opções mantém
+instâncias exclusivas. MySQL/PostgreSQL exigem database e usuário por ambiente/
+serviço; Redis 7 exige usuário, prefixo e par de bancos lógicos próprios, com zero
+reservado. Não trate apenas um prefixo como isolamento completo nem compartilhe
+instâncias incompatíveis ou usadas em testes de carga/configuração global.
+
+Confira o `.env` e a configuração efetiva de API, workers, filas, sessões e cache.
+ENV preenche conexões novas; preserva `.env` existentes e bloqueia divergências.
+Para migrar, preserve dados e configurações, pause escritores e siga a migração
+autorizada; não basta trocar o host. Verifique acesso restrito, operações de fila/
+lock e limpeza de cache sem atingir outros ambientes. Registre evidências sem
+credenciais e preserve os pools ao parar ou remover somente a feature.
+
+O responsável ainda precisa confrontar o que o aplicativo realmente usa. Um banco
+em outro host, uma fila compartilhada ou uploads fora do diretório local continuam
+exigindo análise.
 Configuração ausente, alvo incerto ou acesso insuficiente bloqueiam a ação
 correspondente. Não reutilize produção como fixture.
 

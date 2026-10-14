@@ -13,6 +13,44 @@ Mapa: **Fluxo de IA**, Company Flow, ID
 atualizada em 09/10/2026 às 21:46:44 UTC. Revisão de nomenclatura em 12/10/2026.
 A releitura após escrita confirmou a revisão **97**, em 12/10/2026.
 
+## Decisão de processo — preparar com ENV atual e pools compartilhados
+
+O processo comum **Preparar e comprovar isolamento**
+(`ae9aecbb-826d-4d56-a2c9-dedcf89143e9`) dos cenários 01/04/05/06 usa a
+[skill ENV atual](../skills/env/SKILL.md), conforme o [fluxo de isolamento](workflow.md)
+e o papel [DevOps](roles/infraestrutura.md). Resolva a pasta da instalação carregada;
+não fixe caminhos de usuário nem execute uma cópia antiga por conveniência.
+
+Leia `.envstack/stack.yaml`, base e contexto Docker explícitos. Para projetos que
+adotam pools compatíveis, configure `database_mode: shared` e `redis_mode: shared`
+nos recursos aplicáveis, com consumidores identificados. Ausência das opções
+mantém instâncias exclusivas. Siga o [contrato de bancos compartilhados](../skills/env/references/bancos-compartilhados.md):
+SQL com database/usuário próprios por ambiente/serviço; Redis 7 com usuário,
+prefixo e par de bancos lógicos próprios, mantendo zero reservado. Redis 8/Cluster
+não está certificado, e esse isolamento atende desenvolvimento local confiável.
+Carga, configuração global ou versões incompatíveis exigem instância exclusiva.
+
+Na prontidão, confronte `.env` e configuração efetiva de API/workers, cache,
+sessões e filas. Conexões novas são preenchidas pela skill; `.env` existente é
+preservado e divergência bloqueia início. Migração exige preservar dados e
+configurações, pausar escritores e validar a transferência antes de retomar.
+Verifique acesso cruzado recusado, filas/locks e limpeza de cache restrita ao
+ambiente. Registre evidências sanitizadas; `stop`/`destroy` da feature preservam
+os pools. As cinco dimensões de isolamento continuam obrigatórias.
+
+As avaliações de viabilidade dos cenários 04/05/06 encaminham essa decisão ao
+mesmo processo comum; não precisam copiar o procedimento. Esta edição atualiza
+instruções, sem executar containers, migração ou limpeza para validá-las.
+
+Releitura confirmou a revisão **285**, partindo da **283**. Somente o procedimento
+comum mudou: identificar a instalação/alvos, configurar e então comprovar o
+isolamento. IDs de etapas, portas, conexões, demais processos e cenários foram
+preservados. A conferência semântica pelo autor confrontou os requisitos acima
+com o procedimento relido; os quatro cenários usam esse processo e continuam
+alcançando a PR final terminal. Checker, 29 testes e `git diff --check` passaram;
+são verificações da base documental, sem comprovar execução do ambiente nem
+constituir revisão independente.
+
 ## Papéis, IDs estáveis e responsabilidades
 
 | Nome canônico | ID no catálogo | ID no Company Flow | Contrato |
