@@ -9,6 +9,10 @@ Este arquivo instrui contribuições no repositório. Papéis e contratos ficam 
 - Cada pasta em `skills/` contém `SKILL.md` com `name`, `description` e, nesta
   ordem: Objetivo e escopo; Entradas e pré-requisitos; Procedimento; Saídas;
   Validação; Limites operacionais. Use português nas instruções e interfaces.
+- Exceção: `skills/security-audit/` preserva os arquivos originais de
+  `akitaonrails/my-skills`, inclusive idioma e estrutura, para facilitar
+  atualizações. Registre a revisão de origem no README; não adapte seu conteúdo.
+  Metadados essenciais e links locais continuam sujeitos à validação.
 - Referências extensas ficam em `references/`; scripts, templates e testes são
   opcionais conforme a função. Não crie pastas vazias ou runtimes artificiais.
 - Caminhos executáveis devem partir da pasta da skill carregada. Não introduza

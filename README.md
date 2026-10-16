@@ -1,12 +1,13 @@
 # Bezalel
 
-Base versionável de papéis de agentes, processo de entrega e sete skills
+Base versionável de papéis de agentes, processo de entrega e oito skills
 pessoais. Há definições e validadores locais; não há runtime que inicie agentes,
 monitoramento, serviço hospedado ou instalador automático.
 
 | Skill | Finalidade | Implementação |
 |---|---|---|
 | [clean-code](skills/clean-code/SKILL.md) | Revisar e corrigir código dentro do escopo | Markdown e referências |
+| [security-audit](skills/security-audit/SKILL.md) | Auditar vulnerabilidades com modelo de ameaças e evidências | Skill original de akitaonrails/my-skills, com referências e inventário Bash |
 | [clean-architecture](skills/clean-architecture/SKILL.md) | Revisar responsabilidades e dependências | Markdown e referências |
 | [env](skills/env/SKILL.md) | Gerenciar ambientes locais por worktree e Docker | Bash, Python auxiliar e templates |
 | [vps-deploy](skills/vps-deploy/SKILL.md) | Orientar operações de VPS com configuração por projeto | Markdown e validador Python |
@@ -49,13 +50,19 @@ configuração e papéis nunca concedem autorização permanente de acesso.
 
 ## Estrutura comum
 
-Cada `SKILL.md` declara `name` e `description` e contém objetivo/escopo,
+As skills mantidas no Bezalel declaram `name` e `description` e contêm objetivo/escopo,
 entradas/pré-requisitos, procedimento, saídas, validação e limites operacionais.
 `references/`, `scripts/`, `templates/` e `tests/` aparecem quando necessários.
 `agents/openai.yaml` é um adaptador opcional de interface, não um agente em
 execução. As skills operacionais usam invocação explícita nesse metadado; as duas
-Clean, implementar-snapshots e development-test-workbook podem ser usadas implicitamente em tarefas compatíveis. A interpretação
+Clean, security-audit, implementar-snapshots e development-test-workbook podem ser usadas implicitamente em tarefas compatíveis. A interpretação
 pelo aplicativo deve ser conferida nele; este repositório não certifica loaders.
+
+A `security-audit` é uma exceção de importação: seus arquivos são mantidos sem
+alterações, inclusive idioma e estrutura, para facilitar atualizações da
+[origem](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/security-audit).
+Revisão importada: `7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a`. Instalação não
+autoriza executar seus comandos ou realizar alterações externas.
 
 ## Instalação e uso
 

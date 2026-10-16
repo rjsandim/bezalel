@@ -10,6 +10,8 @@ from check_delivery import ContractError, local_file, read_json, require, text, 
 
 ROOT = Path(__file__).resolve().parents[1]
 SECTIONS = ["Objetivo e escopo", "Entradas e pré-requisitos", "Procedimento", "Saídas", "Validação", "Limites operacionais"]
+# Exceções de formato autorizadas no AGENTS.md; demais verificações permanecem.
+UPSTREAM_FORMAT_SKILLS = {"security-audit"}
 EXCLUDED = {".git", ".DS_Store", "__pycache__", "state", "backups", ".local-review", ".pytest_cache"}
 
 
@@ -35,7 +37,7 @@ def validate_structure(files):
         front = re.match(r"\A---\n(.*?)\n---\n", text, re.S)
         if not front or not re.search(r"^name: " + re.escape(directory.name) + r"$", front[1], re.M) or not re.search(r"^description: \S.+$", front[1], re.M):
             errors.append(f"Invalid essential metadata: {directory.name}")
-        if re.findall(r"^## (.+)$", text, re.M) != SECTIONS:
+        if directory.name not in UPSTREAM_FORMAT_SKILLS and re.findall(r"^## (.+)$", text, re.M) != SECTIONS:
             errors.append(f"Unexpected section order: {directory.name}")
     for path in files:
         if path.suffix != ".md":
