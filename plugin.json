@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "bezalel",
-  "version": "2.0.0-d6b9e45e77da1729",
+  "version": "2.0.0-b436452e2b7fe96a",
   "description": "Agentes do Company Flow v2 e skills para entrega de software.",
   "extensions": {
     "com.openai": {

@@ -75,11 +75,12 @@ def atomic_write(path, data, mode=0o644):
 
 
 def git(root, *args, timeout=30):
-    """Não dispara hooks nem prompts; erros omitem saídas que podem conter credenciais."""
+    """Sem hooks, prompts ou manutenção automática; erros omitem saídas privadas."""
     env = dict(os.environ, GIT_TERMINAL_PROMPT='0', GIT_CONFIG_NOSYSTEM='1')
     try:
         return subprocess.run(
-            ['git', '-c', 'core.hooksPath=/dev/null', '-C', str(root), *args],
+            ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'maintenance.auto=false',
+             '-c', 'gc.auto=0', '-C', str(root), *args],
             check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             timeout=timeout, env=env,
         ).stdout
