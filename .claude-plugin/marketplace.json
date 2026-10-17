@@ -1,6 +1,6 @@
 {
   "name": "bezalel",
-  "description": "Agentes do Company Flow v2 e skills para entrega de software.",
+  "description": "Fluxo de desenvolvimento Bezalel v2, equipe DreamTeam e skills.",
   "owner": {
     "name": "Bezalel"
   },
@@ -8,7 +8,7 @@
     {
       "name": "bezalel",
       "source": "./",
-      "description": "Agentes do Company Flow v2 e skills para entrega de software."
+      "description": "Fluxo de desenvolvimento Bezalel v2, equipe DreamTeam e skills."
     }
   ]
 }

@@ -1,4 +1,4 @@
-# Skills e procedimentos por etapa do Company Flow v2
+# Skills e procedimentos por etapa do fluxo Bezalel v2
 
 As **18 skills estão presentes no Bezalel**. Destas, **11 orientam métodos em 24 das 60 etapas**, distribuídas por 16 dos 20 processos. As demais etapas mantêm pré-condições, encaminhamentos e decisões, reutilizando o resultado do método já aplicado. Os quatro processos humanos não recebem execução por skill.
 

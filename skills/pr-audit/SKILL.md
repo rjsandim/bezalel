@@ -12,7 +12,7 @@ Serve para uma PR existente ou para o candidato integrado anterior à abertura d
 Uma conclusão favorável cobre somente o objeto e o escopo examinados; não equivale
 a aceite humano, parecer de AppSec/QA, autorização de publicação ou aprovação de merge.
 
-Esta adaptação é de **revisão sem execução**, adequada ao TL do Company Flow.
+Esta adaptação é de **revisão sem execução**, adequada ao TL da DreamTeam no fluxo Bezalel.
 O revisor lê código, histórico, contratos, artefatos e resultados já produzidos.
 Não implementa, integra branches nem executa testes/builds/scanners do produto.
 Solicita a prova faltante ao dev, DevOps, AppSec ou QA, mantendo os limites de cada

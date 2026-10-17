@@ -1,13 +1,14 @@
-# Company Flow v2 para bug melhoria e feature
+# Bezalel — fluxo de desenvolvimento v2
 
-Fonte canônica dos três cenários vigentes. São 20 processos reutilizáveis e 60
+Fonte canônica do fluxo de desenvolvimento Bezalel, conduzido pela equipe
+[DreamTeam](README.md). São três cenários, 20 processos reutilizáveis e 60
 etapas, com 18 processos em cada cenário; os quatro devs são opções de especialidade.
 Os contratos em [agents](README.md) distribuem os processos por responsabilidade,
 sem criar um agente por etapa. O aprovador humano é externo.
 
 ## Regras comuns
 
-No Company Flow, estas regras ficam uma única vez na descrição de **Coordenar a entrega · v2**, reutilizada pelos três cenários. Cada atividade usa as pré-condições do destino, inclusive nas retomadas. Condições locais complementam, sem substituir, o procedimento e estas regras.
+Na ferramenta Company Flow, estas regras ficam uma única vez na descrição de **Coordenar a entrega · v2**, reutilizada pelos três cenários. Cada atividade usa as pré-condições do destino, inclusive nas retomadas. Condições locais complementam, sem substituir, o procedimento e estas regras.
 
 ### R1 Registro e autorização
 

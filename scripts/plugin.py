@@ -56,7 +56,7 @@ def build(source, output):
             'Use ${CLAUDE_PLUGIN_ROOT} como raiz da base instalada. Leia o contexto do projeto consumidor.')
         content[path] = (body.encode(), 0o644)
     identity = {'name': 'bezalel', 'version': version,
-                'description': 'Agentes do Company Flow v2 e skills para entrega de software.'}
+                'description': 'Fluxo de desenvolvimento Bezalel v2, equipe DreamTeam e skills.'}
     def hook(client, variable):
         return {'hooks': {'SessionStart': [{'matcher': 'startup', 'hooks': [{
             'type': 'command', 'command': 'python3 "${' + variable + '}/scripts/plugin.py" refresh --client ' + client,
@@ -82,6 +82,7 @@ def build(source, output):
         content[name] = (json_bytes(value), 0o644)
     content['README.md'] = (('\n'.join([
         '# Bezalel para Codex e Claude Code', '',
+        'Bezalel é o fluxo de desenvolvimento; DreamTeam é sua equipe de nove agentes.',
         'Pacote gerado. Não edite este cache: altere a fonte e publique uma nova revisão.',
         'Os contratos portáteis ficam em [contracts/README.md](contracts/README.md).',
         'As skills originais são preservadas. Os agentes nativos carregam seus contratos.',
