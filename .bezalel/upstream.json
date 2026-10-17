@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/akitaonrails/my-skills.git",
+  "branch": "master",
+  "excluded_adaptations": [
+    "iss-audit",
+    "pr-audit"
+  ],
+  "skills": {
+    "security-audit": {
+      "revision": "7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a",
+      "preserve": [],
+      "mode_overrides": {
+        "scripts/security-surface.sh": 420
+      },
+      "files": {
+        "SKILL.md": {
+          "sha256": "a05950e220e3071e47b8e5b57a21e62c1281f37e602c7e4a536e88e9ddfa6645",
+          "mode": 420
+        },
+        "agents/openai.yaml": {
+          "sha256": "07f05a5dfd1157adf61fb34eba76ed19a48d6883907842178970b638511b684d",
+          "mode": 420
+        },
+        "references/ecosystem-checks.md": {
+          "sha256": "6a65520c4822c3c6788996397a63d3a229734e73607d04080d76d4fbdb1c61e9",
+          "mode": 420
+        },
+        "references/security-checklist.md": {
+          "sha256": "3af74a39a5f3230ff555f44a65b413a8ecdd55b47b7ba97e28f44d3a1c839f03",
+          "mode": 420
+        },
+        "scripts/security-surface.sh": {
+          "sha256": "c13bb60831688805dcdcd00f18a415df40d321effd0019a61c006a4773819124",
+          "mode": 420
+        }
+      }
+    },
+    "humanizer": {
+      "revision": "7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a",
+      "preserve": [],
+      "mode_overrides": {},
+      "files": {
+        ".claude-plugin/marketplace.json": {
+          "sha256": "24261fcfead5f536e0a6f0c3fd27fa809c69393217d67d617adb6c83a2715eb7",
+          "mode": 420
+        },
+        ".claude-plugin/plugin.json": {
+          "sha256": "ce4f3dd0397c9ca71fe9a089dd00cd132436cfeba4513c53cc6c486f537de43c",
+          "mode": 420
+        },
+        ".github/workflows/validate.yml": {
+          "sha256": "f2d6a8780fb0b3cf6fa7d2ffccd72d0fc8bee29b4e63ea0fd65924712c9055fd",
+          "mode": 420
+        },
+        "AGENTS.md": {
+          "sha256": "8f5069d68622bc956e2d492f26879d2a06508e2ef16d2e573ab13f7a92a0607a",
+          "mode": 420
+        },
+        "LICENSE": {
+          "sha256": "4ac4810254ab36d45419141aeb8e69bf50652cfafe5b2dab947d06d44e5cbf96",
+          "mode": 420
+        },
+        "README.md": {
+          "sha256": "d546538831ce8423587208d4a86dbe2be1f1f63445505d284dc558e6de86dac0",
+          "mode": 420
+        },
+        "SKILL.md": {
+          "sha256": "e8269e236bed06ed0fe4824c274112e54950b0cb46b0bafe5e1576ef7c9f93d5",
+          "mode": 420
+        },
+        "agents/openai.yaml": {
+          "sha256": "9d87ff83149a04f86a372948b8ee35fa249de20923867bbc2a49304290aad736",
+          "mode": 420
+        },
+        "scripts/validate-package.py": {
+          "sha256": "750e5f50561b8a5285bd1a20ed8b127af65b1b25d50e88c2ce5fe8522943c8fd",
+          "mode": 493
+        }
+      }
+    },
+    "verification-planning": {
+      "revision": "7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a",
+      "preserve": [],
+      "mode_overrides": {},
+      "files": {
+        "SKILL.md": {
+          "sha256": "7d2f4db38901c82a2884284805ebe4105b813933ba5cdca572acfed5b92e83c5",
+          "mode": 420
+        }
+      }
+    },
+    "agent-browser": {
+      "revision": "7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a",
+      "preserve": [],
+      "mode_overrides": {},
+      "files": {
+        "SKILL.md": {
+          "sha256": "3a7520e64de2dfaa516b6721c001e84e06e3c06a187b82af029ae721540ebfac",
+          "mode": 420
+        }
+      }
+    },
+    "github-resolution": {
+      "revision": "7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a",
+      "preserve": [
+        "agents/openai.yaml"
+      ],
+      "mode_overrides": {},
+      "files": {
+        "SKILL.md": {
+          "sha256": "19a5d1592ffcd219b512fef6cd0d5f36f0f2311f3da84daec4236db54a6c515a",
+          "mode": 420
+        },
+        "agents/openai.yaml": {
+          "sha256": "ce4bf4039773a7eb3499e53bf19789823af8681ee126af7afde817a572a2fad8",
+          "mode": 420
+        }
+      }
+    },
+    "pr-bump": {
+      "revision": "7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a",
+      "preserve": [
+        "agents/openai.yaml"
+      ],
+      "mode_overrides": {},
+      "files": {
+        "SKILL.md": {
+          "sha256": "8881b456aa7ff2e57aff6ebc997298a90f0eccc9ad6a9911ef8152345718f75f",
+          "mode": 420
+        },
+        "agents/openai.yaml": {
+          "sha256": "91e05bef31708b92f409e4f0f94edfec2e890a3eaa3cbbf08c8ce8311d766604",
+          "mode": 420
+        }
+      }
+    },
+    "pr-post-audit": {
+      "revision": "7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a",
+      "preserve": [
+        "agents/openai.yaml"
+      ],
+      "mode_overrides": {},
+      "files": {
+        "SKILL.md": {
+          "sha256": "0c6ddadb01cb98e9ac5c5244662b1568833d907fe5a55272cef223d5c840da89",
+          "mode": 420
+        },
+        "agents/openai.yaml": {
+          "sha256": "28e8fe980133994b5b9e1fadabfa91a4e11b91459d8111a7be4e40b7d17f2276",
+          "mode": 420
+        }
+      }
+    },
+    "reflect": {
+      "revision": "7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a",
+      "preserve": [
+        "agents/openai.yaml"
+      ],
+      "mode_overrides": {},
+      "files": {
+        "SKILL.md": {
+          "sha256": "f29f1378df375206f7bb0045cca4bcdf63646ddc96519aad36e35ed26c140d01",
+          "mode": 420
+        },
+        "agents/openai.yaml": {
+          "sha256": "9e3a13dffc0d9b0cb8865e16f7daa05b2a763d6021ca6b32c35f4153e42d0a30",
+          "mode": 420
+        }
+      }
+    },
+    "release": {
+      "revision": "7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a",
+      "preserve": [
+        "agents/openai.yaml"
+      ],
+      "mode_overrides": {},
+      "files": {
+        "SKILL.md": {
+          "sha256": "5908c9e2d59281c31394766341eee6fe78eee703197e9452f77e1577ddc473da",
+          "mode": 420
+        },
+        "agents/openai.yaml": {
+          "sha256": "828e730872dbd2dd513987cd48ac38016a14ecdd58452bd0519d408f724b65a5",
+          "mode": 420
+        }
+      }
+    }
+  }
+}

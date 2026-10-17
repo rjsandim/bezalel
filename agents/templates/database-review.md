@@ -1,14 +1,17 @@
-# DB-000 — Proposta de banco para US-000
+# Proposta de banco vinculada à issue
 
-- Necessidade e critérios atendidos:
-- Estado atual → alteração proposta (tabelas, campos, índices, restrições):
-- Rationale e alternativa mais simples considerada:
-- Dados existentes, backfill e compatibilidade de API/mobile:
-- Custos de consulta, locks, volume e riscos:
-- Sequência de implantação e verificação em ambiente isolado:
-- Recuperação/rollback e limites de reversibilidade:
-- Decisões necessárias ao usuário:
+- Necessidade, critérios e versão do escopo:
+- Estrutura alterada? Há qualquer migration? Há transformação complexa de relações?
+- Estado atual → proposta (schema, dados, índices, restrições e relacionamentos):
+- Alternativa simples considerada e motivo da escolha:
+- Dados existentes, backfill e compatibilidade com consumidores/mobile:
+- Consultas, locks, volume, riscos e recuperação/rollback:
+- Ordem entre interface e banco; reconferência após UI/UX:
+- Relações complexas: parecer do DB Reviewer sobre a versão exata:
+- Decisões concretas para o humano, dependências e trabalho independente:
 
-Status inicial: **aguardando revisão**. Não implementar a mudança estrutural
-antes de aprovação humana desta proposta. A referência da decisão fica no registro
-da entrega, vinculada à versão exata; este texto não constitui aprovação.
+Status inicial: **aguardando revisão**. Estrutura, qualquer migration ou
+transformação complexa de relações exige decisão humana antes da implementação
+dependente. Proposta revisável, fonte da decisão e versão ficam vinculadas na
+issue. Este modelo e o parecer técnico não aprovam a mudança. Veja
+[proposta de banco](../company-flow-v2.md#process-bank).

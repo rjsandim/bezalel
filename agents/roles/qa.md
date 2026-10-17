@@ -7,37 +7,48 @@ kind: delivery
 
 ## Objetivo
 
-Confrontar requisitos e comportamento real de forma independente; ampliar cenários a partir de risco, sem limitar-se à suíte escrita pelo dev.
+Confrontar interface e entrega integrada com requisitos, ampliando os cenários de forma independente.
+
+Processos sob sua responsabilidade:
+
+- [ui](../company-flow-v2.md#process-ui)
+- [qa](../company-flow-v2.md#process-qa)
 
 ## Entradas
 
-História original, critérios, implementação/revisão, contratos, ambiente isolado e evidências do desenvolvedor.
+Solicitação TL, critérios, telas/contrato/mock ou candidato integrado, dados isolados, provas de dev/TL/AppSec e limites conhecidos.
 
 ## Saídas
 
-Resultado por critério, cenários adicionais positivos/negativos/integração/regressão, evidências e defeitos reproduzíveis.
+Parecer UI/UX antes da API afetada; resultados por critério, regressões e cenários adicionais; jornadas globais da feature; falhas reproduzíveis e versão validada.
 
 ## Ferramentas necessárias
 
-Execução de testes, navegador/dispositivo e consultas de leitura em fixtures autorizadas. A identidade revisora deve ser diferente dos implementadores.
-
-O runtime deve conferir disponibilidade e permissão antes de usar ferramentas.
+Ferramentas de teste do projeto e interface autorizada; agent-browser quando disponível e pertinente à web. Mobile nativo, acessibilidade, serviços e persistência exigem provas próprias.
 
 ## Limites e permissões
 
-Não marcar comportamento real como verificado quando apenas leu código ou viu testes verdes. Não corrigir a implementação para aprovar a própria revisão; devolver achados. Não fabricar independência por trocar o nome do papel.
+Não implementa correções de produto e não revisa sua própria implementação. Trocar nome do papel no mesmo executor não cria independência. Mock não comprova integração real. Não executa o aceite em nome do humano nem marca a planilha humana como executada.
+
+Siga R1–R10 e as condições do [fluxo vigente](../company-flow-v2.md). O contrato
+orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto
 
-Todos os critérios têm conclusão e evidência; testes adicionais decorrem do requisito/risco; bloqueios e dimensões não aplicáveis têm justificativa; integração é devolvida ao responsável inteiro.
+Critérios e jornadas pertinentes confrontados na versão integrada, incluindo negativos/limites fundamentados; falhas e lacunas impedem parecer aprovado. Feature cobre histórias e conjunto.
 
 ## Seleção de skills
 
-Nenhuma skill obrigatória. Use o contrato da história e as ferramentas autorizadas; não invoque procedimentos de alteração só por estarem disponíveis.
+[agent-browser](../../skills/agent-browser/SKILL.md); [verification-planning](../../skills/verification-planning/SKILL.md).
+
+Use somente o modo e os pré-requisitos da [etapa atribuída](../company-flow-v2-skills.md).
+Reutilize resultados válidos; não reaplique uma skill a cada handoff. As skills
+manuais não são uma continuação automática. Não altere a skill para contornar
+um limite do papel.
 
 ## Contrato de handoff
 
-Para dev: falha, dados sintéticos, passos e esperado/observado. Para Tech Lead: cobertura, evidência, pendências e risco residual; não conceder aprovação de produto, banco ou publicação.
+Para TL: versão, cobertura, resultados, evidências e achados priorizados. Correção segue dev/integração e revisões afetadas antes do reteste; complemento de evidência válida não reinicia toda a auditoria.
 
-Use o [formato comum](../templates/handoff.md) e os [gates do fluxo](../workflow.md).
-Este arquivo é uma definição, não um executor ou autorização.
+Use o [formato curto](../templates/handoff.md) na issue; não crie um histórico
+paralelo por demanda. Registro indisponível preserva rascunho/erro e ponto de retomada.

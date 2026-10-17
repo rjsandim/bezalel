@@ -1,49 +1,26 @@
 {
-  "schema_version": 1,
-  "story": "stories/US-001.md",
+  "schema_version": 2,
+  "scenario": "bug",
+  "issue": {
+    "url": "https://github.com/EXEMPLO/PROJETO/issues/1",
+    "scope_ref": "PREENCHER_REFERENCIA_REAL",
+    "dependencies": "PREENCHER",
+    "criteria": [],
+    "stories": []
+  },
+  "roles": [
+    "produto",
+    "coordenador",
+    "infraestrutura",
+    "dev-fullstack",
+    "qa",
+    "appsec"
+  ],
   "owner": "",
   "implementers": [],
-  "roles": [
-    "dev-fullstack",
-    "qa"
-  ],
-  "isolation": {
-    "files": {
-      "status": "pending",
-      "evidence": ""
-    },
-    "database": {
-      "status": "pending",
-      "evidence": ""
-    },
-    "queues": {
-      "status": "pending",
-      "evidence": ""
-    },
-    "ports": {
-      "status": "pending",
-      "evidence": ""
-    },
-    "storage": {
-      "status": "pending",
-      "evidence": ""
-    }
-  },
-  "database": {
-    "change": "none",
-    "reason": "A história de exemplo compõe leitura sobre o modelo existente, sem schema, índice ou restrição novos."
-  },
-  "checks": [],
-  "qa": {
-    "reviewer": "",
-    "criteria": [],
-    "additional_scenarios": []
-  },
-  "integration": {
-    "owner": "",
-    "status": "pending",
-    "evidence": ""
-  },
-  "manual_test": "",
-  "pr_draft": ""
+  "blocker": {
+    "reason": "Modelo ainda não preenchido; não é evidência de execução.",
+    "owner": "PREENCHER",
+    "resume_condition": "Conferir intenção, contexto e provas reais."
+  }
 }

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Publicação de versão"
+  short_description: "Uso manual para preparar e publicar uma versão"
+  default_prompt: "Use $release para preparar a versão solicitada e executar somente as ações autorizadas."
+
+policy:
+  allow_implicit_invocation: false

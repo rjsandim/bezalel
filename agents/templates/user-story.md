@@ -1,5 +1,9 @@
 # US-000 — Resultado desejado
 
+Use como corpo da issue ou submissão versionada. Não crie MD paralelo por demanda.
+Em feature, vincule as histórias à principal e explicite critérios globais;
+a decisão humana abrange a versão exata do conjunto.
+
 ## Necessidade
 
 Como <pessoa>, preciso <capacidade> para <resultado>. Contexto essencial:

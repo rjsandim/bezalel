@@ -1,0 +1,77 @@
+name: Propor atualizações das skills originais
+on:
+  schedule:
+    - cron: '0 11 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: bezalel-akita
+  cancel-in-progress: false
+jobs:
+  propose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: master
+      - name: Preparar proposta sem executar código importado
+        run: python3 -B scripts/sync_upstream.py --apply > "$RUNNER_TEMP/akita-report.json"
+      - name: Registrar cobertura e skills protegidas
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          report = json.loads((Path(os.environ['RUNNER_TEMP']) / 'akita-report.json').read_text())
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as output:
+              output.write('Skills com atualização: ' + (', '.join(report['updated']) or 'nenhuma') + '\n\n')
+              output.write('Skills protegidas por mudanças locais: ' + (', '.join(report['protected']) or 'nenhuma') + '\n\n')
+              output.write('Adaptações excluídas: pr-audit e iss-audit. Nenhum merge automático.\n')
+          PY
+      - run: python3 -B scripts/check_repository.py
+      - run: python3 -B -m unittest discover -s tests -v
+      - run: git diff --check
+      - name: Criar PR somente quando houver atualização
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --quiet -- skills .bezalel/upstream.json && exit 0
+          BEZALEL_UPSTREAM_REV=$(python3 -c 'import json,os; print(json.load(open(os.environ["RUNNER_TEMP"]+"/akita-report.json"))["revision"])')
+          BEZALEL_UPDATE_BRANCH="automation/akita-$BEZALEL_UPSTREAM_REV"
+          git ls-remote --heads origin "refs/heads/$BEZALEL_UPDATE_BRANCH" > "$RUNNER_TEMP/akita-branch.txt"
+          if test -s "$RUNNER_TEMP/akita-branch.txt"; then
+            BEZALEL_EXISTING_PR=$(gh pr list --head "$BEZALEL_UPDATE_BRANCH" --state all --json number --jq 'length')
+            if test "$BEZALEL_EXISTING_PR" != 0; then
+              echo 'Esta revisão já tem uma proposta. Preserve a revisão humana existente.'
+              exit 0
+            fi
+            git fetch origin "refs/heads/$BEZALEL_UPDATE_BRANCH"
+            if ! git diff --quiet FETCH_HEAD -- skills .bezalel/upstream.json; then
+              echo 'Branch de proposta existente diverge dos arquivos verificados. Reconciliação necessária.' >&2
+              exit 1
+            fi
+          else
+            git switch -c "$BEZALEL_UPDATE_BRANCH"
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add -- skills .bezalel/upstream.json
+            git commit -m 'Atualiza importações preservadas do Akita'
+            git push origin "HEAD:refs/heads/$BEZALEL_UPDATE_BRANCH"
+          fi
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP'])
+          report = json.loads((root / 'akita-report.json').read_text())
+          text = ('Atualiza as importações sem modificações locais para a revisão `' + report['revision'] + '`.\n\n'
+                  'Skills atualizadas: ' + ', '.join(report['updated']) + '.\n\n'
+                  'Protegidas por mudanças locais: ' + (', '.join(report['protected']) or 'nenhuma') + '.\n\n'
+                  'pr-audit e iss-audit são adaptações e não participam da sincronização. '
+                  'O conteúdo importado não foi executado. Checker estrutural e testes sintéticos passaram; '
+                  'é necessária revisão semântica antes de integrar e distribuir.\n')
+          (root / 'akita-pr.md').write_text(text)
+          PY
+          gh pr create --base master --head "$BEZALEL_UPDATE_BRANCH" --title 'Atualiza skills preservadas do Akita' --body-file "$RUNNER_TEMP/akita-pr.md"

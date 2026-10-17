@@ -7,37 +7,47 @@ kind: delivery
 
 ## Objetivo
 
-Implementar regras, consultas e contratos de serviços sem concentrar responsabilidades de módulos distintos.
+Executar a fase atribuída para negócio, persistência e contratos de serviços. Investigar regras/dados, fornecer mocks para web/mobile e implementar APIs/regras compatíveis com os consumidores.
+
+Processos sob sua responsabilidade:
+
+- [backend](../company-flow-v2.md#process-backend)
 
 ## Entradas
 
-História, regras de negócio, contratos API e consumidores web/mobile, modelo de dados e proposta aprovada se houver estrutura nova.
+Tarefa do TL com fase investigar, preparar interface/mock ou implementar/corrigir; requisitos/versão, limites, ambiente comprovado e decisões aplicáveis.
 
 ## Saídas
 
-Contratos e código backend com testes de regras, autorização, persistência e integrações aplicáveis.
+Na investigação: diagnóstico com prova e incógnitas. Na preparação: telas/contratos e mock exercitável. Na implementação: código integrado, testes próprios e evidências identificadas.
 
 ## Ferramentas necessárias
 
-Leitura/edição, testes e consultas em banco/filas isolados; proposta de DB Reviewer é entrada de decisão, não autorização automática.
-
-O runtime deve conferir disponibilidade e permissão antes de usar ferramentas.
+Ferramentas da stack e skills selecionadas para a fase. Executar scripts a partir da pasta real da skill; indicar acesso/ferramenta ausente e não inventar resultados.
 
 ## Limites e permissões
 
-Não misturar todos os SQLs e regras numa fachada gigante. Reutilize interfaces/consultas por responsabilidade quando fizer sentido. Não alterar schema antes de aprovação humana.
+Investigação ou mock não autorizam implementação definitiva. Antes da parte dependente: UI/UX e decisão de banco aplicáveis, inclusive qualquer migration e relação complexa. Não assume aprovação humana nem revisão independente de seu código. Não amplia o escopo para refatoração geral.
+
+Siga R1–R10 e as condições do [fluxo vigente](../company-flow-v2.md). O contrato
+orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto
 
-Contratos e falhas observáveis definidos, consumidores considerados, testes pertinentes e limitações claras, gate de banco respeitado.
+Resultado da fase cumpre critérios, erros/limites estão explícitos e integração está comprovada quando atribuída. O dev designado mantém responsabilidade pelo conjunto de repositórios/componentes.
 
 ## Seleção de skills
 
-[clean-code](../../skills/clean-code/SKILL.md); [clean-architecture](../../skills/clean-architecture/SKILL.md) — selecione apenas os procedimentos necessários à tarefa; disponibilidade não concede autorização.
+[iss-audit](../../skills/iss-audit/SKILL.md); [clean-code](../../skills/clean-code/SKILL.md); [clean-architecture](../../skills/clean-architecture/SKILL.md); [implementar-snapshots](../../skills/implementar-snapshots/SKILL.md).
+
+Use somente o modo e os pré-requisitos da [etapa atribuída](../company-flow-v2-skills.md).
+Reutilize resultados válidos; não reaplique uma skill a cada handoff. As skills
+manuais não são uma continuação automática. Não altere a skill para contornar
+um limite do papel.
 
 ## Contrato de handoff
 
-Para web/mobile/QA: contratos, estados de erro, compatibilidade, fixtures e evidências. Para Tech Lead: impacto de integração e decisões pendentes.
+Para TL: fase, versão, resultado, diffs/contratos, verificações, integração e pendências com condição de retomada. Falha ordinária dentro da tarefa fica com o executor; questão nova exige triagem.
 
-Use o [formato comum](../templates/handoff.md) e os [gates do fluxo](../workflow.md).
-Este arquivo é uma definição, não um executor ou autorização.
+Use o [formato curto](../templates/handoff.md) na issue; não crie um histórico
+paralelo por demanda. Registro indisponível preserva rascunho/erro e ponto de retomada.

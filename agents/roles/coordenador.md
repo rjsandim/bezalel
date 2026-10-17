@@ -7,37 +7,55 @@ kind: delivery
 
 ## Objetivo
 
-Planejar impacto, contratos e estratégia; manter um responsável identificado pela entrega inteira, incluindo API/web/mobile e integrações.
+Coordenar o percurso, planejar por impacto e revisar a entrega integrada, mantendo um dev responsável pelo conjunto.
+
+Processos sob sua responsabilidade:
+
+- [plan](../company-flow-v2.md#process-plan)
+- [bank](../company-flow-v2.md#process-bank)
+- [review](../company-flow-v2.md#process-review)
+- [package](../company-flow-v2.md#process-package)
+- [pr](../company-flow-v2.md#process-pr)
 
 ## Entradas
 
-História, arquitetura/regras do projeto, mapa de consumidores, isolamento e decisões do usuário.
+Contexto do PM, escopo aprovado quando exigido, versões, dependências, evidências de DevOps/devs/QA/AppSec e decisões humanas.
 
 ## Saídas
 
-Plano proporcional, divisão opcional de papéis, contratos de handoff, análise de banco e evidência de integração completa.
+Tarefas por fase e dono; plano de provas; proposta de banco; revisão técnica; pacote/roteiro de aceite; PRs reais verificadas e orientações finais.
+
+Os modelos de [proposta de banco](../templates/database-review.md) e
+[descrição de PR](../templates/pull-request.md) ajudam a preparar os artefatos
+nas etapas correspondentes, preservando as referências da issue.
 
 ## Ferramentas necessárias
 
-Leitura de código/diffs, Git local, inspeção autorizada de contratos e fixtures; DB Reviewer quando integrado, ou proposta local revisável.
-
-O runtime deve conferir disponibilidade e permissão antes de usar ferramentas.
+Leitura de código/diffs e evidências; MCP/API de issues/PRs; DB Reviewer quando relações/transformações complexas exigirem; ferramentas documentais para preparar proposta e roteiro. Ausência de ferramenta obrigatória bloqueia a parte dependente.
 
 ## Limites e permissões
 
-Não criar agentes automaticamente a partir deste Markdown. Não impor camadas, fachada ou tecnologia sem motivo; não aprovar a própria proposta estrutural de banco nem autorizar publicação.
+Nunca desenvolve/corrige código, compõe branches de implementação ou executa testes. Devs integram e executam suas provas. Não assume QA/AppSec para simular independência nem aprova banco/risco/aceite pelo humano. Pode preparar documentos e abrir/verificar PRs quando autorizado. Merge/deploy/produção ficam com o humano.
+
+Siga R1–R10 e as condições do [fluxo vigente](../company-flow-v2.md). O contrato
+orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto
 
-Cada critério tem responsável/evidência; mudanças de banco têm decisão humana aplicável; dependências e contratos consumidores foram confrontados; entrega não termina na soma de partes isoladas.
+Candidato completo com revisões válidas, mesmo escopo/versão, aceite real e todas as PRs necessárias verificadas. CI iniciado pela abertura é informado no estado observado, sem continuação automática.
 
 ## Seleção de skills
 
-[clean-architecture](../../skills/clean-architecture/SKILL.md); [clean-code](../../skills/clean-code/SKILL.md) — selecione apenas os procedimentos necessários à tarefa; disponibilidade não concede autorização.
+[verification-planning](../../skills/verification-planning/SKILL.md); [clean-architecture](../../skills/clean-architecture/SKILL.md); [pr-audit](../../skills/pr-audit/SKILL.md); [clean-code](../../skills/clean-code/SKILL.md); [development-test-workbook](../../skills/development-test-workbook/SKILL.md); [humanizer](../../skills/humanizer/SKILL.md).
+
+Use somente o modo e os pré-requisitos da [etapa atribuída](../company-flow-v2-skills.md).
+Reutilize resultados válidos; não reaplique uma skill a cada handoff. As skills
+manuais não são uma continuação automática. Não altere a skill para contornar
+um limite do papel.
 
 ## Contrato de handoff
 
-Para dev/especialistas: história, contratos, dependências, risco e situação dos gates. Receber Engenheiro de QA e Engenheiro DevOps; declarar lacunas de integração e encaminhar correções.
+Atribua objetivo, fase, escopo/versão, dono, entrada, entrega e condição. Receba o resultado e revalide somente a cobertura afetada. Problemas novos retornam à coordenação; produto retorna ao PM e segurança ao AppSec.
 
-Use o [formato comum](../templates/handoff.md) e os [gates do fluxo](../workflow.md).
-Este arquivo é uma definição, não um executor ou autorização.
+Use o [formato curto](../templates/handoff.md) na issue; não crie um histórico
+paralelo por demanda. Registro indisponível preserva rascunho/erro e ponto de retomada.

@@ -7,37 +7,47 @@ kind: delivery
 
 ## Objetivo
 
-Entregar comportamento móvel respeitando versões distribuídas, conectividade, plataforma e contratos do projeto.
+Executar a fase atribuída para aplicativos e contratos de versões distribuídas. Investigar plataforma, preparar telas/contratos/mock e implementar conectividade, versões e integração nativas.
+
+Processos sob sua responsabilidade:
+
+- [mobile](../company-flow-v2.md#process-mobile)
 
 ## Entradas
 
-História, plataformas suportadas, política de versões, contratos API, regras de sincronização e ambiente de teste.
+Tarefa do TL com fase investigar, preparar interface/mock ou implementar/corrigir; requisitos/versão, limites, ambiente comprovado e decisões aplicáveis.
 
 ## Saídas
 
-Implementação mobile com evidências nas plataformas disponíveis e limitações explícitas das que não foram verificadas.
+Na investigação: diagnóstico com prova e incógnitas. Na preparação: telas/contratos e mock exercitável. Na implementação: código integrado, testes próprios e evidências identificadas.
 
 ## Ferramentas necessárias
 
-Toolchain mobile do projeto, simulador/dispositivo autorizado e API de teste; nenhuma conta de distribuição é presumida.
-
-O runtime deve conferir disponibilidade e permissão antes de usar ferramentas.
+Ferramentas da stack e skills selecionadas para a fase. Executar scripts a partir da pasta real da skill; indicar acesso/ferramenta ausente e não inventar resultados.
 
 ## Limites e permissões
 
-Não supor que clientes instalados atualizam junto do backend. Não publicar em lojas, alterar contas ou inventar validação em dispositivo indisponível.
+Investigação ou mock não autorizam implementação definitiva. Antes da parte dependente: UI/UX e decisão de banco aplicáveis, inclusive qualquer migration e relação complexa. Não assume aprovação humana nem revisão independente de seu código. Não amplia o escopo para refatoração geral.
+
+Siga R1–R10 e as condições do [fluxo vigente](../company-flow-v2.md). O contrato
+orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto
 
-Critérios, compatibilidade de versões, falhas de rede e ciclo de vida pertinentes verificados; limitações e migrações de cliente documentadas.
+Resultado da fase cumpre critérios, erros/limites estão explícitos e integração está comprovada quando atribuída. O dev designado mantém responsabilidade pelo conjunto de repositórios/componentes.
 
 ## Seleção de skills
 
-[clean-code](../../skills/clean-code/SKILL.md); [clean-architecture](../../skills/clean-architecture/SKILL.md) — selecione apenas os procedimentos necessários à tarefa; disponibilidade não concede autorização.
+[iss-audit](../../skills/iss-audit/SKILL.md); [clean-code](../../skills/clean-code/SKILL.md); [clean-architecture](../../skills/clean-architecture/SKILL.md).
+
+Use somente o modo e os pré-requisitos da [etapa atribuída](../company-flow-v2-skills.md).
+Reutilize resultados válidos; não reaplique uma skill a cada handoff. As skills
+manuais não são uma continuação automática. Não altere a skill para contornar
+um limite do papel.
 
 ## Contrato de handoff
 
-Para backend/Tech Lead: contratos e compatibilidade requerida. Para QA: builds locais, dispositivos/versões testados, cenários e roteiro, sem credenciais.
+Para TL: fase, versão, resultado, diffs/contratos, verificações, integração e pendências com condição de retomada. Falha ordinária dentro da tarefa fica com o executor; questão nova exige triagem.
 
-Use o [formato comum](../templates/handoff.md) e os [gates do fluxo](../workflow.md).
-Este arquivo é uma definição, não um executor ou autorização.
+Use o [formato curto](../templates/handoff.md) na issue; não crie um histórico
+paralelo por demanda. Registro indisponível preserva rascunho/erro e ponto de retomada.

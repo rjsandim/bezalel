@@ -1,0 +1,4 @@
+interface:
+  display_name: "Auditoria de entrega"
+  short_description: "Revisar candidatos e evidências sem executar testes"
+  default_prompt: "Use $pr-audit para revisar este candidato e apontar achados e provas pendentes."

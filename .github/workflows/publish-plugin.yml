@@ -1,0 +1,53 @@
+name: Atualizar o canal de plugins após publicação no Bezalel
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: bezalel-plugins
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: master
+          fetch-depth: 0
+      - run: python3 -B scripts/check_repository.py
+      - run: python3 -B -m unittest discover -s tests -v
+      - run: git diff --check
+      - name: Gerar pacote e catálogos dos dois aplicativos
+        run: python3 -B scripts/plugin.py build --output "$RUNNER_TEMP/bezalel-package"
+      - name: Publicar somente a branch de distribuição
+        shell: bash
+        run: |
+          set -euo pipefail
+          BEZALEL_PUBLISH_DIR="$RUNNER_TEMP/bezalel-publish"
+          git ls-remote --heads origin refs/heads/bezalel-plugins > "$RUNNER_TEMP/bezalel-channel.txt"
+          if test -s "$RUNNER_TEMP/bezalel-channel.txt"; then
+            git fetch origin refs/heads/bezalel-plugins
+            git worktree add --detach "$BEZALEL_PUBLISH_DIR" FETCH_HEAD
+          else
+            git worktree add --detach "$BEZALEL_PUBLISH_DIR" HEAD
+            git -C "$BEZALEL_PUBLISH_DIR" checkout --orphan bezalel-plugins
+          fi
+          python3 - <<'PY'
+          import os, sys
+          from pathlib import Path
+          sys.path.insert(0, 'scripts')
+          from distribution import files, replace_files
+          temp = Path(os.environ['RUNNER_TEMP'])
+          target = temp / 'bezalel-publish'
+          if not (target / '.git').is_file():
+              raise SystemExit('Destino não é a worktree temporária esperada.')
+          replace_files(target, files(target), files(temp / 'bezalel-package'))
+          PY
+          git -C "$BEZALEL_PUBLISH_DIR" add -A
+          git -C "$BEZALEL_PUBLISH_DIR" diff --cached --quiet && exit 0
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C "$BEZALEL_PUBLISH_DIR" commit -m 'Atualiza pacote Bezalel para Codex e Claude Code'
+          git -C "$BEZALEL_PUBLISH_DIR" push origin HEAD:refs/heads/bezalel-plugins

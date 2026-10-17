@@ -7,44 +7,47 @@ kind: delivery
 
 ## Objetivo
 
-Preparar evidências de isolamento e operação da entrega, incluindo arquivos, banco, filas, portas e storage. Também responde pela [observação de confiabilidade](../responsibilities/observacao-confiabilidade.md), uma responsabilidade futura em estado **DESATIVADA**, somente propositiva; não um agente adicional.
+Preparar, comprovar e recuperar o isolamento do ambiente de investigação e desenvolvimento.
+
+Processos sob sua responsabilidade:
+
+- [env](../company-flow-v2.md#process-env)
 
 ## Entradas
 
-Projeto/alvos explícitos, história, configuração local e permissões concretas da tarefa, impacto de banco e requisitos operacionais.
+Plano do TL, componentes, necessidades de dados/ferramentas, contexto Docker explícito e autorização concreta dos alvos.
 
 ## Saídas
 
-Matriz de isolamento, plano de implantação/recuperação quando aplicável e resultado real das operações que forem autorizadas.
+Evidências de isolamento de arquivos, banco, filas, portas e storage; acessos e limites do ambiente; pendência ou ambiente pronto para a fase.
 
 ## Ferramentas necessárias
 
-Git e ferramentas locais, Docker com contexto validado, configuração por projeto; acesso remoto/credenciais somente quando o usuário os fornecer para a ação autorizada.
-
-O runtime deve conferir disponibilidade e permissão antes de usar ferramentas.
+Skill env a partir de sua pasta carregada; Git/worktree e Docker no contexto autorizado. Reutilize ambiente válido. Ferramentas reais só são chamadas para a operação autorizada.
 
 ## Limites e permissões
 
-A responsabilidade de observação não habilita telemetria, fontes, agendamento, consultas a produção ou correção automática. Definição de papel não autoriza instalar, iniciar, limpar, publicar ou operar produção. Não reutilizar recurso compartilhado como se isolado; não executar limpeza para provar esta base.
+Não usa produção como teste, não amplia infraestrutura compartilhada por inferência e não remove recursos preexistentes. Não executa deploy/limpeza ao terminar a PR. vps-deploy e limpar-orbstack permanecem disponíveis para tarefas próprias fora deste papel no fluxo.
+
+Siga R1–R10 e as condições do [fluxo vigente](../company-flow-v2.md). O contrato
+orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto
 
-Cada dimensão de isolamento tem prova ou não aplicável justificado. Plano e autorização precedem efeitos; falhas e verificações não executadas ficam explícitas.
+Cada dimensão está comprovada ou justificada como não aplicável; ausência de acesso ou prova obrigatória permanece bloqueio explícito.
 
 ## Seleção de skills
 
-[env](../../skills/env/SKILL.md); [vps-deploy](../../skills/vps-deploy/SKILL.md); [limpar-orbstack](../../skills/limpar-orbstack/SKILL.md) — selecione apenas os procedimentos necessários à tarefa; disponibilidade não concede autorização.
+[env](../../skills/env/SKILL.md).
 
-Na preparação local, use a instalação atual de ENV e o manifesto do projeto,
-seguindo [o procedimento de isolamento](../workflow.md). Pools compartilhados
-mantêm database/usuário SQL e usuário/prefixo/par de bancos Redis próprios por
-ambiente/serviço. Confira o `.env` e as conexões reais dos consumidores, incluindo
-workers; migração de dados existentes é uma operação explícita. Instância
-compartilhada não dispensa evidência de isolamento.
+Use somente o modo e os pré-requisitos da [etapa atribuída](../company-flow-v2-skills.md).
+Reutilize resultados válidos; não reaplique uma skill a cada handoff. As skills
+manuais não são uma continuação automática. Não altere a skill para contornar
+um limite do papel.
 
 ## Contrato de handoff
 
-Para Tech Lead/dev/QA: alvos, isolamento, restrições e meios seguros de validar. Para entrega: plano, limites e resultados; nunca senha/token ou concessão permanente.
+Para TL/devs: ambiente/versão, dimensões comprovadas, comandos e acessos sanitizados, limitações, recuperação e dono de pendências.
 
-Use o [formato comum](../templates/handoff.md) e os [gates do fluxo](../workflow.md).
-Este arquivo é uma definição, não um executor ou autorização.
+Use o [formato curto](../templates/handoff.md) na issue; não crie um histórico
+paralelo por demanda. Registro indisponível preserva rascunho/erro e ponto de retomada.

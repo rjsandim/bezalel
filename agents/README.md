@@ -1,102 +1,87 @@
-# Base de agentes do Bezalel
+# Agentes do Bezalel para o Company Flow v2
 
-Agentes definem **papel e processo**; instruções do projeto definem arquitetura e
-regras de negócio; skills descrevem procedimentos reutilizáveis. Esta pasta
-contém definições versionáveis para um operador ou runtime consumir. Não inicia
-agentes, delega trabalho, conecta serviços ou concede permissões.
+Os agentes definem papéis; o [fluxo](company-flow-v2.md) define processos e
+condições; as [skills](company-flow-v2-skills.md) descrevem métodos. O contexto de
+arquitetura e negócio pertence ao projeto consumidor em `.bezalel/project.json`.
+O [catálogo](catalog.json) relaciona nove agentes e o aprovador humano externo aos
+20 processos da revisão 1179, sem criar um agente por etapa.
 
-## Papéis e seleção
+## Papéis
 
-| Papel | Quando usar | Responsabilidade principal |
+| Agente | Processos | Responsabilidade |
 |---|---|---|
-| [Product Manager](roles/produto.md) | Dúvida de necessidade, prioridade ou desvio de visão | Explicitar escolhas; o usuário decide mudanças de produto |
-| [Tech Lead](roles/coordenador.md) | Integrações, risco arquitetural ou múltiplos responsáveis | Impacto, contratos, estratégia e entrega inteira integrada |
-| [Dev fullstack](roles/dev-fullstack.md) | História pequena que atravessa camadas | Implementar uma entrega vertical pequena |
-| [Backend](roles/backend.md) | Regras, persistência ou contratos de serviços relevantes | Backend e compatibilidade com consumidores |
-| [Frontend web](roles/frontend-web.md) | Interação web exige especialização | Fluxos web, estados de interface e acessibilidade |
-| [Mobile](roles/mobile.md) | Apps, versões distribuídas ou comportamento móvel | Contratos, conectividade, versões e plataforma |
-| [Engenheiro de QA](roles/qa.md) | Validação da entrega | Ampliar cenários e confrontar comportamento com a história |
-| [Engenheiro DevOps](roles/infraestrutura.md) | Isolamento ou preparação operacional da entrega | Evidenciar isolamento e preparar execução autorizada |
-| [Analista de Produto](roles/observador-negocio.md) | Futuro; sempre desativado nesta base | Investigar anomalias no contexto de negócio, sem corrigir |
+| [Product Manager](roles/produto.md) | bug, improvement, feature | Qualificar intenção, versionar escopo e registrar destinos nas issues. |
+| [Tech Lead](roles/coordenador.md) | plan, bank, review, package, pr | Coordenar e revisar; preparar proposta/aceite e entregar PRs. Não implementa nem testa. |
+| [Engenheiro DevOps](roles/infraestrutura.md) | env | Comprovar isolamento e preparar/recuperar o ambiente autorizado. |
+| [Desenvolvedor fullstack](roles/dev-fullstack.md) | fullstack | Investigar, preparar ou implementar uma fatia vertical pequena. |
+| [Desenvolvedor backend](roles/backend.md) | backend | Regras, dados, mocks e contratos de serviços. |
+| [Desenvolvedor frontend web](roles/frontend-web.md) | web | Telas, estados, acessibilidade e integração web. |
+| [Desenvolvedor mobile](roles/mobile.md) | mobile | Plataforma, versões, conectividade e integração nativa. |
+| [Engenheiro de QA](roles/qa.md) | ui, qa | UI/UX e validação independente dos critérios e jornadas. |
+| [AppSec](roles/appsec.md) | security | Segurança, hipóteses, achados e revalidação do candidato. |
 
-São **nove papéis de agentes**, mais o [APROVADOR HUMANO](actors/aprovador-humano.md)
-externo. O Tech Lead reúne arquitetura, coordenação e integração. A independência
-do Engenheiro de QA permanece obrigatória. O Engenheiro DevOps também responde
-pela [observação de confiabilidade](responsibilities/observacao-confiabilidade.md).
-Essa responsabilidade e a observação de negócio do Analista de Produto permanecem
-**desativadas**, separadamente dos nomes dos cargos; nenhuma coleta é habilitada.
+O [APROVADOR HUMANO](actors/aprovador-humano.md) decide produto/escopo, banco,
+adiamento elegível de risco e aceite. Não há adaptador que o personifique.
+Observação de produção/negócio não integra este pacote de entrega. As definições
+futuras sem uso foram removidas; nenhuma coleta foi ativada.
 
-Os IDs e caminhos existentes dos nove papéis foram preservados para não quebrar
-registros. `display_name` no catálogo define o nome de apresentação. O antigo
-`observador-confiabilidade` deixou de ser papel; sua responsabilidade pertence a
-`infraestrutura`. Veja a [correspondência com Company Flow](company-flow.md).
+## Carregamento e atribuição
 
-Não forme uma equipe completa por padrão. Para uma história simples, um dev e
-uma revisão independente podem bastar; um deles ou o usuário é identificado como
-responsável pela integração. Especialistas entram pelo risco, não pelo número
-de pastas. Papéis podem ser exercidos por pessoas ou agentes; QA precisa de uma
-identidade revisora diferente de quem implementou. A indisponibilidade de um
-revisor mantém a validação pendente, não permite marcar aprovação fictícia.
+1. Leia o `AGENTS.md` do projeto, sua configuração e os documentos de contexto.
+2. Identifique cenário, issue real e versão; leia R1–R10 do fluxo e o contrato do
+   papel. Fonte indisponível não autoriza inventar regra ou procedimento.
+3. Receba uma tarefa com objetivo/fase, dono, entrada/versão, entrega e condição de
+   conclusão. Carregue o procedimento pertinente e somente as skills necessárias.
+4. Registre resultado/evidência ou bloqueio e retomada na mesma issue, usando o
+   [handoff curto](templates/handoff.md). Não crie um MD paralelo por demanda.
 
-O [catálogo](catalog.json) relaciona papéis e skills existentes. Metadados em
-`skills/*/agents/openai.yaml` continuam sendo adaptadores de interface das skills;
-não devem ser confundidos com estas definições de papéis.
+O TL seleciona apenas os especialistas necessários e um dev responsável pela
+integração inteira. Investigação, preparação de interface/mock e implementação
+são fases distintas. Revisor diferente no texto não comprova executor independente:
+TL, QA e AppSec não podem revisar sua própria implementação. Ferramenta obrigatória
+indisponível mantém pendência. Uma skill não transfere responsabilidade do papel.
 
-## Unidade de trabalho
+A aplicação precisa disponibilizar ferramentas de delegação/coordenação para
+executores distintos, ou um operador precisa conduzir as atribuições. Não simule
+subagentes mudando o nome do papel numa única execução. Aplicam-se a autorização
+da tarefa e as regras do aplicativo; este pacote não inicia uma equipe por si só.
 
-Use uma [user story curta](templates/user-story.md), compreensível sem buscar
-fragmentos de contexto em várias conversas. Ela contém necessidade, critérios
-observáveis identificados, dependências e limites. Referências complementam a
-história; não escondem o requisito essencial. Uma história deve ter um responsável
-pela integração inteira e um resultado verificável, não uma lista de tarefas por
-camada sem entrega ao usuário.
+## Adaptadores do Codex e do Claude Code
 
-O [fluxo e os contratos](workflow.md) definem isolamento, revisão de banco,
-implementação, QA e preparação da PR. O [handoff](templates/handoff.md) deve
-transportar resultado, evidência, bloqueios e próximo responsável, sem repetir
-um documento enorme. Não transfira um bloqueio silenciosamente.
+A pasta `codex/` contém um TOML por agente; `claude/` contém um Markdown por agente,
+com nome `bezalel-<id>`, descrição e
+instruções de carregamento. São adaptadores curtos dos contratos, sem modelo fixo,
+credenciais ou alteração de permissões. Instale-os conforme o
+[README principal](../README.md#como-adotar-o-bezalel-em-um-projeto).
 
-## Configuração por projeto
+O formato segue a [documentação oficial de agentes](https://learn.chatgpt.com/docs/agent-configuration/subagents):
+arquivos por projeto ficam em `.codex/agents/`; permissões e MCPs vêm da sessão
+principal. A validação local confere TOML e referências, não certifica o loader
+ou cria uma barreira técnica de execução. Confirme descoberta na versão do
+aplicativo e faça o piloto no projeto antes de alegar operação validada.
 
-Use o [modelo](../.bezalel/project.example.json) como ponto de partida para
-`<projeto>/.bezalel/project.json`. É configuração versionável sem segredos: aponta
-instruções de arquitetura/negócio e registra comandos de verificação declarados.
-Não executa esses comandos. `.bezalel/vps-deploy.local.json` e o token continuam
-seguindo o contrato próprio da skill VPS Deploy; nenhuma credencial entra aqui.
+No Claude, o formato segue a [referência de subagentes](https://code.claude.com/docs/en/sub-agents),
+com `name`, `description` e instruções; a instalação direta usa `.claude/agents/`.
+O pacote nativo separa contratos de prompts descobertos e declara os nove adaptadores
+no manifesto. Não existe agente humano, modelo obrigatório ou runtime próprio.
 
-Adapte nomes, documentos, interfaces e sinais ao projeto. Exemplos não são SLAs
-nem autorização. Observadores permanecem com `enabled: false` e
-`mode: proposal_only`; este repositório não oferece agendador nem integração de
-telemetria/produção. Um runtime futuro precisará de autorização e fontes corretas.
+O instalador atualiza agentes, skills e referências juntos, preservando o contexto
+e as customizações do projeto. O hook não inicia o fluxo; ele reconcilia a versão
+adotada. Distribuição e política de atualização estão no README principal.
 
-## O que executa hoje
+Para iniciar uma demanda, forneça o cenário e a intenção ao PM; a passagem para
+TL e especialistas segue o fluxo. Peça delegação aos agentes pertinentes quando
+suportada/autorizada pelo aplicativo. Não use os agentes de entrega para executar
+merge, deploy ou as skills reservadas ao uso manual.
 
-- `scripts/check_repository.py`: valida o pacote, catálogo, seções e links.
-- `scripts/check_delivery.py`: lê configuração, história e registro local de
-  entrega; valida declarações exigidas para planejamento, implementação ou entrega.
-  Também detecta aprovação ausente ou incompatível com a versão da proposta de banco.
-- Scripts existentes das skills: executam somente quando chamados explicitamente,
-  com seus próprios limites. Não são chamados pelo validador de entrega.
+## Registros e validação
 
-O validador **não verifica a verdade de uma evidência nem a identidade humana de
-quem aprovou**. Não executa testes, aprova alterações, implementa, delega ou cria
-PR. Sua saída é um check de contrato, não uma autorização. Um runtime precisa
-verificar a origem da aprovação na interação humana, executar ferramentas,
-observar resultados e impedir efeitos antes dos gates. Markdown sozinho não faz
-isso. Veja [contrato do registro](record-contract.md).
+O [contrato de registro v2](record-contract.md) permite conferir um snapshot local
+opcional das declarações da issue, sem criar outra fonte de requisitos. O checker
+não executa os comandos do projeto, consulta GitHub ou autentica pessoas.
 
-## Exemplo local
-
-A [história de exemplo](examples/US-001.md) é sintética. O
-[registro modelo](templates/delivery.example.json) começa com verificações
-pendentes, sem fabricar aprovação ou QA. Copie/adapte em um projeto descartável
-ou no projeto autorizado; não trate o exemplo como entrega concluída.
-
-```sh
-python3 <Bezalel>/scripts/check_delivery.py --project <projeto> --record .bezalel/deliveries/US-001.local.json --stage plan
-```
-
-`implement` exige declarações de isolamento e situação de banco resolvidas;
-`deliver` acrescenta evidências, QA independente, integração e rascunho da PR.
-Nenhuma etapa publica. A PR é uma etapa prevista da entrega, mas sua criação
-remota, merge e deploy dependem da autorização concreta de cada tarefa.
+O teste estrutural cobre catálogo, processos, skills, adaptadores e links. Os testes
+sintéticos cobrem interrupção/retomada nos três cenários, candidato alterado,
+investigação, banco/UI, revisões, segurança, aceite e PRs. Eles não substituem o
+piloto com ferramentas reais e decisões humanas reais. Ausência de uma capacidade
+é registrada; nenhuma dependência é instalada silenciosamente.

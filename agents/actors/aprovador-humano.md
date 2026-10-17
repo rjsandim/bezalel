@@ -1,14 +1,20 @@
 # APROVADOR HUMANO
 
-Ator externo humano, **não agente**. Examina propostas concretas e registra suas
-decisões reais; nenhum agente pode assumir sua identidade ou inferir aprovação.
+Ator externo, nunca agente. Confere propostas concretas e decide sobre o conteúdo
+exato. A interação real identifica pessoa, fonte, data/fuso e objeto/versão.
+Silêncio, parecer de agente, rótulo, JSON, hash e CI verde não substituem decisão.
 
-- Banco: decide sobre a proposta estrutural exata antes da implementação. Mudança
-  da proposta exige nova decisão; silêncio, JSON, hash e CI verde não aprovam.
-- Publicação/operação: delimita as ações autorizadas e seus alvos. Aprovar banco,
-  push ou PR não autoriza automaticamente merge, deploy ou limpeza.
-- Produto: continua cabendo ao usuário decidir alterações de visão/requisito.
-  Product Manager e Tech Lead apresentam alternativas e impactos.
+- [Produto/escopo](../company-flow-v2.md#process-product): regra, comportamento
+  esperado, reclassificação, escopo vN da feature e mudanças não abrangidas por
+  decisão anterior. Rejeitar uma solução não descarta automaticamente a intenção.
+- [Banco](../company-flow-v2.md#process-bankDecision): estrutura, qualquer migration
+  e transformação complexa de relações antes da implementação dependente.
+- [Risco](../company-flow-v2.md#process-risk): adiamento de médio/baixo confirmado,
+  com motivo, dono e prazo/condição. Crítico/alto confirmado não é elegível.
+- [Aceite](../company-flow-v2.md#process-accept): executar o roteiro e decidir sobre
+  o candidato realmente testado; planilha gerada ou executada por agente não basta.
 
-Os gates do [fluxo](../workflow.md) e do [registro](../record-contract.md) continuam
-válidos. A presença deste ator no catálogo é documental; não autentica decisões.
+Aproveite decisão já existente que cubra exatamente o objeto. Mudança material
+exige reconferir o que foi abrangido; não fabricar uma nova resposta nem repetir
+uma pergunta resolvida. O humano conduz merge, deploy e ações de produção depois
+do handoff. Autorizar PR não autoriza essas ações.

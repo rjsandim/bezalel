@@ -1,24 +1,26 @@
-# US-000 — Problema e comportamento resultante
+# Problema e comportamento resultante
 
 ## Mudança
 
-Necessidade atendida, critérios observáveis e exemplo antes/depois quando útil.
+Issue, necessidade atendida, resultado e exemplo antes/depois quando útil.
 
 ## Validação
 
-Testes executados, cenários adicionais de QA, evidências e integração completa.
-Informe falhas ou verificações não executadas. Identifique os responsáveis.
+Candidato completo, componentes/repos/base/head, checks prévios, revisão TL,
+AppSec, QA independente e integração pelo dev responsável. Informe limitações
+reais e tratamento dos achados. Referencie o aceite humano da mesma versão.
 
-## Roteiro manual
+## Roteiro e aceite
 
-Pré-condições/ambiente isolado, passos e resultados esperados por critério.
-Se o roteiro solicitado for Excel, referencie o `.xlsx` local pelo campo
-`manual_test`, conforme o [contrato](../record-contract.md). Gerar a planilha não
-executa testes e não autoriza anexá-la à PR. Não inclua segredos ou dados privados.
+Roteiro executado pelo humano e evidência da decisão: Excel em melhoria/feature;
+no bug, formato pertinente. Gerar a planilha não executa testes. Artefatos e links
+não podem conter segredos/dados privados nem ser publicados sem autorização.
 
-## Banco, contratos e operação
+## Banco, contratos e próximos passos
 
-Proposta/decisão humana quando houve mudança estrutural; caso contrário,
-justifique não aplicável. Registre compatibilidade, implantação, recuperação,
-dependências e riscos relevantes. Publicação/merge/deploy ainda dependem da
-autorização concreta; este rascunho não concede acesso nem publica a PR.
+Proposta/decisão exatas quando houve estrutura, migration ou relações complexas;
+caso contrário, não aplicável com razão. Registre compatibilidade, recuperação,
+dependências e riscos. Após abrir/verificar todas as PRs, informe CI no estado
+observado e orientações manuais ao humano. Não habilite merge/deploy automático.
+Este rascunho não comprova abertura ou execução: siga o
+[processo de PR](../company-flow-v2.md#process-pr).

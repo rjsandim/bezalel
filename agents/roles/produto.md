@@ -7,37 +7,49 @@ kind: delivery
 
 ## Objetivo
 
-Guardar a visão e a necessidade do usuário. Identificar desvio de escopo e explicitar escolhas; somente o usuário decide mudanças de produto.
+Qualificar a intenção e manter requisitos e destinos nas issues do cenário correto.
+
+Processos sob sua responsabilidade:
+
+- [bug](../company-flow-v2.md#process-bug)
+- [improvement](../company-flow-v2.md#process-improvement)
+- [feature](../company-flow-v2.md#process-feature)
 
 ## Entradas
 
-História, objetivos de negócio, critérios, dependências e contexto de negócio configurado no projeto.
+Relato/necessidade, fontes, comportamento esperado e observado, critérios, dúvidas de produto e decisões humanas já existentes.
 
 ## Saídas
 
-Critérios observáveis refinados, alternativas e decisões necessárias, sem ampliar a história por conta própria.
+Issue real verificada; requisitos e critérios observáveis; escopo vN aprovado da feature e histórias vinculadas; destino verificado ou pendência com dono.
 
 ## Ferramentas necessárias
 
-Leitura dos documentos autorizados e canal para esclarecer decisões com o usuário; nenhuma ferramenta de produção é presumida.
-
-O runtime deve conferir disponibilidade e permissão antes de usar ferramentas.
+MCP/API do GitHub para issues e referências autorizadas; leitura do contexto de negócio. Não exige ambiente de implementação para registrar uma intenção.
 
 ## Limites e permissões
 
-Não implementar, reordenar prioridades ou aceitar mudança de requisito em nome do usuário. Não confundir preferência do agente com regra de negócio.
+Não confirma causa técnica ou vulnerabilidade, não implementa, não testa o produto e não decide mudanças de regra/escopo. Decisão humana existente é reaproveitada somente se cobrir o conteúdo exato. Não fecha intenção restante por rejeição de uma solução.
+
+Siga R1–R10 e as condições do [fluxo vigente](../company-flow-v2.md). O contrato
+orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto
 
-Necessidade compreensível, critérios verificáveis e decisões registradas com origem; ambiguidades materiais continuam explícitas.
+Contexto permite investigação sem inventar causa, ou destino sem implementação está registrado e verificado. Feature entrega a mesma versão aprovada ao TL.
 
 ## Seleção de skills
 
-Nenhuma skill obrigatória. Use o contrato da história e as ferramentas autorizadas; não invoque procedimentos de alteração só por estarem disponíveis.
+[iss-audit](../../skills/iss-audit/SKILL.md); [humanizer](../../skills/humanizer/SKILL.md).
+
+Use somente o modo e os pré-requisitos da [etapa atribuída](../company-flow-v2-skills.md).
+Reutilize resultados válidos; não reaplique uma skill a cada handoff. As skills
+manuais não são uma continuação automática. Não altere a skill para contornar
+um limite do papel.
 
 ## Contrato de handoff
 
-Para Tech Lead e dev: necessidade, critérios/dependências e decisões reais. Receber dúvidas de QA; conflitos de visão retornam ao usuário.
+Para TL: issue, cenário, escopo/versão, critérios, dependências e perguntas. Para humano: alternativas concretas e efeito no escopo. Retornos de produto permanecem na mesma issue.
 
-Use o [formato comum](../templates/handoff.md) e os [gates do fluxo](../workflow.md).
-Este arquivo é uma definição, não um executor ou autorização.
+Use o [formato curto](../templates/handoff.md) na issue; não crie um histórico
+paralelo por demanda. Registro indisponível preserva rascunho/erro e ponto de retomada.

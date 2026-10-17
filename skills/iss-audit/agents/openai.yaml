@@ -1,0 +1,4 @@
+interface:
+  display_name: "Auditoria de demanda"
+  short_description: "Separar relatos, hipóteses e causas comprovadas"
+  default_prompt: "Use $iss-audit para qualificar esta demanda ou investigar suas hipóteses na fase atribuída."

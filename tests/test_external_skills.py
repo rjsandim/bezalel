@@ -44,6 +44,46 @@ class ExternalSkillStructureTests(unittest.TestCase):
         self.assertIn("Invalid essential metadata: security-audit", errors)
         self.assertTrue(any("Missing/outside link" in error for error in errors))
 
+    def test_imported_skills_accept_block_descriptions_without_rewriting_them(self):
+        for marker in ("|", "|-", ">", ">+"):
+            with self.subTest(marker=marker):
+                external = self.skill("humanizer")
+                external.write_text(
+                    "---\nname: humanizer\ndescription: " + marker
+                    + "\n  Preserve the original meaning.\n"
+                    + "  Edit only prose.\nlicense: MIT\n---\n## Upstream section\n"
+                )
+                original = external.read_bytes()
+                self.assertEqual(repository.validate_structure([external]), [])
+                self.assertEqual(external.read_bytes(), original)
+
+    def test_empty_block_or_scalar_description_is_not_valid_metadata(self):
+        for description in ("|\nlicense: MIT", ">-\n  # comment only", "''", '\"\"', " "):
+            with self.subTest(description=description):
+                external = self.skill("humanizer")
+                external.write_text(
+                    "---\nname: humanizer\ndescription: " + description
+                    + "\n---\n## Upstream section\n"
+                )
+                self.assertIn(
+                    "Invalid essential metadata: humanizer",
+                    repository.validate_structure([external]),
+                )
+
+    def test_new_format_exceptions_keep_identity_and_link_checks(self):
+        for name in (
+            "humanizer", "verification-planning", "agent-browser", "release",
+            "reflect", "github-resolution", "pr-bump", "pr-post-audit",
+        ):
+            with self.subTest(name=name):
+                external = self.skill(
+                    name, name="wrong-name",
+                    body="## Upstream section\n[Missing](references/missing.md)\n",
+                )
+                errors = repository.validate_structure([external])
+                self.assertIn("Invalid essential metadata: " + name, errors)
+                self.assertTrue(any("Missing/outside link" in error for error in errors))
+
 
 if __name__ == "__main__":
     unittest.main()
