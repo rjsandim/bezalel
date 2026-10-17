@@ -5,8 +5,9 @@ Este arquivo instrui contribuições no repositório. Papéis e contratos ficam 
 
 Bezalel é o fluxo de desenvolvimento; DreamTeam é a equipe de agentes; Company
 Flow é a ferramenta visual. Use esses nomes nas instruções e apresentações.
-Preserve caminhos e IDs técnicos existentes para manter compatibilidade com as
-instalações e a correspondência com a ferramenta.
+Preserve os IDs da correspondência com a ferramenta. Ao renomear arquivos,
+atualize catálogo, links, adaptadores e instruções gerenciadas; confira a migração
+das instalações existentes. O validador e o instalador usam os caminhos do catálogo.
 
 ## Escopo e estrutura
 
@@ -71,7 +72,7 @@ instalações e a correspondência com a ferramenta.
 - PR é etapa prevista de entrega, mas publicação/merge/deploy exigem autorização
   concreta da tarefa. Quando ausente, prepare rascunho local e registre a pendência.
 
-- Em mudanças que afetem o fluxo Bezalel, use a [fonte canônica](agents/company-flow-v2.md):
+- Em mudanças que afetem o fluxo Bezalel, use a [fonte canônica](agents/bezalel-v2.md):
   arquivos são a fonte canônica; releia a revisão visual, preserve alterações
   concorrentes e confira etapas/decisões/condições nos dois sentidos. Diferencie
   checker estrutural de revisão semântica e registre divergências preexistentes.
@@ -83,8 +84,8 @@ instalações e a correspondência com a ferramenta.
   na mesma tarefa, conforme o impacto. Não é necessário reescrever instruções
   que continuam válidas; não deixe mudança de comportamento sem documentação.
 - Use `AGENTS.md` como instrução curta de contribuição, README como guia de adoção,
-  [Bezalel v2](agents/company-flow-v2.md) como processo vigente e a
-  [relação por etapa](agents/company-flow-v2-skills.md) para selecionar skills.
+  [Bezalel v2](agents/bezalel-v2.md) como processo vigente e a
+  [relação por etapa](agents/bezalel-v2-skills.md) para selecionar skills.
   Referencie essas fontes; não copie seus procedimentos completos aqui.
 - Contratos, catálogo, templates, adaptadores e validadores seguem a v2. Atualize
   o conjunto quando uma responsabilidade mudar; não reintroduza percursos antigos,

@@ -23,4 +23,4 @@ caso contrário, não aplicável com razão. Registre compatibilidade, recupera�
 dependências e riscos. Após abrir/verificar todas as PRs, informe CI no estado
 observado e orientações manuais ao humano. Não habilite merge/deploy automático.
 Este rascunho não comprova abertura ou execução: siga o
-[processo de PR](../company-flow-v2.md#process-pr).
+[processo de PR](../bezalel-v2.md#process-pr).

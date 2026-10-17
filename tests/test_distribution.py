@@ -143,13 +143,13 @@ class DistributionTests(unittest.TestCase):
         path.parent.mkdir()
         sections = ['Objetivo e escopo', 'Entradas e pré-requisitos', 'Procedimento', 'Saídas', 'Validação', 'Limites operacionais']
         path.write_text('---\nname: new-skill\ndescription: Fixture\n---\n' + ''.join('## ' + s + '\nTexto.\n' for s in sections))
-        with (source / 'agents/company-flow-v2.md').open('a') as stream:
+        with (source / 'agents/bezalel-v2.md').open('a') as stream:
             stream.write('\nNota sintética de versão.\n')
         revision = commit(source)
         self.assertTrue(project.update(consumer, state))
         self.assertEqual(dist.git(base, 'rev-parse', 'HEAD').decode().strip(), revision)
         self.assertTrue((consumer / '.agents/skills/new-skill/SKILL.md').is_file())
-        self.assertIn('Nota sintética', (base / 'agents/company-flow-v2.md').read_text())
+        self.assertIn('Nota sintética', (base / 'agents/bezalel-v2.md').read_text())
         self.assertFalse(project.update(consumer, dist.read_json(consumer / project.STATE)))
 
     def test_update_refuses_dirty_source_without_fetch_or_discard(self):
@@ -158,6 +158,32 @@ class DistributionTests(unittest.TestCase):
         with self.assertRaisesRegex(dist.DistributionError, 'mudanças locais'):
             project.update(consumer, state)
         self.assertEqual((base / 'README.md').read_text(), 'Personalizado')
+
+    def test_published_revision_renames_flow_references_together(self):
+        source, consumer, base, state = self.connected()
+        flow = dist.read_json(source / 'agents/catalog.json')['company_flow']
+        renamed = {flow['source']: 'fluxo-renomeado.md', flow['skills']: 'metodos-renomeados.md'}
+        for path in [source / 'README.md', source / 'AGENTS.md', *(source / 'agents').rglob('*')]:
+            if path.is_file() and path.suffix in {'.md', '.json', '.toml'}:
+                content = path.read_text()
+                for old, new in renamed.items():
+                    content = content.replace(old, new)
+                path.write_text(content)
+        for old, new in renamed.items():
+            (source / 'agents' / old).rename(source / 'agents' / new)
+        revision = commit(source)
+        self.assertTrue(project.update(consumer, state))
+        for old, new in renamed.items():
+            self.assertFalse((base / 'agents' / old).exists())
+            self.assertTrue((base / 'agents' / new).is_file())
+            for name in ['AGENTS.md', 'CLAUDE.md']:
+                content = (consumer / name).read_text()
+                self.assertIn('agents/' + new, content)
+                self.assertNotIn('agents/' + old, content)
+        self.assertEqual(dist.read_json(consumer / project.STATE)['revision'], revision)
+        result = subprocess.run([sys.executable, '-B', str(base / 'scripts/project.py'),
+                                 'status', '--project', str(consumer)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_invalid_remote_does_not_move_source_or_installation(self):
         source, consumer, base, state = self.connected()
@@ -283,7 +309,7 @@ class DistributionTests(unittest.TestCase):
         self.assertNotIn('hooks/hooks.json', dist.files(package))
         self.assertIn('${CLAUDE_PLUGIN_ROOT}', (package / 'contracts/claude/bezalel-qa.md').read_text())
         self.assertFalse((package / 'agents').exists())
-        with (source / 'agents/company-flow-v2.md').open('a') as stream:
+        with (source / 'agents/bezalel-v2.md').open('a') as stream:
             stream.write('\nNova versão\n')
         v2 = plugin.build(source, self.root / 'plugin2')
         self.assertNotEqual(v1, v2)

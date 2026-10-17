@@ -57,19 +57,19 @@ uma PR não inicia deploy nem comprova que um ambiente pode ser removido.
 | [vps-deploy](skills/vps-deploy/SKILL.md) | Orientar operações de VPS com configuração por projeto | Markdown e validador Python |
 | [limpar-orbstack](skills/limpar-orbstack/SKILL.md) | Auditar e limpar ambientes explicitamente autorizados | Markdown e roteiros de preservação |
 
-O [inventário de todas as skills analisadas](agents/company-flow-skills-inventario.md)
-e a [relação por processo e etapa](agents/company-flow-v2-skills.md) registram a
+O [inventário de todas as skills analisadas](agents/bezalel-skills-inventario.md)
+e a [relação por processo e etapa](agents/bezalel-v2-skills.md) registram a
 seleção de 11 skills em 24 etapas do fluxo Bezalel v2. As cópias ficam somente nesta árvore;
 os agentes referenciam os métodos pertinentes sem instalar ferramentas ou alterar
 as instalações globais.
-As cinco novas skills manuais têm [condições de uso próprias](agents/company-flow-skills-uso-manual.md)
+As cinco novas skills manuais têm [condições de uso próprias](agents/bezalel-skills-uso-manual.md)
 e metadado de invocação explícita; não são chamadas pelas etapas do fluxo.
 
 ## DreamTeam e o fluxo Bezalel v2
 
 A [DreamTeam](agents/README.md) contém contratos e adaptadores para Product
 Manager, Tech Lead, DevOps, desenvolvedores fullstack/backend/web/mobile, QA e
-AppSec. O aprovador humano é externo. Os [20 processos da v2](agents/company-flow-v2.md)
+AppSec. O aprovador humano é externo. Os [20 processos da v2](agents/bezalel-v2.md)
 são distribuídos por responsabilidade no [catálogo](agents/catalog.json); não há
 um agente para cada etapa. O TL coordena e revisa; um dev assume a integração
 inteira. QA e AppSec verificam independentemente dos autores.
@@ -157,6 +157,20 @@ não reescrevem o `SKILL.md`. ENV, VPS e limpar-orbstack também preservam sua p
 explícita existente, além das cinco skills manuais fora do fluxo.
 
 ### Atualizar e iniciar uma sessão
+
+**Instalações anteriores à renomeação dos arquivos do fluxo:** o validador antigo
+exigia um nome fixo e recusa essa atualização. Use o atualizador de uma cópia nova
+do Bezalel uma vez, sem trocar manualmente a base instalada:
+
+```sh
+git clone --branch master --single-branch https://github.com/rjsandim/bezalel.git /caminho/bezalel-atualizador
+python3 -B /caminho/bezalel-atualizador/scripts/project.py update --project /caminho/do/projeto
+```
+
+Escolha uma pasta nova para o clone, fora da base do projeto. Esse comando mantém
+as verificações de customizações, valida a nova árvore e atualiza o registro e as
+referências juntos. Depois dessa migração, use os comandos abaixo normalmente.
+Plugins nativos recebem os arquivos renomeados pela atualização do plugin.
 
 Para receber a versão publicada **antes** de abrir o aplicativo:
 

@@ -11,7 +11,7 @@ Preparar, comprovar e recuperar o isolamento do ambiente de investigação e des
 
 Processos sob sua responsabilidade:
 
-- [env](../company-flow-v2.md#process-env)
+- [env](../bezalel-v2.md#process-env)
 
 ## Entradas
 
@@ -29,7 +29,7 @@ Skill env a partir de sua pasta carregada; Git/worktree e Docker no contexto aut
 
 Não usa produção como teste, não amplia infraestrutura compartilhada por inferência e não remove recursos preexistentes. Não executa deploy/limpeza ao terminar a PR. vps-deploy e limpar-orbstack permanecem disponíveis para tarefas próprias fora deste papel no fluxo.
 
-Siga R1–R10 e as condições do [fluxo vigente](../company-flow-v2.md). O contrato
+Siga R1–R10 e as condições do [fluxo vigente](../bezalel-v2.md). O contrato
 orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto
@@ -40,7 +40,7 @@ Cada dimensão está comprovada ou justificada como não aplicável; ausência d
 
 [env](../../skills/env/SKILL.md).
 
-Use somente o modo e os pré-requisitos da [etapa atribuída](../company-flow-v2-skills.md).
+Use somente o modo e os pré-requisitos da [etapa atribuída](../bezalel-v2-skills.md).
 Reutilize resultados válidos; não reaplique uma skill a cada handoff. As skills
 manuais não são uma continuação automática. Não altere a skill para contornar
 um limite do papel.

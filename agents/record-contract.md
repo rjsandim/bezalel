@@ -141,5 +141,5 @@ não preencha sucesso para converter registros antigos.
 
 Os checks são estruturais. A autenticação humana, independência real, veracidade
 da evidência, adequação da cobertura e conteúdo do Excel dependem do executor e
-do operador. O fluxo completo está em [Bezalel v2](company-flow-v2.md);
+do operador. O fluxo completo está em [Bezalel v2](bezalel-v2.md);
 este esquema não é um runtime, agendador, autorização ou substituto do fluxo.
