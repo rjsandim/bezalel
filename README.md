@@ -290,6 +290,9 @@ permite verificar uma cópia local sem fetch. `--apply` grava arquivos/registro 
 sem commit, push ou PR. O workflow precisa de Actions habilitado, escrita de conteúdo
 e permissão para criar PRs; proteções da organização/branch continuam valendo.
 Uma falha de autenticação, permissão ou publicação é falha, não atualização concluída.
+As operações Git dos scripts de distribuição desativam a manutenção automática
+somente durante cada comando, evitando gravações posteriores em diretórios
+temporários; a configuração persistente do Git é preservada.
 
 ### Suporte e validação
 

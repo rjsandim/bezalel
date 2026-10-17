@@ -92,6 +92,9 @@ Este arquivo instrui contribuições no repositório. Papéis e contratos ficam 
   adaptadores, hooks e blocos de instrução por projeto. Preserve conteúdo próprio,
   contexto e estado operacional. Customizações e colisões interrompem a atualização;
   não as adote silenciosamente. Use clone estável para ENV e não siga links externos.
+  Operações Git da distribuição não devem iniciar manutenção automática que possa
+  continuar escrevendo após o retorno; aplique a restrição por comando, sem alterar
+  a configuração persistente do usuário ou do projeto.
 - `scripts/plugin.py` gera o pacote nativo: contratos em `contracts/`, adaptadores
   Claude explicitamente listados e TOMLs Codex conectados ao projeto. Não coloque
   contratos/humano numa pasta descoberta como agentes. Skills originais permanecem

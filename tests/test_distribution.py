@@ -175,6 +175,27 @@ class DistributionTests(unittest.TestCase):
             project.update(consumer, state)
         self.assertEqual(dist.git(base, 'rev-parse', 'HEAD').decode().strip(), state['revision'])
 
+    def test_git_operations_do_not_start_automatic_maintenance(self):
+        consumer = self.consumer()
+        settings = {
+            'maintenance.auto': 'true',
+            'maintenance.autoDetach': 'false',
+            'maintenance.gc.enabled': 'false',
+            'maintenance.commit-graph.enabled': 'true',
+            'maintenance.commit-graph.auto': '-1',
+        }
+        for key, value in settings.items():
+            dist.git(consumer, 'config', key, value)
+        config_before = (consumer / '.git/config').read_bytes()
+        trace = self.root / 'git-trace.json'
+        with patch.dict(os.environ, {'GIT_TRACE2_EVENT': str(trace)}):
+            commit(consumer)
+        events = [json.loads(line) for line in trace.read_text().splitlines()]
+        maintenance = [event for event in events if event.get('event') == 'child_start'
+                       and any(arg in {'maintenance', 'gc'} for arg in event.get('argv', []))]
+        self.assertEqual(maintenance, [], 'A operação iniciou manutenção automática do Git.')
+        self.assertEqual((consumer / '.git/config').read_bytes(), config_before)
+
     def test_write_failure_rolls_back_managed_files(self):
         consumer = self.consumer()
         original = project.atomic_write
