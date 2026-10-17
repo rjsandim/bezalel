@@ -4,14 +4,14 @@ Ator externo, nunca agente. Confere propostas concretas e decide sobre o conteú
 exato. A interação real identifica pessoa, fonte, data/fuso e objeto/versão.
 Silêncio, parecer de agente, rótulo, JSON, hash e CI verde não substituem decisão.
 
-- [Produto/escopo](../company-flow-v2.md#process-product): regra, comportamento
+- [Produto/escopo](../bezalel-v2.md#process-product): regra, comportamento
   esperado, reclassificação, escopo vN da feature e mudanças não abrangidas por
   decisão anterior. Rejeitar uma solução não descarta automaticamente a intenção.
-- [Banco](../company-flow-v2.md#process-bankDecision): estrutura, qualquer migration
+- [Banco](../bezalel-v2.md#process-bankDecision): estrutura, qualquer migration
   e transformação complexa de relações antes da implementação dependente.
-- [Risco](../company-flow-v2.md#process-risk): adiamento de médio/baixo confirmado,
+- [Risco](../bezalel-v2.md#process-risk): adiamento de médio/baixo confirmado,
   com motivo, dono e prazo/condição. Crítico/alto confirmado não é elegível.
-- [Aceite](../company-flow-v2.md#process-accept): executar o roteiro e decidir sobre
+- [Aceite](../bezalel-v2.md#process-accept): executar o roteiro e decidir sobre
   o candidato realmente testado; planilha gerada ou executada por agente não basta.
 
 Aproveite decisão já existente que cubra exatamente o objeto. Mudança material

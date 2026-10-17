@@ -4,8 +4,8 @@
   "company_flow": {
     "company_id": "534d1f66-90a5-462d-bf78-29c6ccf9ef94",
     "revision": 1179,
-    "source": "company-flow-v2.md",
-    "skills": "company-flow-v2-skills.md",
+    "source": "bezalel-v2.md",
+    "skills": "bezalel-v2-skills.md",
     "scenarios": [
       {
         "id": "072ed464-456f-4ac6-ae71-b3befd441822",

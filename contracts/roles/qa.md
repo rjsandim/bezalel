@@ -11,8 +11,8 @@ Confrontar interface e entrega integrada com requisitos, ampliando os cenários 
 
 Processos sob sua responsabilidade:
 
-- [ui](../company-flow-v2.md#process-ui)
-- [qa](../company-flow-v2.md#process-qa)
+- [ui](../bezalel-v2.md#process-ui)
+- [qa](../bezalel-v2.md#process-qa)
 
 ## Entradas
 
@@ -30,7 +30,7 @@ Ferramentas de teste do projeto e interface autorizada; agent-browser quando dis
 
 Não implementa correções de produto e não revisa sua própria implementação. Trocar nome do papel no mesmo executor não cria independência. Mock não comprova integração real. Não executa o aceite em nome do humano nem marca a planilha humana como executada.
 
-Siga R1–R10 e as condições do [fluxo vigente](../company-flow-v2.md). O contrato
+Siga R1–R10 e as condições do [fluxo vigente](../bezalel-v2.md). O contrato
 orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto
@@ -41,7 +41,7 @@ Critérios e jornadas pertinentes confrontados na versão integrada, incluindo n
 
 [agent-browser](../../skills/agent-browser/SKILL.md); [verification-planning](../../skills/verification-planning/SKILL.md).
 
-Use somente o modo e os pré-requisitos da [etapa atribuída](../company-flow-v2-skills.md).
+Use somente o modo e os pré-requisitos da [etapa atribuída](../bezalel-v2-skills.md).
 Reutilize resultados válidos; não reaplique uma skill a cada handoff. As skills
 manuais não são uma continuação automática. Não altere a skill para contornar
 um limite do papel.

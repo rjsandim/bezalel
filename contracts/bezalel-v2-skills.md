@@ -2,11 +2,11 @@
 
 As **18 skills estão presentes no Bezalel**. Destas, **11 orientam métodos em 24 das 60 etapas**, distribuídas por 16 dos 20 processos. As demais etapas mantêm pré-condições, encaminhamentos e decisões, reutilizando o resultado do método já aplicado. Os quatro processos humanos não recebem execução por skill.
 
-O fluxo define o que entregar, quem responde, quando avançar e como retomar. A skill reúne o procedimento técnico. Uma mesma auditoria/plano pode atravessar várias etapas sem ser reiniciada. As descrições atuais estão na [fonte canônica](company-flow-v2.md); o [inventário](company-flow-skills-inventario.md) registra todas as origens e decisões.
+O fluxo define o que entregar, quem responde, quando avançar e como retomar. A skill reúne o procedimento técnico. Uma mesma auditoria/plano pode atravessar várias etapas sem ser reiniciada. As descrições atuais estão na [fonte canônica](bezalel-v2.md); o [inventário](bezalel-skills-inventario.md) registra todas as origens e decisões.
 
 ## Como aplicar
 
-Use a [orientação comum](company-flow-v2.md#seleção-de-skills-nas-etapas) e as
+Use a [orientação comum](bezalel-v2.md#seleção-de-skills-nas-etapas) e as
 condições da etapa. A tabela abaixo é um índice; o procedimento vigente fica no
 fluxo e o método na skill. Os [contratos de agentes](README.md) definem os limites
 do executor. As cinco skills manuais, vps-deploy e limpar-orbstack ficam fora do fluxo.

@@ -95,7 +95,7 @@ aprovação de tarefas futuras nem certificam decisões humanas.
 ## Uso manual fora do fluxo
 
 As cinco novas skills manuais e suas condições estão no
-[guia de uso manual](company-flow-skills-uso-manual.md). Não são uma continuação
+[guia de uso manual](bezalel-skills-uso-manual.md). Não são uma continuação
 automática após a PR. A política `allow_implicit_invocation: false` foi registrada
 nos adaptadores; sua interpretação no aplicativo não foi certificada.
 
@@ -130,7 +130,7 @@ Ainda não há skill portátil específica de DB Reviewer/modelagem e migrations
 nesses conjuntos. Os processos e ferramentas de verificação continuam exigidos;
 uma skill opcional indisponível não dispensa evidência obrigatória.
 
-A [relação por processo e etapa](company-flow-v2-skills.md) registra as 11 skills
+A [relação por processo e etapa](bezalel-v2-skills.md) registra as 11 skills
 indicadas em 24 etapas de 16 processos. Os 20 processos, 60 etapas, responsáveis,
 decisões e caminhos permanecem. Os [contratos e adaptadores](README.md) usam essa
 seleção; as skills não foram alteradas na conversão. Não houve execução de produto,

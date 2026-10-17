@@ -3,8 +3,8 @@
 DreamTeam é a equipe de nove agentes que atua no fluxo de desenvolvimento
 **Bezalel v2**. Company Flow é a ferramenta usada para representar o fluxo visualmente.
 
-Os agentes definem papéis; o [fluxo](company-flow-v2.md) define processos e
-condições; as [skills](company-flow-v2-skills.md) descrevem métodos. O contexto de
+Os agentes definem papéis; o [fluxo](bezalel-v2.md) define processos e
+condições; as [skills](bezalel-v2-skills.md) descrevem métodos. O contexto de
 arquitetura e negócio pertence ao projeto consumidor em `.bezalel/project.json`.
 O [catálogo](catalog.json) relaciona nove agentes e o aprovador humano externo aos
 20 processos da revisão 1179, sem criar um agente por etapa.
@@ -57,8 +57,8 @@ instruções de carregamento. São adaptadores curtos dos contratos, sem modelo 
 credenciais ou alteração de permissões. Instale-os conforme o
 [README principal](../README.md#como-adotar-o-bezalel-em-um-projeto).
 
-Os nomes técnicos `bezalel-<id>` e os caminhos `company-flow-*` são preservados
-para manter as instalações existentes. Os campos `company_flow` e
+Os agentes usam o namespace técnico `bezalel-<id>` do pacote. Os documentos do fluxo
+usam o prefixo `bezalel-`; seus caminhos ficam no catálogo. Os campos `company_flow` e
 `company_flow_role_id` do catálogo mantêm a correspondência com a ferramenta
 visual; a nomenclatura do fluxo é Bezalel e a da equipe é DreamTeam.
 
