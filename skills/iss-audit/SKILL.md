@@ -23,7 +23,7 @@ Escolha o modo pelo responsável e pela fase:
   alternativas ao TL. Experimentos ficam separados da entrega; a auditoria não
   autoriza implementar a solução definitiva.
 
-No Company Flow, não existe um novo cargo de “auditor de issues”. Use a mesma
+No fluxo Bezalel, não existe um novo cargo de “auditor de issues”. Use a mesma
 issue/história e os mesmos responsáveis, fases e destinos já definidos.
 
 ## Entradas e pré-requisitos

@@ -86,6 +86,7 @@ def desired(project, base, platforms, automatic, contract_dir='agents'):
                 'kind': 'file', 'content': adapter.read_text()}
     instructions = '\n'.join([
         '## Uso do Bezalel neste projeto', '',
+        '- Bezalel é o fluxo de desenvolvimento; DreamTeam é a equipe de agentes.',
         '- Leia `.bezalel/project.json` e seus documentos de arquitetura e negócio.',
         '- Use `.bezalel/base/agents/README.md`, o contrato do papel atribuído e',
         '  `.bezalel/base/agents/company-flow-v2.md`; selecione skills pela relação',
@@ -96,7 +97,7 @@ def desired(project, base, platforms, automatic, contract_dir='agents'):
         '- Scripts e referências partem da pasta real da skill carregada.',
         '- Ao mudar comandos, estrutura ou regras do projeto, atualize seu README e',
         '  AGENTS.md/CLAUDE.md. Preserve as instruções próprias fora deste bloco.',
-        '- Esta instalação não concede acesso nem inicia o Company Flow automaticamente.',
+        '- Esta instalação não concede acesso nem inicia o fluxo Bezalel automaticamente.',
     ])
     instructions = instructions.replace('.bezalel/base/agents/', '.bezalel/base/' + contract_dir + '/')
     for name in ['AGENTS.md', *(['CLAUDE.md'] if 'claude' in platforms else [])]:

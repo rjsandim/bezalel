@@ -3,9 +3,14 @@
 Este arquivo instrui contribuições no repositório. Papéis e contratos ficam em
 `agents/`; são contratos e adaptadores de agentes, sem runtime próprio de autorização.
 
+Bezalel é o fluxo de desenvolvimento; DreamTeam é a equipe de agentes; Company
+Flow é a ferramenta visual. Use esses nomes nas instruções e apresentações.
+Preserve caminhos e IDs técnicos existentes para manter compatibilidade com as
+instalações e a correspondência com a ferramenta.
+
 ## Escopo e estrutura
 
-- Trabalhe nesta árvore; não edite as instalações originais fora do Bezalel.
+- Trabalhe nesta árvore; não edite as instalações originais fora do fluxo Bezalel.
 - Cada pasta em `skills/` contém `SKILL.md` com `name`, `description` e, nesta
   ordem: Objetivo e escopo; Entradas e pré-requisitos; Procedimento; Saídas;
   Validação; Limites operacionais. Use português nas instruções e interfaces.
@@ -17,14 +22,14 @@ Este arquivo instrui contribuições no repositório. Papéis e contratos ficam 
   atualizações. A seleção inicial fica no README/inventário; a revisão vigente por
   skill fica em `.bezalel/upstream.json`. Não adapte seu conteúdo.
   Metadados essenciais, inclusive descrição YAML em bloco, e links locais
-  continuam sujeitos à validação. A seleção no Company Flow não autoriza
+  continuam sujeitos à validação. A seleção no fluxo Bezalel não autoriza
   adaptar essas cópias nem executar ações fora do escopo de cada responsável.
   Somente os adaptadores de invocação das cinco skills manuais podem acrescentar
   `allow_implicit_invocation: false`, conforme solicitado; o conteúdo original
   permanece intacto. `pr-audit` e `iss-audit` são variantes cuja adaptação foi
   autorizada, seguem o formato comum e registram origem/motivos em suas referências.
 - `release`, `reflect`, `github-resolution`, `pr-bump` e `pr-post-audit` ficam
-  fora do Company Flow e são para chamada manual explícita. Relatório de auditoria
+  fora do fluxo Bezalel e são para chamada manual explícita. Relatório de auditoria
   não é aprovação humana; procedimentos importados não ampliam autorização nem
   substituem regras do projeto. Confira stack, versão final e comandos reais antes
   de usar exemplos da origem. Limpeza não pode usar força nem atingir recursos
@@ -42,7 +47,7 @@ Este arquivo instrui contribuições no repositório. Papéis e contratos ficam 
 - Agente define papel/processo; `.bezalel/project.json` aponta instruções de
   arquitetura/negócio do projeto; skills definem procedimentos. Não misture as três
   responsabilidades. A instalação e distribuição autorizadas disponibilizam
-  arquivos; não criam runtime de execução ou autorização do Company Flow.
+  arquivos; não criam runtime de execução ou autorização do fluxo Bezalel.
 - Papéis em `agents/roles/` constam do catálogo e descrevem objetivo, entradas,
   saídas, ferramentas, limites, pronto, seleção de skills e handoff. Não alegue
   que um Markdown delega, executa ferramentas ou impõe gates.
@@ -66,7 +71,7 @@ Este arquivo instrui contribuições no repositório. Papéis e contratos ficam 
 - PR é etapa prevista de entrega, mas publicação/merge/deploy exigem autorização
   concreta da tarefa. Quando ausente, prepare rascunho local e registre a pendência.
 
-- Em mudanças que afetem o Company Flow, use a [fonte canônica](agents/company-flow-v2.md):
+- Em mudanças que afetem o fluxo Bezalel, use a [fonte canônica](agents/company-flow-v2.md):
   arquivos são a fonte canônica; releia a revisão visual, preserve alterações
   concorrentes e confira etapas/decisões/condições nos dois sentidos. Diferencie
   checker estrutural de revisão semântica e registre divergências preexistentes.
@@ -78,7 +83,7 @@ Este arquivo instrui contribuições no repositório. Papéis e contratos ficam 
   na mesma tarefa, conforme o impacto. Não é necessário reescrever instruções
   que continuam válidas; não deixe mudança de comportamento sem documentação.
 - Use `AGENTS.md` como instrução curta de contribuição, README como guia de adoção,
-  [Company Flow v2](agents/company-flow-v2.md) como processo vigente e a
+  [Bezalel v2](agents/company-flow-v2.md) como processo vigente e a
   [relação por etapa](agents/company-flow-v2-skills.md) para selecionar skills.
   Referencie essas fontes; não copie seus procedimentos completos aqui.
 - Contratos, catálogo, templates, adaptadores e validadores seguem a v2. Atualize
