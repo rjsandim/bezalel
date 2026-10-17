@@ -78,12 +78,12 @@ def validate_agents():
     expected_roles = {"produto", "coordenador", "infraestrutura", "dev-fullstack", "backend", "frontend-web", "mobile", "qa", "appsec"}
     try:
         catalog = read_json(ROOT / "agents/catalog.json")
-        require(isinstance(catalog, dict) and set(catalog) == {"schema_version", "execution", "company_flow", "roles", "external_actors"}, "Catálogo v2 inválido.")
+        require(isinstance(catalog, dict) and set(catalog) == {"schema_version", "execution", "company_flow", "roles", "external_actors"}, "Catálogo de agentes inválido.")
         require(catalog["schema_version"] == 2 and catalog["execution"] == "agent_contracts", "Catálogo não pode declarar runtime implementado.")
-        require(isinstance(catalog["roles"], dict) and set(catalog["roles"]) == expected_roles, "Catálogo deve conter os nove agentes ativos da v2, incluindo AppSec.")
+        require(isinstance(catalog["roles"], dict) and set(catalog["roles"]) == expected_roles, "Catálogo deve conter os nove agentes ativos do fluxo, incluindo AppSec.")
         flow = catalog["company_flow"]
         source = local_file(ROOT / "agents", flow["source"], "Fluxo").read_text()
-        require(re.findall(r"^### (R\d+) ", source, re.M) == ["R" + str(n) for n in range(1, 11)], "Preserve as dez regras comuns da v2.")
+        require(re.findall(r"^### (R\d+) ", source, re.M) == ["R" + str(n) for n in range(1, 11)], "Preserve as dez regras comuns do fluxo.")
         local_file(ROOT / "agents", flow["skills"], "Relação de skills")
         sections = {}
         for block in re.split(r"^### ", source, flags=re.M):
@@ -91,9 +91,9 @@ def validate_agents():
             if match:
                 require(match[1] not in sections, "Processo duplicado no fluxo.")
                 procedure = block.split("**Pronto:**", 1)[0]
-                require(re.findall(r"^([123])\. \*\*", procedure, re.M) == ["1", "2", "3"], "Cada processo v2 deve preservar suas três etapas.")
+                require(re.findall(r"^([123])\. \*\*", procedure, re.M) == ["1", "2", "3"], "Cada processo deve preservar suas três etapas.")
                 sections[match[1]] = (match[2], procedure)
-        require(len(sections) == 20, "O fluxo deve cobrir os 20 processos da v2.")
+        require(len(sections) == 20, "O fluxo deve cobrir os 20 processos previstos.")
         scenarios = flow["scenarios"]
         require(isinstance(scenarios, list) and len(scenarios) == 3 and len({x["id"] for x in scenarios}) == 3, "Declare três cenários distintos.")
         require(text(flow["company_id"]) and type(flow["revision"]) is int, "Declare empresa e revisão visual conferidas.")
@@ -129,16 +129,18 @@ def validate_agents():
             require(set(entry["skills"]) == required_skills, "Seleção de skills do papel diverge das etapas.")
             require(all('../../skills/' + skill + '/SKILL.md' in content for skill in required_skills), "Skill ausente do contrato.")
             adapter_path = local_file(ROOT / "agents", entry["codex"], "Adaptador Codex")
-            require(adapter_path.parent == ROOT / "agents/codex", "Adaptador fora da pasta prevista.")
+            require(adapter_path.parent == ROOT / "agents/codex" and adapter_path.suffix == '.toml', "Adaptador fora da pasta prevista.")
+            require(re.fullmatch('[a-z0-9-]+', adapter_path.stem) is not None and adapter_path not in adapters, "Nome de adaptador inválido ou duplicado.")
             adapters.add(adapter_path)
             adapter = tomllib.loads(adapter_path.read_text())
-            require(set(adapter) == {"name", "description", "developer_instructions"} and adapter["name"] == 'bezalel-' + role and text(adapter["description"]), "Adaptador inválido ou amplia configurações não previstas.")
+            require(set(adapter) == {"name", "description", "developer_instructions"} and adapter["name"] == adapter_path.stem and text(adapter["description"]), "Adaptador inválido ou amplia configurações não previstas.")
             require('agents/' + entry["file"] in adapter["developer_instructions"] and 'agents/' + flow["source"] in adapter["developer_instructions"], "Adaptador precisa carregar contrato e fluxo vigentes.")
             claude_path = local_file(ROOT / "agents", entry["claude"], "Adaptador Claude")
-            require(claude_path.parent == ROOT / 'agents/claude', "Adaptador Claude fora da pasta prevista.")
+            require(claude_path.parent == ROOT / 'agents/claude' and claude_path.suffix == '.md', "Adaptador Claude fora da pasta prevista.")
+            require(claude_path.stem == adapter_path.stem and claude_path not in claude_adapters, "Identidade do agente deve coincidir entre as plataformas, sem duplicatas.")
             claude_adapters.add(claude_path)
             claude = claude_path.read_text()
-            require(claude.startswith('---\nname: bezalel-' + role + '\ndescription: ') and claude.count('\n---\n') == 1, "Adaptador Claude inválido.")
+            require(claude.startswith('---\nname: ' + claude_path.stem + '\ndescription: ') and claude.count('\n---\n') == 1, "Adaptador Claude inválido.")
             front, body = claude[4:].split('\n---\n', 1)
             require(len(front.splitlines()) == 2 and text(front.splitlines()[1].removeprefix('description: ').strip('"')), "Adaptador Claude amplia configurações não previstas.")
             require('agents/' + entry['file'] in body and 'agents/' + flow['source'] in body, "Adaptador Claude deve carregar contrato e fluxo.")

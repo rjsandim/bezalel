@@ -1,10 +1,10 @@
 # Bezalel
 
-**Bezalel** é o fluxo de desenvolvimento para bugs, melhorias e features.
-**DreamTeam** é a equipe de nove agentes que atua nesse fluxo.
+**Bezalel** é o plugin completo de agentes e skills.
+**DreamTeam** é sua equipe de nove agentes para corrigir bugs e desenvolver melhorias e features.
 **Company Flow** é a ferramenta visual usada para modelar e revisar seus processos.
 
-Este pacote reúne o fluxo Bezalel v2, a DreamTeam e 18 skills, incluindo nove
+O plugin reúne a DreamTeam, seu fluxo de desenvolvimento e 18 skills, incluindo nove
 importações com conteúdo preservado e duas auditorias adaptadas.
 Há contratos portáteis, adaptadores para Codex e Claude Code, instalação por
 projeto, pacote de plugin e validadores locais.
@@ -14,11 +14,11 @@ hospedado, monitoramento ou runtime próprio que aplique autorizações.
 ## Inventário de skills
 
 As **18 skills disponíveis** estão organizadas pelo uso: **11 indicadas no
-fluxo Bezalel v2**, **cinco reservadas à chamada manual** e **duas operacionais
+fluxo da DreamTeam**, **cinco reservadas à chamada manual** e **duas operacionais
 fora do fluxo**. A indicação no fluxo depende da etapa, do escopo e dos
 pré-requisitos; não significa executar todas em cada demanda.
 
-### Indicadas no fluxo Bezalel v2
+### Indicadas no fluxo da DreamTeam
 
 | Skill | Finalidade | Implementação |
 |---|---|---|
@@ -36,14 +36,14 @@ pré-requisitos; não significa executar todas em cada demanda.
 
 ### Reservadas à chamada manual
 
-Estas cinco skills ficam fora das etapas do fluxo Bezalel e têm metadados de
+Estas cinco skills ficam fora das etapas do fluxo da DreamTeam e têm metadados de
 invocação explícita. Não são iniciadas ao concluir uma auditoria ou entregar uma PR.
 
 | Skill | Finalidade | Implementação |
 |---|---|---|
-| [release](skills/release/SKILL.md) | Preparar e publicar versões quando solicitado | Conteúdo original; chamada manual, fora do fluxo Bezalel |
-| [reflect](skills/reflect/SKILL.md) | Avaliar padrões recorrentes e propor melhorias | Conteúdo original; chamada manual, fora do fluxo Bezalel |
-| [github-resolution](skills/github-resolution/SKILL.md) | Executar resoluções auditadas e autorizadas | Conteúdo original; chamada manual, fora do fluxo Bezalel |
+| [release](skills/release/SKILL.md) | Preparar e publicar versões quando solicitado | Conteúdo original; chamada manual, fora do fluxo da DreamTeam |
+| [reflect](skills/reflect/SKILL.md) | Avaliar padrões recorrentes e propor melhorias | Conteúdo original; chamada manual, fora do fluxo da DreamTeam |
+| [github-resolution](skills/github-resolution/SKILL.md) | Executar resoluções auditadas e autorizadas | Conteúdo original; chamada manual, fora do fluxo da DreamTeam |
 | [pr-bump](skills/pr-bump/SKILL.md) | Consolidar atualizações de dependências de bots | Conteúdo original com exemplos Rails; chamada manual |
 | [pr-post-audit](skills/pr-post-audit/SKILL.md) | Auditar a composição de mudanças antes de release/deploy | Conteúdo original; apoio manual de release/github-resolution |
 
@@ -57,19 +57,19 @@ uma PR não inicia deploy nem comprova que um ambiente pode ser removido.
 | [vps-deploy](skills/vps-deploy/SKILL.md) | Orientar operações de VPS com configuração por projeto | Markdown e validador Python |
 | [limpar-orbstack](skills/limpar-orbstack/SKILL.md) | Auditar e limpar ambientes explicitamente autorizados | Markdown e roteiros de preservação |
 
-O [inventário de todas as skills analisadas](agents/bezalel-skills-inventario.md)
-e a [relação por processo e etapa](agents/bezalel-v2-skills.md) registram a
-seleção de 11 skills em 24 etapas do fluxo Bezalel v2. As cópias ficam somente nesta árvore;
+O [inventário de todas as skills analisadas](agents/skills-inventario.md)
+e a [relação por processo e etapa](agents/dream-team-skills.md) registram a
+seleção de 11 skills em 24 etapas do fluxo da DreamTeam. As cópias ficam somente nesta árvore;
 os agentes referenciam os métodos pertinentes sem instalar ferramentas ou alterar
 as instalações globais.
-As cinco novas skills manuais têm [condições de uso próprias](agents/bezalel-skills-uso-manual.md)
+As cinco novas skills manuais têm [condições de uso próprias](agents/skills-uso-manual.md)
 e metadado de invocação explícita; não são chamadas pelas etapas do fluxo.
 
-## DreamTeam e o fluxo Bezalel v2
+## DreamTeam e seu fluxo de desenvolvimento
 
 A [DreamTeam](agents/README.md) contém contratos e adaptadores para Product
 Manager, Tech Lead, DevOps, desenvolvedores fullstack/backend/web/mobile, QA e
-AppSec. O aprovador humano é externo. Os [20 processos da v2](agents/bezalel-v2.md)
+AppSec. O aprovador humano é externo. Os [20 processos do fluxo](agents/dream-team.md)
 são distribuídos por responsabilidade no [catálogo](agents/catalog.json); não há
 um agente para cada etapa. O TL coordena e revisa; um dev assume a integração
 inteira. QA e AppSec verificam independentemente dos autores.
@@ -82,7 +82,7 @@ antes da implementação dependente. Merge e deploy permanecem manuais.
 
 A issue é a fonte da demanda. Os [modelos](agents/templates/user-story.md) ajudam
 na redação de requisitos, proposta e handoff, sem exigir MD paralelo por tarefa.
-O [registro v2](agents/record-contract.md) é um snapshot local opcional para
+O [registro](agents/record-contract.md) é um snapshot local opcional para
 conferência: investigação, UI/banco, candidato, revisões, risco, aceite e PRs.
 O CLI só valida declarações; não autentica decisões, executa comandos ou consulta
 o GitHub. Passar no checker não prova a veracidade das evidências.
@@ -119,7 +119,7 @@ limites do responsável nem a decisão humana.
 
 ## Como adotar o Bezalel em um projeto
 
-A integração direta é a opção recomendada para o fluxo Bezalel e para projetos
+A integração direta é a opção recomendada para o fluxo da DreamTeam e para projetos
 que usam ENV: mantém a base em um caminho estável e preserva seu estado operacional.
 Requer Git, Python 3.11+, macOS/Linux e os aplicativos já instalados. Não instala
 CLIs, Docker, credenciais ou serviços. Use uma única modalidade por projeto.
@@ -158,8 +158,8 @@ explícita existente, além das cinco skills manuais fora do fluxo.
 
 ### Atualizar e iniciar uma sessão
 
-**Instalações anteriores à renomeação dos arquivos do fluxo:** o validador antigo
-exigia um nome fixo e recusa essa atualização. Use o atualizador de uma cópia nova
+**Instalações anteriores à renomeação dos arquivos e agentes:** o validador antigo
+exigia nomes fixos e recusa essa atualização. Use o atualizador de uma cópia nova
 do Bezalel uma vez, sem trocar manualmente a base instalada:
 
 ```sh
@@ -169,7 +169,9 @@ python3 -B /caminho/bezalel-atualizador/scripts/project.py update --project /cam
 
 Escolha uma pasta nova para o clone, fora da base do projeto. Esse comando mantém
 as verificações de customizações, valida a nova árvore e atualiza o registro e as
-referências juntos. Depois dessa migração, use os comandos abaixo normalmente.
+referências juntos. Os agentes passam a usar `dream-team-<id>`; os arquivos antigos
+gerenciados são removidos somente se não houver customizações. Depois dessa
+migração, use os comandos abaixo normalmente.
 Plugins nativos recebem os arquivos renomeados pela atualização do plugin.
 
 Para receber a versão publicada **antes** de abrir o aplicativo:
@@ -428,7 +430,7 @@ Codex, não consulta banco nem executa os casos. Fórmulas exigem recálculo em 
 aplicativo de planilhas. O gerador recusa sobrescrever arquivos existentes.
 
 O campo `manual_test.path` da entrega aponta para o roteiro local, conforme o
-[contrato v2](agents/record-contract.md). Excel é obrigatório em melhoria/feature;
+[contrato](agents/record-contract.md). Excel é obrigatório em melhoria/feature;
 no bug, o formato depende da necessidade. A skill produz o artefato; QA, revisão
 e decisão humana continuam no fluxo.
 

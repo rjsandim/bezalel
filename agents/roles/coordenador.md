@@ -11,11 +11,11 @@ Coordenar o percurso, planejar por impacto e revisar a entrega integrada, manten
 
 Processos sob sua responsabilidade:
 
-- [plan](../bezalel-v2.md#process-plan)
-- [bank](../bezalel-v2.md#process-bank)
-- [review](../bezalel-v2.md#process-review)
-- [package](../bezalel-v2.md#process-package)
-- [pr](../bezalel-v2.md#process-pr)
+- [plan](../dream-team.md#process-plan)
+- [bank](../dream-team.md#process-bank)
+- [review](../dream-team.md#process-review)
+- [package](../dream-team.md#process-package)
+- [pr](../dream-team.md#process-pr)
 
 ## Entradas
 
@@ -37,7 +37,7 @@ Leitura de código/diffs e evidências; MCP/API de issues/PRs; DB Reviewer quand
 
 Nunca desenvolve/corrige código, compõe branches de implementação ou executa testes. Devs integram e executam suas provas. Não assume QA/AppSec para simular independência nem aprova banco/risco/aceite pelo humano. Pode preparar documentos e abrir/verificar PRs quando autorizado. Merge/deploy/produção ficam com o humano.
 
-Siga R1–R10 e as condições do [fluxo vigente](../bezalel-v2.md). O contrato
+Siga R1–R10 e as condições do [fluxo vigente](../dream-team.md). O contrato
 orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto
@@ -48,7 +48,7 @@ Candidato completo com revisões válidas, mesmo escopo/versão, aceite real e t
 
 [verification-planning](../../skills/verification-planning/SKILL.md); [clean-architecture](../../skills/clean-architecture/SKILL.md); [pr-audit](../../skills/pr-audit/SKILL.md); [clean-code](../../skills/clean-code/SKILL.md); [development-test-workbook](../../skills/development-test-workbook/SKILL.md); [humanizer](../../skills/humanizer/SKILL.md).
 
-Use somente o modo e os pré-requisitos da [etapa atribuída](../bezalel-v2-skills.md).
+Use somente o modo e os pré-requisitos da [etapa atribuída](../dream-team-skills.md).
 Reutilize resultados válidos; não reaplique uma skill a cada handoff. As skills
 manuais não são uma continuação automática. Não altere a skill para contornar
 um limite do papel.

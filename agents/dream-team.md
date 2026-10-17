@@ -1,14 +1,14 @@
-# Bezalel — fluxo de desenvolvimento v2
+# DreamTeam — fluxo de desenvolvimento
 
-Fonte canônica do fluxo de desenvolvimento Bezalel, conduzido pela equipe
-[DreamTeam](README.md). São três cenários, 20 processos reutilizáveis e 60
+Fonte canônica do fluxo de desenvolvimento da [DreamTeam](README.md), equipe de
+agentes do plugin Bezalel. São três cenários, 20 processos reutilizáveis e 60
 etapas, com 18 processos em cada cenário; os quatro devs são opções de especialidade.
 Os contratos em [agents](README.md) distribuem os processos por responsabilidade,
 sem criar um agente por etapa. O aprovador humano é externo.
 
 ## Regras comuns
 
-Na ferramenta Company Flow, estas regras ficam uma única vez na descrição de **Coordenar a entrega · v2**, reutilizada pelos três cenários. Cada atividade usa as pré-condições do destino, inclusive nas retomadas. Condições locais complementam, sem substituir, o procedimento e estas regras.
+Na ferramenta Company Flow, estas regras ficam uma única vez na descrição de **Coordenar a entrega**, reutilizada pelos três cenários. Cada atividade usa as pré-condições do destino, inclusive nas retomadas. Condições locais complementam, sem substituir, o procedimento e estas regras.
 
 ### R1 Registro e autorização
 
@@ -44,7 +44,7 @@ AppSec distingue hipótese, confirmação, severidade, confiança e cobertura. V
 
 ### R9 Decisões e destinos
 
-Decisão humana registra interação real, identidade, fonte, data/fuso e conteúdo/versão. Reaproveitar decisão que já cubra o objeto; ambiguidade exige esclarecimento. Rejeitar solução não cancela a intenção. PM trata revisão parcial, adiamento integral, descarte, reabertura e transferência na entrada do cenário: adiar mantém issue aberta com dono/retomada; descartar fecha e verifica somente itens abrangidos/exclusivos; reabrir requer orientação humana. Transferência exige destino iniciado/verificado na mesma issue antes de encerrar origem; v2 usa v2 do destino. Estados sem implementação dispensam PR/scan fictícios.
+Decisão humana registra interação real, identidade, fonte, data/fuso e conteúdo/versão. Reaproveitar decisão que já cubra o objeto; ambiguidade exige esclarecimento. Rejeitar solução não cancela a intenção. PM trata revisão parcial, adiamento integral, descarte, reabertura e transferência na entrada do cenário: adiar mantém issue aberta com dono/retomada; descartar fecha e verifica somente itens abrangidos/exclusivos; reabrir requer orientação humana. Transferência exige destino iniciado/verificado na mesma issue antes de encerrar origem; use o percurso vigente do destino. Estados sem implementação dispensam PR/scan fictícios.
 
 ### R10 Entrega e validade final
 
@@ -57,15 +57,15 @@ iss-audit: qualificação PM ou investigação dev, conforme fase. pr-audit: rev
 agent-browser exige CLI/guia da versão e alvo isolado autorizado; não instalar por inferência. MCP continua preferido para operações do serviço. Browser apoia a prova da interface, sem substituir regressão automatizada, acessibilidade completa, serviços/persistência ou mobile nativo. humanizer é opcional na redação antes da submissão/publicação; não muda fatos, critérios, respostas, resultados ou decisões versionadas.
 security-audit fica em auditoria/validação: correção de produto volta a TL/dev; não ampliar credenciais, remover GITHUB_TOKEN, alterar/encerrar alertas ou cancelar CI por esta indicação. Cópias originais permanecem intactas; pr-audit e iss-audit usam variantes autorizadas. Skills reservadas ao uso manual e candidatas pendentes no inventário ficam fora das etapas; nenhuma é disparada ao concluir PR/auditoria.
 
-O [inventário completo](bezalel-skills-inventario.md) registra origem, cópias e adaptações pendentes. A [relação por processo e etapa](bezalel-v2-skills.md) facilita consultar a seleção. As adaptações autorizadas de pr-audit e iss-audit estão identificadas; as demais cópias preservam o conteúdo original. Os agentes referenciam essas skills sem duplicar seus procedimentos.
+O [inventário completo](skills-inventario.md) registra origem, cópias e adaptações pendentes. A [relação por processo e etapa](dream-team-skills.md) facilita consultar a seleção. As adaptações autorizadas de pr-audit e iss-audit estão identificadas; as demais cópias preservam o conteúdo original. Os agentes referenciam essas skills sem duplicar seus procedimentos.
 
 ## Percursos dos cenários
 
-### 1 Bug v2 investigar e entregar a correção
+### 1 Bug investigar e entregar a correção
 
 **Entrada:** Relato de possível defeito ou retomada humana, com esperado/observado/evidências a esclarecer.
 
-Foco: separar hipótese, comportamento esperado e defeito; investigar antes de definir a menor correção segura. Diagnóstico suficiente é a investigação obrigatória. Residual de produto fica vinculado; suspeita/achado de segurança precisa de tratamento. Humano decide regra, comportamento esperado e reclassificação. Transferências permitidas: 2 v2 ou 3 v2, iniciadas/verificadas pelo PM na mesma issue.
+Foco: separar hipótese, comportamento esperado e defeito; investigar antes de definir a menor correção segura. Diagnóstico suficiente é a investigação obrigatória. Residual de produto fica vinculado; suspeita/achado de segurança precisa de tratamento. Humano decide regra, comportamento esperado e reclassificação. Transferências permitidas: 2 ou 3, iniciadas/verificadas pelo PM na mesma issue.
 
 **Percurso:** PM qualifica a intenção e resolve decisões de produto necessárias → TL delimita investigação → DevOps comprova ambiente → devs investigam → TL confirma plano → interface/mock e UI/UX quando pertinentes, banco na ordem definida → devs implementam e integram → TL revisa o conjunto → AppSec analisa → QA valida → TL prepara roteiro → humano executa/aceita → TL confere, abre/verifica PRs e entrega próximos passos.
 
@@ -73,11 +73,11 @@ Foco: separar hipótese, comportamento esperado e defeito; investigar antes de d
 
 **Resultado:** Com implementação: todas as PRs necessárias abertas/verificadas para a branch de produção real, na versão validada e aceita, com orientação manual entregue a Rafael. Sem implementação: destinos documentados pelo PM e estados verificados. Espera/revisão/bloqueio não são conclusão. Merge, deploy e produção permanecem manuais.
 
-### 2 Melhoria v2 delimitar e validar a mudança
+### 2 Melhoria delimitar e validar a mudança
 
 **Entrada:** Melhoria de comportamento existente ou transferência humana do bug; benefício e limite a confirmar.
 
-Foco: resultado observável e escopo pequeno, confirmado pelo TL após investigação de comportamento, contratos e dependências. Mudança de regra/escopo precisa de decisão humana; aproveitar o pedido já claro. Se a investigação revelar trabalho de feature, humano decide transferência a 3 v2 e PM inicia/verifica o destino na mesma issue. Roteiro de aceite em Excel .xlsx real.
+Foco: resultado observável e escopo pequeno, confirmado pelo TL após investigação de comportamento, contratos e dependências. Mudança de regra/escopo precisa de decisão humana; aproveitar o pedido já claro. Se a investigação revelar trabalho de feature, humano decide transferência a 3 e PM inicia/verifica o destino na mesma issue. Roteiro de aceite em Excel .xlsx real.
 
 **Percurso:** PM qualifica a intenção e resolve decisões de produto necessárias → TL delimita investigação → DevOps comprova ambiente → devs investigam → TL confirma plano → interface/mock e UI/UX quando pertinentes, banco na ordem definida → devs implementam e integram → TL revisa o conjunto → AppSec analisa → QA valida → TL prepara roteiro → humano executa/aceita → TL confere, abre/verifica PRs e entrega próximos passos.
 
@@ -85,7 +85,7 @@ Foco: resultado observável e escopo pequeno, confirmado pelo TL após investiga
 
 **Resultado:** Com implementação: todas as PRs necessárias abertas/verificadas para a branch de produção real, na versão validada e aceita, com orientação manual entregue a Rafael. Sem implementação: destinos documentados pelo PM e estados verificados. Espera/revisão/bloqueio não são conclusão. Merge, deploy e produção permanecem manuais.
 
-### 3 Feature v2 aprovar e entregar o conjunto
+### 3 Feature aprovar e entregar o conjunto
 
 **Entrada:** Capacidade nova ou mudança grande, inclusive transferência humana de bug/melhoria; exige visão, histórias e critérios globais.
 
@@ -107,24 +107,24 @@ Os identificadores curtos abaixo organizam a correspondência documental; não s
 
 **Referência:** `bug`. **Responsável:** Product Manager.
 
-Entrada e manutenção do cenário 1 v2: relato, decisões de produto e destinos sem correção. Referência: regras comuns no processo Coordenar a entrega · v2.
+Entrada e manutenção do cenário 1: relato, decisões de produto e destinos sem correção. Referência: regras comuns no processo Coordenar a entrega.
 
 1. **Garantir a issue mínima.** Localizar/criar e verificar a mesma issue, com relato e fonte. Decisão integral de adiamento/descarte segue diretamente ao destino; retomada reabre/verifica o objeto autorizado.
 
 2. **Definir a necessidade.** Aplicar iss-audit no modo PM para qualificar necessidade, esperado/observado, impacto, perfis/dados, hipóteses e critérios. Não exigir causa comprovada para investigar. Dúvida de regra, esperado ou reclassificação exige decisão humana. Usar humanizer somente se a redação precisar de revisão.
 
-3. **Entregar contexto ou registrar destino.** Aplicar R9 na mesma issue. Revisão parcial preserva a intenção restante e confere a decisão sobre o conteúdo atualizado; decisão integral não exige detalhamento/investigação. Descarte/adiamento/reabertura têm estados reais verificados; falha permanece no PM. Transferência humana a 2 v2 ou 3 v2 exige destino iniciado/verificado, mesmo se adiado. Encerrar como comportamento esperado só com confirmação humana, justificativa e fechamento verificado, registrando ausência de correção. Caso qualificado segue ao TL.
+3. **Entregar contexto ou registrar destino.** Aplicar R9 na mesma issue. Revisão parcial preserva a intenção restante e confere a decisão sobre o conteúdo atualizado; decisão integral não exige detalhamento/investigação. Descarte/adiamento/reabertura têm estados reais verificados; falha permanece no PM. Transferência humana a 2 ou 3 exige destino iniciado/verificado, mesmo se adiado. Encerrar como comportamento esperado só com confirmação humana, justificativa e fechamento verificado, registrando ausência de correção. Caso qualificado segue ao TL.
 
 **Pronto:** issue real e contexto suficiente para investigação; ou destino próprio decidido e verificado. Não exige comprovar a causa para iniciar.
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Contexto conferido: TL | Conclusão da atividade | Coordenar a entrega · v2 |
-| Decisão de produto necessária | Encaminhamento | Decidir regra ou escopo · v2 |
+| Contexto conferido: TL | Conclusão da atividade | Coordenar a entrega |
+| Decisão de produto necessária | Encaminhamento | Decidir regra ou escopo |
 | Pendência de registro ou resposta | Estado próprio | Estado descrito na saída; não encaminha outro processo |
 | Intenção adiada e registrada | Estado próprio | Estado descrito na saída; não encaminha outro processo |
 | Intenção encerrada sem implementação | Estado próprio | Estado descrito na saída; não encaminha outro processo |
-| Transferência verificada para 2 v2 ou 3 v2 | Estado próprio | Estado descrito na saída; não encaminha outro processo |
+| Transferência verificada para 2 ou 3 | Estado próprio | Estado descrito na saída; não encaminha outro processo |
 
 **Condições locais das etapas:**
 
@@ -132,7 +132,7 @@ Entrada e manutenção do cenário 1 v2: relato, decisões de produto e destinos
 - Etapa 2 → **Decisão de produto necessária**: Regra, escopo, comportamento esperado ou reclassificação precisam de decisão humana.
 - Etapa 3 → **Intenção adiada e registrada**: Decisão integral de adiar registrada; issue aberta verificada, dono e retomada definidos.
 - Etapa 3 → **Intenção encerrada sem implementação**: Descarte ou comportamento esperado possuem decisão humana e fechamento verificado.
-- Etapa 3 → **Transferência verificada para 2 v2 ou 3 v2**: Destino 2 v2 ou 3 v2 iniciado e verificado com a mesma issue.
+- Etapa 3 → **Transferência verificada para 2 ou 3**: Destino 2 ou 3 iniciado e verificado com a mesma issue.
 
 <a id="process-improvement"></a>
 
@@ -140,24 +140,24 @@ Entrada e manutenção do cenário 1 v2: relato, decisões de produto e destinos
 
 **Referência:** `improvement`. **Responsável:** Product Manager.
 
-Entrada e manutenção do cenário 2 v2: melhoria do comportamento existente com benefício e limite claros.
+Entrada e manutenção do cenário 2: melhoria do comportamento existente com benefício e limite claros.
 
 1. **Garantir a issue mínima.** Localizar/criar e verificar a mesma issue, inclusive em transferência; registrar intenção, fonte e decisão existente. Retomada, adiamento e descarte seguem R9.
 
 2. **Definir resultado e limites.** Aplicar iss-audit no modo PM para definir benefício, comportamento atual/desejado, critérios, exclusões e dependências, usuários/perfis, dados e integrações pertinentes. Encaminhar dúvidas de segurança. TL confirma o impacto limitado após investigar; mudança de regra/escopo exige humano, aproveitando pedido já inequívoco. humanizer é opcional para revisar a redação.
 
-3. **Entregar contexto ou registrar destino.** Aplicar R9 na mesma issue. Revisão parcial preserva a intenção restante e confere a decisão sobre o conteúdo atualizado; decisão integral dispensa detalhamento/investigação. Verificar estados reais de descarte/adiamento/reabertura; falha permanece no PM. Transferência humana a 3 v2 exige destino iniciado/verificado, mesmo se adiado. Entregar ao TL a versão correspondente dos requisitos e decisões.
+3. **Entregar contexto ou registrar destino.** Aplicar R9 na mesma issue. Revisão parcial preserva a intenção restante e confere a decisão sobre o conteúdo atualizado; decisão integral dispensa detalhamento/investigação. Verificar estados reais de descarte/adiamento/reabertura; falha permanece no PM. Transferência humana a 3 exige destino iniciado/verificado, mesmo se adiado. Entregar ao TL a versão correspondente dos requisitos e decisões.
 
 **Pronto:** benefício e critérios suficientes para investigar, com escopo autorizado; ou destino próprio verificado.
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Contexto conferido: TL | Conclusão da atividade | Coordenar a entrega · v2 |
-| Decisão de produto necessária | Encaminhamento | Decidir regra ou escopo · v2 |
+| Contexto conferido: TL | Conclusão da atividade | Coordenar a entrega |
+| Decisão de produto necessária | Encaminhamento | Decidir regra ou escopo |
 | Pendência de registro ou resposta | Estado próprio | Estado descrito na saída; não encaminha outro processo |
 | Intenção adiada e registrada | Estado próprio | Estado descrito na saída; não encaminha outro processo |
 | Intenção encerrada sem implementação | Estado próprio | Estado descrito na saída; não encaminha outro processo |
-| Transferência verificada para 3 v2 | Estado próprio | Estado descrito na saída; não encaminha outro processo |
+| Transferência verificada para 3 | Estado próprio | Estado descrito na saída; não encaminha outro processo |
 
 **Condições locais das etapas:**
 
@@ -165,7 +165,7 @@ Entrada e manutenção do cenário 2 v2: melhoria do comportamento existente com
 - Etapa 2 → **Decisão de produto necessária**: Falta decisão de regra/escopo ou o reenquadramento para feature requer decisão humana.
 - Etapa 3 → **Intenção adiada e registrada**: Adiamento integral registrado, com issue aberta e retomada.
 - Etapa 3 → **Intenção encerrada sem implementação**: Descarte integral decidido e fechamento dos itens abrangidos verificado.
-- Etapa 3 → **Transferência verificada para 3 v2**: Cenário 3 v2 iniciado e verificado com a mesma issue.
+- Etapa 3 → **Transferência verificada para 3**: Cenário 3 iniciado e verificado com a mesma issue.
 
 <a id="process-feature"></a>
 
@@ -173,7 +173,7 @@ Entrada e manutenção do cenário 2 v2: melhoria do comportamento existente com
 
 **Referência:** `feature`. **Responsável:** Product Manager.
 
-Entrada e manutenção do cenário 3 v2: visão e histórias aprovadas como conjunto, com um responsável pela integração.
+Entrada e manutenção do cenário 3: visão e histórias aprovadas como conjunto, com um responsável pela integração.
 
 1. **Registrar visão e histórias.** Garantir issue principal mínima. Aplicar iss-audit no modo PM para qualificar visão, necessidades, limites, perfis/dados/integrações e questões de segurança. Vincular histórias curtas com critérios individuais, dependências e exclusões; a principal reúne critérios globais. humanizer pode revisar a redação antes de submeter a versão.
 
@@ -185,8 +185,8 @@ Entrada e manutenção do cenário 3 v2: visão e histórias aprovadas como conj
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Contexto conferido: TL | Conclusão da atividade | Coordenar a entrega · v2 |
-| Decisão de produto necessária | Encaminhamento | Decidir regra ou escopo · v2 |
+| Contexto conferido: TL | Conclusão da atividade | Coordenar a entrega |
+| Decisão de produto necessária | Encaminhamento | Decidir regra ou escopo |
 | Pendência de registro ou resposta | Estado próprio | Estado descrito na saída; não encaminha outro processo |
 | Intenção adiada e registrada | Estado próprio | Estado descrito na saída; não encaminha outro processo |
 | Intenção encerrada sem implementação | Estado próprio | Estado descrito na saída; não encaminha outro processo |
@@ -241,19 +241,19 @@ Planejamento, atribuição e retomada do cenário ativo. Regras transversais na 
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Ambiente: preparar ou recuperar | Encaminhamento | Preparar ou recuperar o ambiente · v2 |
-| Tarefa ao dev fullstack | Encaminhamento | Executar contribuição fullstack · v2 |
-| Tarefa ao dev backend | Encaminhamento | Executar contribuição backend · v2 |
-| Tarefa ao dev web | Encaminhamento | Executar contribuição web · v2 |
-| Tarefa ao dev mobile | Encaminhamento | Executar contribuição mobile · v2 |
-| Mock completo: revisar UI/UX | Encaminhamento | Revisar interface e contrato · v2 |
-| Banco: preparar ou revisar proposta | Encaminhamento | Preparar a proposta de banco · v2 |
+| Ambiente: preparar ou recuperar | Encaminhamento | Preparar ou recuperar o ambiente |
+| Tarefa ao dev fullstack | Encaminhamento | Executar contribuição fullstack |
+| Tarefa ao dev backend | Encaminhamento | Executar contribuição backend |
+| Tarefa ao dev web | Encaminhamento | Executar contribuição web |
+| Tarefa ao dev mobile | Encaminhamento | Executar contribuição mobile |
+| Mock completo: revisar UI/UX | Encaminhamento | Revisar interface e contrato |
+| Banco: preparar ou revisar proposta | Encaminhamento | Preparar a proposta de banco |
 | Contexto ou decisão: PM | Encaminhamento | PM do cenário ativo |
-| Conjunto integrado: revisão de código | Conclusão da atividade | Revisar a entrega integrada · v2 |
-| Consulta ou revalidação AppSec | Encaminhamento | Analisar ou revalidar segurança · v2 |
-| QA: retomar ou completar prova | Encaminhamento | Validar critérios e jornadas · v2 |
-| QA válido: preparar aceite | Encaminhamento | Preparar o aceite humano · v2 |
-| Aceite válido: retomar entrega da PR | Encaminhamento | Abrir PRs e entregar próximos passos · v2 |
+| Conjunto integrado: revisão de código | Conclusão da atividade | Revisar a entrega integrada |
+| Consulta ou revalidação AppSec | Encaminhamento | Analisar ou revalidar segurança |
+| QA: retomar ou completar prova | Encaminhamento | Validar critérios e jornadas |
+| QA válido: preparar aceite | Encaminhamento | Preparar o aceite humano |
+| Aceite válido: retomar entrega da PR | Encaminhamento | Abrir PRs e entregar próximos passos |
 | Pendência atribuída; aguardar | Estado próprio | Estado descrito na saída; não encaminha outro processo |
 
 **Condições locais das etapas:**
@@ -280,8 +280,8 @@ Avaliação, preparação e prova de isolamento no mesmo procedimento. Usar a sk
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Ambiente/prova entregue: TL | Conclusão da atividade | Coordenar a entrega · v2 |
-| Impedimento ou decisão necessária: TL | Impedimento/reprovação | Coordenar a entrega · v2 |
+| Ambiente/prova entregue: TL | Conclusão da atividade | Coordenar a entrega |
+| Impedimento ou decisão necessária: TL | Impedimento/reprovação | Coordenar a entrega |
 
 **Condições locais das etapas:**
 
@@ -306,8 +306,8 @@ Abrange as camadas selecionadas. Preparar telas/contrato e próprio mock quando 
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Contribuição ou prova concluída: TL | Conclusão da atividade | Coordenar a entrega · v2 |
-| Condição ausente ou decisão necessária: TL | Impedimento/reprovação | Coordenar a entrega · v2 |
+| Contribuição ou prova concluída: TL | Conclusão da atividade | Coordenar a entrega |
+| Condição ausente ou decisão necessária: TL | Impedimento/reprovação | Coordenar a entrega |
 
 **Condições locais das etapas:**
 
@@ -332,8 +332,8 @@ Investigar e implementar negócio, contratos, persistência e serviços selecion
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Contribuição ou prova concluída: TL | Conclusão da atividade | Coordenar a entrega · v2 |
-| Condição ausente ou decisão necessária: TL | Impedimento/reprovação | Coordenar a entrega · v2 |
+| Contribuição ou prova concluída: TL | Conclusão da atividade | Coordenar a entrega |
+| Condição ausente ou decisão necessária: TL | Impedimento/reprovação | Coordenar a entrega |
 
 **Condições locais das etapas:**
 
@@ -358,8 +358,8 @@ Preparar telas/estados/contratos web e exercitá-los com mock fornecido pelo bac
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Contribuição ou prova concluída: TL | Conclusão da atividade | Coordenar a entrega · v2 |
-| Condição ausente ou decisão necessária: TL | Impedimento/reprovação | Coordenar a entrega · v2 |
+| Contribuição ou prova concluída: TL | Conclusão da atividade | Coordenar a entrega |
+| Condição ausente ou decisão necessária: TL | Impedimento/reprovação | Coordenar a entrega |
 
 **Condições locais das etapas:**
 
@@ -384,8 +384,8 @@ Preparar telas/estados/contratos mobile e exercitá-los com mock combinado com b
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Contribuição ou prova concluída: TL | Conclusão da atividade | Coordenar a entrega · v2 |
-| Condição ausente ou decisão necessária: TL | Impedimento/reprovação | Coordenar a entrega · v2 |
+| Contribuição ou prova concluída: TL | Conclusão da atividade | Coordenar a entrega |
+| Condição ausente ou decisão necessária: TL | Impedimento/reprovação | Coordenar a entrega |
 
 **Condições locais das etapas:**
 
@@ -410,8 +410,8 @@ Proposta revisável somente quando estrutura, migration ou transformação compl
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Proposta identificada: decisão humana | Conclusão da atividade | Decidir a proposta de banco · v2 |
-| Prova, classificação ou ferramenta insuficiente: TL | Impedimento/reprovação | Coordenar a entrega · v2 |
+| Proposta identificada: decisão humana | Conclusão da atividade | Decidir a proposta de banco |
+| Prova, classificação ou ferramenta insuficiente: TL | Impedimento/reprovação | Coordenar a entrega |
 
 **Condições locais das etapas:**
 
@@ -436,7 +436,7 @@ Decisão humana anterior à criação de migrations, implementação estrutural 
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Decisão registrada: TL | Conclusão da atividade | Coordenar a entrega · v2 |
+| Decisão registrada: TL | Conclusão da atividade | Coordenar a entrega |
 | Aguardando decisão ou esclarecimento | Estado próprio | Estado descrito na saída; não encaminha outro processo |
 
 **Condições locais das etapas:**
@@ -461,8 +461,8 @@ Revisão independente de UI/UX sobre telas e mock, antes da API definitiva afeta
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Parecer UI/UX registrado: TL | Conclusão da atividade | Coordenar a entrega · v2 |
-| Pré-condição ausente ou UI/UX reprovada: TL | Impedimento/reprovação | Coordenar a entrega · v2 |
+| Parecer UI/UX registrado: TL | Conclusão da atividade | Coordenar a entrega |
+| Pré-condição ausente ou UI/UX reprovada: TL | Impedimento/reprovação | Coordenar a entrega |
 
 **Condições locais das etapas:**
 
@@ -487,8 +487,8 @@ Uma revisão reúne completude da integração, versão e código. Elimina confe
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Candidato revisado: AppSec | Conclusão da atividade | Analisar ou revalidar segurança · v2 |
-| Entrega incompleta ou revisão reprovada: TL | Impedimento/reprovação | Coordenar a entrega · v2 |
+| Candidato revisado: AppSec | Conclusão da atividade | Analisar ou revalidar segurança |
+| Entrega incompleta ou revisão reprovada: TL | Impedimento/reprovação | Coordenar a entrega |
 
 **Condições locais das etapas:**
 
@@ -513,10 +513,10 @@ Um procedimento para consulta antecipada, análise da entrega e revalidação af
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Parecer da entrega válido: QA | Conclusão da atividade | Validar critérios e jornadas · v2 |
-| Consulta ou complemento concluído: TL | Encaminhamento | Coordenar a entrega · v2 |
-| Proposta de adiar risco médio/baixo: humano | Encaminhamento | Decidir adiamento de risco · v2 |
-| Achado bloqueante ou dependência externa: TL | Impedimento/reprovação | Coordenar a entrega · v2 |
+| Parecer da entrega válido: QA | Conclusão da atividade | Validar critérios e jornadas |
+| Consulta ou complemento concluído: TL | Encaminhamento | Coordenar a entrega |
+| Proposta de adiar risco médio/baixo: humano | Encaminhamento | Decidir adiamento de risco |
+| Achado bloqueante ou dependência externa: TL | Impedimento/reprovação | Coordenar a entrega |
 
 **Condições locais das etapas:**
 
@@ -544,8 +544,8 @@ Decisão restrita a achados de segurança confirmados médios/baixos. Não equiv
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Adiamento registrado: consolidar parecer | Conclusão da atividade | Analisar ou revalidar segurança · v2 |
-| Corrigir ou rever tratamento: TL | Encaminhamento | Coordenar a entrega · v2 |
+| Adiamento registrado: consolidar parecer | Conclusão da atividade | Analisar ou revalidar segurança |
+| Corrigir ou rever tratamento: TL | Encaminhamento | Coordenar a entrega |
 | Aguardando decisão ou esclarecimento | Estado próprio | Estado descrito na saída; não encaminha outro processo |
 
 **Condições locais das etapas:**
@@ -572,9 +572,9 @@ QA independente da entrega completa. Bug, melhoria e feature usam o mesmo proced
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| QA completo aprovado: preparar aceite | Conclusão da atividade | Preparar o aceite humano · v2 |
-| Complemento de prova concluído: TL | Encaminhamento | Coordenar a entrega · v2 |
-| Falha ou cobertura obrigatória ausente: TL | Impedimento/reprovação | Coordenar a entrega · v2 |
+| QA completo aprovado: preparar aceite | Conclusão da atividade | Preparar o aceite humano |
+| Complemento de prova concluído: TL | Encaminhamento | Coordenar a entrega |
+| Falha ou cobertura obrigatória ausente: TL | Impedimento/reprovação | Coordenar a entrega |
 
 **Condições locais das etapas:**
 
@@ -600,8 +600,8 @@ Pacote único de evidências e roteiro manual para o candidato validado. Nos cen
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Roteiro e candidato apresentados: humano | Conclusão da atividade | Executar roteiro e decidir aceite · v2 |
-| Versão, prova ou acesso insuficiente: TL | Impedimento/reprovação | Coordenar a entrega · v2 |
+| Roteiro e candidato apresentados: humano | Conclusão da atividade | Executar roteiro e decidir aceite |
+| Versão, prova ou acesso insuficiente: TL | Impedimento/reprovação | Coordenar a entrega |
 
 **Condições locais das etapas:**
 
@@ -626,8 +626,8 @@ Aceite funcional externo sobre a versão apresentada. A execução do humano per
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Aceite registrado: entregar PR | Conclusão da atividade | Abrir PRs e entregar próximos passos · v2 |
-| Falha, impedimento ou ajuste: TL | Encaminhamento | Coordenar a entrega · v2 |
+| Aceite registrado: entregar PR | Conclusão da atividade | Abrir PRs e entregar próximos passos |
+| Falha, impedimento ou ajuste: TL | Encaminhamento | Coordenar a entrega |
 | Roteiro ou decisão pendente | Estado próprio | Estado descrito na saída; não encaminha outro processo |
 
 **Condições locais das etapas:**
@@ -656,7 +656,7 @@ Conclusão com todas as PRs necessárias abertas/verificadas para as bases de pr
 | Saída | Tipo | Destino |
 |---|---|---|
 | PRs verificadas e orientação entregue | Estado próprio | Estado descrito na saída; não encaminha outro processo |
-| Versão divergente ou revalidação necessária: TL | Impedimento/reprovação | Coordenar a entrega · v2 |
+| Versão divergente ou revalidação necessária: TL | Impedimento/reprovação | Coordenar a entrega |
 | Abertura, verificação ou orientação pendente | Estado próprio | Estado descrito na saída; não encaminha outro processo |
 
 **Condições locais das etapas:**
@@ -673,34 +673,37 @@ Conclusão com todas as PRs necessárias abertas/verificadas para as bases de pr
 
 ### Cenário 1
 
-- **Qualificar e conduzir o bug · v2**: Bug: fonte, observado/esperado, reprodução, impacto e critério de correção. Comportamento esperado exige decisão humana e fechamento verificado.
-- **Coordenar a entrega · v2**: Consolidar diagnóstico já realizado; delimitar menor correção segura. Separar residual sem dispensar segurança.
-- **Analisar ou revalidar segurança · v2**: Examinar causa, correção e regressões de segurança no fluxo atingido.
-- **Validar critérios e jornadas · v2**: Validar reprodução original, correção, regressões e integração da versão; considerar acesso/dados de outros usuários. Relato não reproduzido não significa ausência de defeito.
-- **Preparar o aceite humano · v2**: Roteiro manual proporcional ao bug, com reprodução, resultado esperado e regressões relevantes.
+- **Qualificar e conduzir o bug**: Bug: fonte, observado/esperado, reprodução, impacto e critério de correção. Comportamento esperado exige decisão humana e fechamento verificado.
+- **Coordenar a entrega**: Consolidar diagnóstico já realizado; delimitar menor correção segura. Separar residual sem dispensar segurança.
+- **Analisar ou revalidar segurança**: Examinar causa, correção e regressões de segurança no fluxo atingido.
+- **Validar critérios e jornadas**: Validar reprodução original, correção, regressões e integração da versão; considerar acesso/dados de outros usuários. Relato não reproduzido não significa ausência de defeito.
+- **Preparar o aceite humano**: Roteiro manual proporcional ao bug, com reprodução, resultado esperado e regressões relevantes.
 
 ### Cenário 2
 
-- **Qualificar e conduzir a melhoria · v2**: Melhoria: necessidade, benefício, limites e critérios observáveis; escopo pequeno é confirmado tecnicamente após investigação.
-- **Coordenar a entrega · v2**: Confirmar escopo pequeno após investigação. Se necessário, propor transferência humana à feature.
-- **Analisar ou revalidar segurança · v2**: Examinar entradas/API, permissões, dados e dependências alteradas; tamanho não define risco.
-- **Validar critérios e jornadas · v2**: Validar benefício/critério esperado, limites acordados e regressões do comportamento existente na integração real.
-- **Preparar o aceite humano · v2**: Arquivo Excel .xlsx real, acessível e vinculado ao candidato; casos humanos começam não executados.
+- **Qualificar e conduzir a melhoria**: Melhoria: necessidade, benefício, limites e critérios observáveis; escopo pequeno é confirmado tecnicamente após investigação.
+- **Coordenar a entrega**: Confirmar escopo pequeno após investigação. Se necessário, propor transferência humana à feature.
+- **Analisar ou revalidar segurança**: Examinar entradas/API, permissões, dados e dependências alteradas; tamanho não define risco.
+- **Validar critérios e jornadas**: Validar benefício/critério esperado, limites acordados e regressões do comportamento existente na integração real.
+- **Preparar o aceite humano**: Arquivo Excel .xlsx real, acessível e vinculado ao candidato; casos humanos começam não executados.
 
 ### Cenário 3
 
-- **Definir e conduzir o escopo da feature · v2**: Feature: principal e histórias, comentários de submissão vN, decisão humana correspondente e handoff da mesma versão ao TL.
-- **Coordenar a entrega · v2**: Exigir recebimento da vN aprovada; planejar todas as histórias/dependências e um integrador do conjunto.
-- **Analisar ou revalidar segurança · v2**: Analisar histórias/jornadas integradas, ativos, perfis e fronteiras de confiança; parecer de parte isolada não aprova o conjunto.
-- **Validar critérios e jornadas · v2**: No mesmo candidato completo, validar critérios de cada história e depois jornadas globais, dependências e integração entre serviços. Uma história isolada aprovada não conclui a feature.
-- **Preparar o aceite humano · v2**: Arquivo Excel .xlsx real, acessível e vinculado ao candidato; casos humanos começam não executados.
+- **Definir e conduzir o escopo da feature**: Feature: principal e histórias, comentários de submissão vN, decisão humana correspondente e handoff da mesma versão ao TL.
+- **Coordenar a entrega**: Exigir recebimento da vN aprovada; planejar todas as histórias/dependências e um integrador do conjunto.
+- **Analisar ou revalidar segurança**: Analisar histórias/jornadas integradas, ativos, perfis e fronteiras de confiança; parecer de parte isolada não aprova o conjunto.
+- **Validar critérios e jornadas**: No mesmo candidato completo, validar critérios de cada história e depois jornadas globais, dependências e integração entre serviços. Uma história isolada aprovada não conclui a feature.
+- **Preparar o aceite humano**: Arquivo Excel .xlsx real, acessível e vinculado ao candidato; casos humanos começam não executados.
 
 ## Correspondência com o MCP
 
 Empresa **Fluxo de IA**, `534d1f66-90a5-462d-bf78-29c6ccf9ef94`.
 A revisão **1179** é a referência de conversão. O [catálogo](catalog.json) associa
 os IDs estáveis de cargos, cenários e processos aos contratos e às skills.
-Os três cenários são 1 — Bug v2, 2 — Melhoria v2 e 3 — Feature v2; os 74 processos
+Os nomes nesta documentação omitem os sufixos históricos de versão presentes na
+ferramenta visual; esses rótulos não versionam agentes. Essa diferença de nomenclatura
+foi conferida na revisão indicada, sem alterar procedimentos ou o conteúdo do MCP.
+Os três cenários são 1 — Bug, 2 — Melhoria e 3 — Feature; os 74 processos
 antigos que ainda existem no catálogo visual não integram este pacote de execução.
 
 Em mudanças acordadas do fluxo, releia o MCP, preserve alterações concorrentes e

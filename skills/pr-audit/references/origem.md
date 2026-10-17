@@ -8,7 +8,7 @@ Preservados: conferência de alegações, fronteira de confiança, inspeção de
 hostis/supply chain, compatibilidade, consumidores, regressões e validade de evidências.
 
 Alterados: objeto inclui candidato anterior à PR; execução de testes e correções
-foi substituída por conferência e pedidos aos donos, porque o TL da v2 não executa.
+foi substituída por conferência e pedidos aos donos, porque o TL da DreamTeam não executa.
 Retirados carry-through, ajustes/merge, cancelamento de CI e obrigações específicas
 do projeto do autor. A auditoria não decide produto, amplia credenciais nem presume
 que toda hipótese possa ser resolvida imediatamente. Achados são proporcionais ao

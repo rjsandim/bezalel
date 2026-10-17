@@ -16,6 +16,7 @@ import distribution as dist
 import plugin
 import project
 import sync_upstream
+import check_repository
 
 
 def commit(root, message='Fixture'):
@@ -27,6 +28,20 @@ def commit(root, message='Fixture'):
 def init(root):
     root.mkdir(parents=True, exist_ok=True)
     dist.git(root, 'init', '-q', '-b', 'master')
+
+
+def rename_agent(source, role, name):
+    catalog_path = source / 'agents/catalog.json'
+    catalog = dist.read_json(catalog_path)
+    previous = dict(catalog['roles'][role])
+    for platform in ['codex', 'claude']:
+        old = source / 'agents' / previous[platform]
+        new = old.with_name(name + old.suffix)
+        new.write_text(old.read_text().replace(old.stem, name))
+        old.unlink()
+        catalog['roles'][role][platform] = new.relative_to(source / 'agents').as_posix()
+    catalog_path.write_bytes(dist.json_bytes(catalog))
+    return previous
 
 
 class DistributionTests(unittest.TestCase):
@@ -80,7 +95,7 @@ class DistributionTests(unittest.TestCase):
         for kind in ['file', 'broken-link']:
             with self.subTest(kind=kind):
                 consumer = self.root / kind
-                path = consumer / '.codex/agents/bezalel-qa.toml'
+                path = consumer / '.codex/agents/dream-team-qa.toml'
                 path.parent.mkdir(parents=True)
                 if kind == 'file':
                     path.write_text('Customizado')
@@ -119,7 +134,7 @@ class DistributionTests(unittest.TestCase):
     def test_custom_agent_and_managed_block_stop_update_before_any_writes(self):
         consumer = self.consumer()
         state = project.reconcile(consumer, ROOT, {}, ['codex'], False, 'fixture')
-        path = consumer / '.codex/agents/bezalel-qa.toml'
+        path = consumer / '.codex/agents/dream-team-qa.toml'
         path.write_text('Minha customização')
         with self.assertRaises(dist.DistributionError):
             project.reconcile(consumer, ROOT, state, ['codex'], True, 'fixture2')
@@ -131,7 +146,7 @@ class DistributionTests(unittest.TestCase):
         state = project.reconcile(consumer, ROOT, {}, ['codex', 'claude'], True, 'fixture')
         (consumer / '.bezalel/project.json').write_text('contexto próprio')
         project.reconcile(consumer, ROOT, state, ['codex', 'claude'], False, 'fixture', disable=True)
-        self.assertFalse((consumer / '.codex/agents/bezalel-qa.toml').exists())
+        self.assertFalse((consumer / '.codex/agents/dream-team-qa.toml').exists())
         self.assertFalse((consumer / '.agents/skills/release').is_symlink())
         self.assertNotIn(project.START, (consumer / 'AGENTS.md').read_text())
         self.assertIn('Regras do projeto.', (consumer / 'AGENTS.md').read_text())
@@ -143,13 +158,13 @@ class DistributionTests(unittest.TestCase):
         path.parent.mkdir()
         sections = ['Objetivo e escopo', 'Entradas e pré-requisitos', 'Procedimento', 'Saídas', 'Validação', 'Limites operacionais']
         path.write_text('---\nname: new-skill\ndescription: Fixture\n---\n' + ''.join('## ' + s + '\nTexto.\n' for s in sections))
-        with (source / 'agents/bezalel-v2.md').open('a') as stream:
+        with (source / 'agents/dream-team.md').open('a') as stream:
             stream.write('\nNota sintética de versão.\n')
         revision = commit(source)
         self.assertTrue(project.update(consumer, state))
         self.assertEqual(dist.git(base, 'rev-parse', 'HEAD').decode().strip(), revision)
         self.assertTrue((consumer / '.agents/skills/new-skill/SKILL.md').is_file())
-        self.assertIn('Nota sintética', (base / 'agents/bezalel-v2.md').read_text())
+        self.assertIn('Nota sintética', (base / 'agents/dream-team.md').read_text())
         self.assertFalse(project.update(consumer, dist.read_json(consumer / project.STATE)))
 
     def test_update_refuses_dirty_source_without_fetch_or_discard(self):
@@ -193,6 +208,51 @@ class DistributionTests(unittest.TestCase):
             project.update(consumer, state)
         self.assertEqual(dist.git(base, 'rev-parse', 'HEAD').decode().strip(), state['revision'])
         self.assertEqual(dist.read_json(consumer / project.STATE), state)
+
+    def test_published_agent_rename_replaces_both_platforms_without_duplicates(self):
+        source, consumer, base, state = self.connected()
+        previous = rename_agent(source, 'qa', 'quality-check')
+        revision = commit(source)
+        self.assertTrue(project.update(consumer, state))
+        for platform, suffix in [('codex', '.toml'), ('claude', '.md')]:
+            folder = consumer / ('.' + platform) / 'agents'
+            self.assertFalse((folder / Path(previous[platform]).name).exists())
+            self.assertIn('quality-check', (folder / ('quality-check' + suffix)).read_text())
+            self.assertEqual(len(list(folder.glob('*' + suffix))), 9)
+        self.assertEqual(dist.git(base, 'rev-parse', 'HEAD').decode().strip(), revision)
+        self.assertIn('Regras do projeto.', (consumer / 'AGENTS.md').read_text())
+        self.assertTrue((consumer / '.claude/commands/bezalel-release.md').is_file())
+
+    def test_renaming_a_customized_agent_blocks_before_removing_it(self):
+        source, consumer, base, state = self.connected()
+        previous = rename_agent(source, 'qa', 'quality-check')
+        commit(source)
+        old = consumer / '.codex/agents' / Path(previous['codex']).name
+        old.write_text('Minha customização')
+        with self.assertRaises(dist.DistributionError):
+            project.update(consumer, state)
+        self.assertEqual(old.read_text(), 'Minha customização')
+        self.assertFalse((consumer / '.codex/agents/quality-check.toml').exists())
+        self.assertEqual(dist.git(base, 'rev-parse', 'HEAD').decode().strip(), state['revision'])
+        self.assertEqual(dist.read_json(consumer / project.STATE), state)
+
+    def test_agent_identity_must_match_filename_and_both_platforms(self):
+        source = self.source()
+        previous = rename_agent(source, 'qa', 'quality-check')
+        with patch.object(check_repository, 'ROOT', source.resolve()):
+            self.assertEqual(check_repository.validate_agents(), [])
+            adapter = source / 'agents/codex/quality-check.toml'
+            original = adapter.read_text()
+            adapter.write_text(original.replace('name = "quality-check"', 'name = "wrong"'))
+            self.assertTrue(check_repository.validate_agents())
+            adapter.write_text(original)
+            claude = source / 'agents/claude/quality-check.md'
+            claude.rename(source / 'agents' / previous['claude'])
+            catalog_path = source / 'agents/catalog.json'
+            catalog = dist.read_json(catalog_path)
+            catalog['roles']['qa']['claude'] = previous['claude']
+            catalog_path.write_bytes(dist.json_bytes(catalog))
+            self.assertTrue(check_repository.validate_agents())
 
     def test_network_failure_preserves_current_version(self):
         _, consumer, base, state = self.connected()
@@ -269,7 +329,7 @@ class DistributionTests(unittest.TestCase):
 
     def test_remote_update_rolls_back_base_when_project_write_fails(self):
         source, consumer, base, state = self.connected()
-        adapter = source / 'agents/codex/bezalel-qa.toml'
+        adapter = source / 'agents/codex/dream-team-qa.toml'
         adapter.write_text(adapter.read_text().replace('Você exerce', 'Nesta versão, você exerce'))
         commit(source)
         original = project.atomic_write
@@ -285,7 +345,7 @@ class DistributionTests(unittest.TestCase):
                 project.update(consumer, state)
         self.assertEqual(dist.git(base, 'rev-parse', 'HEAD').decode().strip(), state['revision'])
         self.assertEqual(dist.read_json(consumer / project.STATE), state)
-        self.assertNotIn('Nesta versão', (consumer / '.codex/agents/bezalel-qa.toml').read_text())
+        self.assertNotIn('Nesta versão', (consumer / '.codex/agents/dream-team-qa.toml').read_text())
 
     def test_rewritten_remote_history_is_not_forced_onto_project(self):
         source, consumer, base, state = self.connected()
@@ -307,9 +367,9 @@ class DistributionTests(unittest.TestCase):
         self.assertNotIn('./skills/release', claude['skills'])
         self.assertIn('./commands/bezalel-release.md', claude['commands'])
         self.assertNotIn('hooks/hooks.json', dist.files(package))
-        self.assertIn('${CLAUDE_PLUGIN_ROOT}', (package / 'contracts/claude/bezalel-qa.md').read_text())
+        self.assertIn('${CLAUDE_PLUGIN_ROOT}', (package / 'contracts/claude/dream-team-qa.md').read_text())
         self.assertFalse((package / 'agents').exists())
-        with (source / 'agents/bezalel-v2.md').open('a') as stream:
+        with (source / 'agents/dream-team.md').open('a') as stream:
             stream.write('\nNova versão\n')
         v2 = plugin.build(source, self.root / 'plugin2')
         self.assertNotEqual(v1, v2)
@@ -324,10 +384,28 @@ class DistributionTests(unittest.TestCase):
         self.assertEqual((consumer / '.bezalel/base').resolve(), package.resolve())
         self.assertFalse((consumer / '.agents/skills').exists())
         self.assertFalse((consumer / '.claude/agents').exists())
-        self.assertTrue((consumer / '.codex/agents/bezalel-qa.toml').is_file())
-        (consumer / '.codex/agents/bezalel-qa.toml').write_text('Meu agente')
+        self.assertTrue((consumer / '.codex/agents/dream-team-qa.toml').is_file())
+        (consumer / '.codex/agents/dream-team-qa.toml').write_text('Meu agente')
         with self.assertRaises(dist.DistributionError):
             plugin.bind(consumer, package, state, ['codex', 'claude'], True)
+
+    def test_native_update_replaces_renamed_agent_and_rebinds_new_package(self):
+        source = self.source()
+        package = self.root / 'plugin'
+        plugin.build(source, package)
+        consumer = self.consumer()
+        state = plugin.bind(consumer, package, {}, ['codex', 'claude'], True)
+        previous = rename_agent(source, 'qa', 'quality-check')
+        updated = self.root / 'updated-plugin'
+        plugin.build(source, updated)
+        plugin.bind(consumer, updated, state, ['codex', 'claude'], True)
+        self.assertEqual((consumer / '.bezalel/base').resolve(), updated.resolve())
+        self.assertFalse((consumer / '.codex/agents' / Path(previous['codex']).name).exists())
+        self.assertTrue((consumer / '.codex/agents/quality-check.toml').is_file())
+        self.assertEqual(len(list((consumer / '.codex/agents').glob('*.toml'))), 9)
+        manifest = dist.read_json(updated / '.claude-plugin/plugin.json')
+        self.assertIn('./contracts/claude/quality-check.md', manifest['agents'])
+        self.assertNotIn('./contracts/' + previous['claude'], manifest['agents'])
 
     def test_refresh_is_scoped_to_bezalel_and_never_runs_skill_commands(self):
         for client in ['codex', 'claude']:
@@ -350,7 +428,7 @@ class DistributionTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(context.read_text(), '{"custom": "preservar"}')
         self.assertIn('/base/', (consumer / '.bezalel/.gitignore').read_text())
-        self.assertFalse((consumer / '.codex/agents/bezalel-qa.toml').exists())
+        self.assertFalse((consumer / '.codex/agents/dream-team-qa.toml').exists())
 
 
 class UpstreamTests(unittest.TestCase):

@@ -3,15 +3,16 @@
 Este arquivo instrui contribuições no repositório. Papéis e contratos ficam em
 `agents/`; são contratos e adaptadores de agentes, sem runtime próprio de autorização.
 
-Bezalel é o fluxo de desenvolvimento; DreamTeam é a equipe de agentes; Company
-Flow é a ferramenta visual. Use esses nomes nas instruções e apresentações.
+Bezalel é o plugin completo; DreamTeam é a equipe de agentes; Company Flow é a
+ferramenta visual. Use `dream-team` nos arquivos e adaptadores da equipe, sem
+sufixo de versão. Documentos gerais de skills não precisam de prefixo do plugin.
 Preserve os IDs da correspondência com a ferramenta. Ao renomear arquivos,
 atualize catálogo, links, adaptadores e instruções gerenciadas; confira a migração
 das instalações existentes. O validador e o instalador usam os caminhos do catálogo.
 
 ## Escopo e estrutura
 
-- Trabalhe nesta árvore; não edite as instalações originais fora do fluxo Bezalel.
+- Trabalhe nesta árvore; não edite as instalações originais fora do Bezalel.
 - Cada pasta em `skills/` contém `SKILL.md` com `name`, `description` e, nesta
   ordem: Objetivo e escopo; Entradas e pré-requisitos; Procedimento; Saídas;
   Validação; Limites operacionais. Use português nas instruções e interfaces.
@@ -23,14 +24,14 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   atualizações. A seleção inicial fica no README/inventário; a revisão vigente por
   skill fica em `.bezalel/upstream.json`. Não adapte seu conteúdo.
   Metadados essenciais, inclusive descrição YAML em bloco, e links locais
-  continuam sujeitos à validação. A seleção no fluxo Bezalel não autoriza
+  continuam sujeitos à validação. A seleção no fluxo da DreamTeam não autoriza
   adaptar essas cópias nem executar ações fora do escopo de cada responsável.
   Somente os adaptadores de invocação das cinco skills manuais podem acrescentar
   `allow_implicit_invocation: false`, conforme solicitado; o conteúdo original
   permanece intacto. `pr-audit` e `iss-audit` são variantes cuja adaptação foi
   autorizada, seguem o formato comum e registram origem/motivos em suas referências.
 - `release`, `reflect`, `github-resolution`, `pr-bump` e `pr-post-audit` ficam
-  fora do fluxo Bezalel e são para chamada manual explícita. Relatório de auditoria
+  fora do fluxo da DreamTeam e são para chamada manual explícita. Relatório de auditoria
   não é aprovação humana; procedimentos importados não ampliam autorização nem
   substituem regras do projeto. Confira stack, versão final e comandos reais antes
   de usar exemplos da origem. Limpeza não pode usar força nem atingir recursos
@@ -48,7 +49,7 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
 - Agente define papel/processo; `.bezalel/project.json` aponta instruções de
   arquitetura/negócio do projeto; skills definem procedimentos. Não misture as três
   responsabilidades. A instalação e distribuição autorizadas disponibilizam
-  arquivos; não criam runtime de execução ou autorização do fluxo Bezalel.
+  arquivos; não criam runtime de execução ou autorização do fluxo da DreamTeam.
 - Papéis em `agents/roles/` constam do catálogo e descrevem objetivo, entradas,
   saídas, ferramentas, limites, pronto, seleção de skills e handoff. Não alegue
   que um Markdown delega, executa ferramentas ou impõe gates.
@@ -64,7 +65,7 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
 - Product Manager aponta desvios e alternativas; o usuário decide mudanças. Contratos,
   fachadas e reutilização devem resolver problemas concretos, sem refatorar fora
   do escopo ou concentrar regras/SQLs de todos os módulos num arquivo gigante.
-- Preserve os nove agentes ativos da v2 e o APROVADOR HUMANO externo: PM, TL,
+- Preserve os nove agentes ativos do fluxo e o APROVADOR HUMANO externo: PM, TL,
   DevOps, quatro devs, QA e AppSec. IDs são estáveis; `display_name` define a
   nomenclatura. Processos e skills atribuídos devem corresponder à fonte canônica.
 - Observação de produção/negócio está fora deste pacote. Não ative coleta, leia
@@ -72,7 +73,7 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
 - PR é etapa prevista de entrega, mas publicação/merge/deploy exigem autorização
   concreta da tarefa. Quando ausente, prepare rascunho local e registre a pendência.
 
-- Em mudanças que afetem o fluxo Bezalel, use a [fonte canônica](agents/bezalel-v2.md):
+- Em mudanças que afetem o fluxo da DreamTeam, use a [fonte canônica](agents/dream-team.md):
   arquivos são a fonte canônica; releia a revisão visual, preserve alterações
   concorrentes e confira etapas/decisões/condições nos dois sentidos. Diferencie
   checker estrutural de revisão semântica e registre divergências preexistentes.
@@ -84,10 +85,10 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   na mesma tarefa, conforme o impacto. Não é necessário reescrever instruções
   que continuam válidas; não deixe mudança de comportamento sem documentação.
 - Use `AGENTS.md` como instrução curta de contribuição, README como guia de adoção,
-  [Bezalel v2](agents/bezalel-v2.md) como processo vigente e a
-  [relação por etapa](agents/bezalel-v2-skills.md) para selecionar skills.
+  [fluxo da DreamTeam](agents/dream-team.md) como processo vigente e a
+  [relação por etapa](agents/dream-team-skills.md) para selecionar skills.
   Referencie essas fontes; não copie seus procedimentos completos aqui.
-- Contratos, catálogo, templates, adaptadores e validadores seguem a v2. Atualize
+- Contratos, catálogo, templates, adaptadores e validadores seguem o fluxo vigente. Atualize
   o conjunto quando uma responsabilidade mudar; não reintroduza percursos antigos,
   observadores ou instruções duplicadas. Piloto real e descoberta no aplicativo
   são verificações próprias; testes locais não certificam execução de agentes.
@@ -112,7 +113,7 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
 - Os registros de integridade em `.bezalel/upstream.json` e no projeto consumidor
   existem para detectar alterações antes de atualizar, limitados a arquivos
   gerenciados. Não regenere hashes de toda a árvore a cada contribuição.
-- O registro v2 é um snapshot opcional da issue. Não exija Markdown paralelo por
+- O registro é um snapshot opcional da issue. Não exija Markdown paralelo por
   demanda nem preencha decisões/resultados para satisfazer o checker. Migração
   de v1 é explícita, com provas reais; comandos declarados nunca são executados
   pelo validador. Arquivos removidos não podem permanecer referenciados nos guias.

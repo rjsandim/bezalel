@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Confere declarações da v2, sem executar ferramentas ou autenticar decisões."""
+"""Confere declarações de entrega, sem executar ferramentas ou autenticar decisões."""
 import argparse
 from datetime import datetime
 import hashlib
@@ -73,8 +73,8 @@ def https_reference(value):
 
 def validate_config(config, project=None):
     fields = {"schema_version", "project", "context", "interfaces", "checks", "production_branches"}
-    require(isinstance(config, dict) and set(config) == fields, "Configuração v2: campos ausentes/desconhecidos; não declare permissões, credenciais ou observadores.")
-    require(type(config["schema_version"]) is int and config["schema_version"] == 2 and text(config["project"]), "Use configuração v2 com nome do projeto; migre v1 explicitamente.")
+    require(isinstance(config, dict) and set(config) == fields, "Configuração do projeto: campos ausentes/desconhecidos; não declare permissões, credenciais ou observadores.")
+    require(type(config["schema_version"]) is int and config["schema_version"] == 2 and text(config["project"]), "Use schema_version 2 e nome do projeto; migre o formato 1 explicitamente.")
     context = config["context"]
     require(isinstance(context, dict) and set(context) == {"architecture", "business"}, "Declare contexto de arquitetura e negócio.")
     for value in context.values():
@@ -266,13 +266,13 @@ def verify_disposition(record):
         require(disposition.get("issue_state") == "open", "Adiamento/transferência preserva issue aberta.")
         require(text(disposition.get("owner")) and text(disposition.get("resume_condition")), "Declare dono e retomada.")
     if disposition["kind"] == "transferred":
-        require(disposition.get("target") in {"bug", "improvement", "feature"} - {record["scenario"]} and text(disposition.get("target_started_evidence")), "Transferência exige destino v2 iniciado e verificado na mesma issue.")
+        require(disposition.get("target") in {"bug", "improvement", "feature"} - {record["scenario"]} and text(disposition.get("target_started_evidence")), "Transferência exige destino iniciado e verificado na mesma issue.")
 
 
 def validate_delivery(record, project, stage, config=None):
     require(stage in STAGES, "Etapa desconhecida.")
     fields = {"schema_version", "scenario", "issue", "roles", "owner", "implementers", "isolation", "investigation", "ui", "database", "candidate", "checks", "integration", "review", "security", "qa", "manual_test", "acceptance", "pr_draft", "pull_requests", "handoff", "blocker", "disposition"}
-    require(isinstance(record, dict) and set(record) <= fields and type(record.get("schema_version")) is int and record["schema_version"] == 2, "Use registro v2; campos desconhecidos ou v1 precisam de migração explícita.")
+    require(isinstance(record, dict) and set(record) <= fields and type(record.get("schema_version")) is int and record["schema_version"] == 2, "Use schema_version 2 no registro; campos desconhecidos ou formatos antigos precisam de migração explícita.")
     require(text(record.get("scenario")) and record["scenario"] in {"bug", "improvement", "feature"}, "Selecione bug, improvement ou feature.")
     issue = record.get("issue")
     require(isinstance(issue, dict) and https_reference(issue.get("url")), "Intenção exige URL de issue; o CLI não verifica o serviço remoto.")

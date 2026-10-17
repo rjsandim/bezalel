@@ -4,20 +4,20 @@
   "company_flow": {
     "company_id": "534d1f66-90a5-462d-bf78-29c6ccf9ef94",
     "revision": 1179,
-    "source": "bezalel-v2.md",
-    "skills": "bezalel-v2-skills.md",
+    "source": "dream-team.md",
+    "skills": "dream-team-skills.md",
     "scenarios": [
       {
         "id": "072ed464-456f-4ac6-ae71-b3befd441822",
-        "name": "1 • Bug v2 — investigar e entregar a correção"
+        "name": "1 • Bug — investigar e entregar a correção"
       },
       {
         "id": "dd7c337d-52cd-40ac-831f-27d7406d2f65",
-        "name": "2 • Melhoria v2 — delimitar e validar a mudança"
+        "name": "2 • Melhoria — delimitar e validar a mudança"
       },
       {
         "id": "a92c3bfb-2d6e-466e-a94a-3a5714dad560",
-        "name": "3 • Feature v2 — aprovar e entregar o conjunto"
+        "name": "3 • Feature — aprovar e entregar o conjunto"
       }
     ]
   },
@@ -57,8 +57,8 @@
         "iss-audit",
         "humanizer"
       ],
-      "codex": "codex/bezalel-produto.toml",
-      "claude": "claude/bezalel-produto.md"
+      "codex": "codex/dream-team-produto.toml",
+      "claude": "claude/dream-team-produto.md"
     },
     "coordenador": {
       "file": "roles/coordenador.md",
@@ -115,8 +115,8 @@
         "development-test-workbook",
         "humanizer"
       ],
-      "codex": "codex/bezalel-coordenador.toml",
-      "claude": "claude/bezalel-coordenador.md"
+      "codex": "codex/dream-team-coordenador.toml",
+      "claude": "claude/dream-team-coordenador.md"
     },
     "infraestrutura": {
       "file": "roles/infraestrutura.md",
@@ -135,8 +135,8 @@
       "skills": [
         "env"
       ],
-      "codex": "codex/bezalel-infraestrutura.toml",
-      "claude": "claude/bezalel-infraestrutura.md"
+      "codex": "codex/dream-team-infraestrutura.toml",
+      "claude": "claude/dream-team-infraestrutura.md"
     },
     "dev-fullstack": {
       "file": "roles/dev-fullstack.md",
@@ -163,8 +163,8 @@
         "implementar-snapshots",
         "agent-browser"
       ],
-      "codex": "codex/bezalel-dev-fullstack.toml",
-      "claude": "claude/bezalel-dev-fullstack.md"
+      "codex": "codex/dream-team-dev-fullstack.toml",
+      "claude": "claude/dream-team-dev-fullstack.md"
     },
     "backend": {
       "file": "roles/backend.md",
@@ -189,8 +189,8 @@
         "clean-architecture",
         "implementar-snapshots"
       ],
-      "codex": "codex/bezalel-backend.toml",
-      "claude": "claude/bezalel-backend.md"
+      "codex": "codex/dream-team-backend.toml",
+      "claude": "claude/dream-team-backend.md"
     },
     "frontend-web": {
       "file": "roles/frontend-web.md",
@@ -215,8 +215,8 @@
         "clean-architecture",
         "agent-browser"
       ],
-      "codex": "codex/bezalel-frontend-web.toml",
-      "claude": "claude/bezalel-frontend-web.md"
+      "codex": "codex/dream-team-frontend-web.toml",
+      "claude": "claude/dream-team-frontend-web.md"
     },
     "mobile": {
       "file": "roles/mobile.md",
@@ -239,8 +239,8 @@
         "clean-code",
         "clean-architecture"
       ],
-      "codex": "codex/bezalel-mobile.toml",
-      "claude": "claude/bezalel-mobile.md"
+      "codex": "codex/dream-team-mobile.toml",
+      "claude": "claude/dream-team-mobile.md"
     },
     "qa": {
       "file": "roles/qa.md",
@@ -268,8 +268,8 @@
         "agent-browser",
         "verification-planning"
       ],
-      "codex": "codex/bezalel-qa.toml",
-      "claude": "claude/bezalel-qa.md"
+      "codex": "codex/dream-team-qa.toml",
+      "claude": "claude/dream-team-qa.md"
     },
     "appsec": {
       "file": "roles/appsec.md",
@@ -288,8 +288,8 @@
       "skills": [
         "security-audit"
       ],
-      "codex": "codex/bezalel-appsec.toml",
-      "claude": "claude/bezalel-appsec.md"
+      "codex": "codex/dream-team-appsec.toml",
+      "claude": "claude/dream-team-appsec.md"
     }
   },
   "external_actors": {

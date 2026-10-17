@@ -1,4 +1,4 @@
-"""Cenários sintéticos da v2; decisões fictícias nunca autorizam trabalho real."""
+"""Cenários sintéticos do fluxo; decisões fictícias nunca autorizam trabalho real."""
 from copy import deepcopy
 import json
 from pathlib import Path
@@ -472,7 +472,7 @@ class DeliveryContractTests(unittest.TestCase):
                 self.validate('plan')
 
     def test_adapter_cannot_omit_contract_or_change_permissions(self):
-        for adapter in [{'name': 'wrong', 'description': 'fixture', 'developer_instructions': 'missing'}, {'name': 'bezalel-produto', 'description': 'fixture', 'developer_instructions': 'agents/roles/produto.md agents/bezalel-v2.md', 'approval_policy': 'never'}]:
+        for adapter in [{'name': 'wrong', 'description': 'fixture', 'developer_instructions': 'missing'}, {'name': 'dream-team-produto', 'description': 'fixture', 'developer_instructions': 'agents/roles/produto.md agents/dream-team.md', 'approval_policy': 'never'}]:
             with patch.object(repository.tomllib, 'loads', return_value=adapter):
                 self.assertTrue(repository.validate_agents())
 

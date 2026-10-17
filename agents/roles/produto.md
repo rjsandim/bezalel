@@ -11,9 +11,9 @@ Qualificar a intenção e manter requisitos e destinos nas issues do cenário co
 
 Processos sob sua responsabilidade:
 
-- [bug](../bezalel-v2.md#process-bug)
-- [improvement](../bezalel-v2.md#process-improvement)
-- [feature](../bezalel-v2.md#process-feature)
+- [bug](../dream-team.md#process-bug)
+- [improvement](../dream-team.md#process-improvement)
+- [feature](../dream-team.md#process-feature)
 
 ## Entradas
 
@@ -31,7 +31,7 @@ MCP/API do GitHub para issues e referências autorizadas; leitura do contexto de
 
 Não confirma causa técnica ou vulnerabilidade, não implementa, não testa o produto e não decide mudanças de regra/escopo. Decisão humana existente é reaproveitada somente se cobrir o conteúdo exato. Não fecha intenção restante por rejeição de uma solução.
 
-Siga R1–R10 e as condições do [fluxo vigente](../bezalel-v2.md). O contrato
+Siga R1–R10 e as condições do [fluxo vigente](../dream-team.md). O contrato
 orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto
@@ -42,7 +42,7 @@ Contexto permite investigação sem inventar causa, ou destino sem implementaç�
 
 [iss-audit](../../skills/iss-audit/SKILL.md); [humanizer](../../skills/humanizer/SKILL.md).
 
-Use somente o modo e os pré-requisitos da [etapa atribuída](../bezalel-v2-skills.md).
+Use somente o modo e os pré-requisitos da [etapa atribuída](../dream-team-skills.md).
 Reutilize resultados válidos; não reaplique uma skill a cada handoff. As skills
 manuais não são uma continuação automática. Não altere a skill para contornar
 um limite do papel.

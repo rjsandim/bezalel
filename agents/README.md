@@ -1,10 +1,10 @@
 # DreamTeam — equipe de agentes do Bezalel
 
-DreamTeam é a equipe de nove agentes que atua no fluxo de desenvolvimento
-**Bezalel v2**. Company Flow é a ferramenta usada para representar o fluxo visualmente.
+DreamTeam é a equipe de nove agentes do plugin **Bezalel**. Company Flow é a
+ferramenta usada para representar seu fluxo de desenvolvimento visualmente.
 
-Os agentes definem papéis; o [fluxo](bezalel-v2.md) define processos e
-condições; as [skills](bezalel-v2-skills.md) descrevem métodos. O contexto de
+Os agentes definem papéis; o [fluxo](dream-team.md) define processos e
+condições; as [skills](dream-team-skills.md) descrevem métodos. O contexto de
 arquitetura e negócio pertence ao projeto consumidor em `.bezalel/project.json`.
 O [catálogo](catalog.json) relaciona nove agentes e o aprovador humano externo aos
 20 processos da revisão 1179, sem criar um agente por etapa.
@@ -52,15 +52,16 @@ da tarefa e as regras do aplicativo; este pacote não inicia uma equipe por si s
 ## Adaptadores do Codex e do Claude Code
 
 A pasta `codex/` contém um TOML por agente; `claude/` contém um Markdown por agente,
-com nome `bezalel-<id>`, descrição e
+com nome `dream-team-<id>`, descrição e
 instruções de carregamento. São adaptadores curtos dos contratos, sem modelo fixo,
 credenciais ou alteração de permissões. Instale-os conforme o
 [README principal](../README.md#como-adotar-o-bezalel-em-um-projeto).
 
-Os agentes usam o namespace técnico `bezalel-<id>` do pacote. Os documentos do fluxo
-usam o prefixo `bezalel-`; seus caminhos ficam no catálogo. Os campos `company_flow` e
-`company_flow_role_id` do catálogo mantêm a correspondência com a ferramenta
-visual; a nomenclatura do fluxo é Bezalel e a da equipe é DreamTeam.
+Os nomes e caminhos dos adaptadores ficam no catálogo e coincidem entre as duas
+plataformas. O fluxo e sua relação de skills usam o prefixo `dream-team`; inventário
+e guia de uso manual são documentos gerais do plugin, sem prefixo. Os campos
+`company_flow` e `company_flow_role_id` mantêm a correspondência com a ferramenta
+visual. O plugin e seus comandos manuais continuam usando `bezalel`.
 
 O formato segue a [documentação oficial de agentes](https://learn.chatgpt.com/docs/agent-configuration/subagents):
 arquivos por projeto ficam em `.codex/agents/`; permissões e MCPs vêm da sessão
@@ -84,7 +85,7 @@ merge, deploy ou as skills reservadas ao uso manual.
 
 ## Registros e validação
 
-O [contrato de registro v2](record-contract.md) permite conferir um snapshot local
+O [contrato de registro](record-contract.md) permite conferir um snapshot local
 opcional das declarações da issue, sem criar outra fonte de requisitos. O checker
 não executa os comandos do projeto, consulta GitHub ou autentica pessoas.
 

@@ -1,10 +1,10 @@
-# Inventário de skills para o fluxo Bezalel v2
+# Inventário de skills do Bezalel
 
 Inventário solicitado em 16/10/2026, limitado às skills do Bezalel e ao
 [repositório akitaonrails/my-skills](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a).
 A base inicial tinha **8 pacotes locais e 23 externos**, com security-audit em ambos:
 **30 skills distintas examinadas**. Após as duas rodadas autorizadas, o Bezalel
-contém **18 pacotes**: **11 indicados condicionalmente na v2**, cinco novas skills
+contém **18 pacotes**: **11 indicados condicionalmente no fluxo**, cinco novas skills
 somente manuais e os dois procedimentos operacionais anteriores fora do fluxo.
 
 O repositório completo foi baixado em `.local-review/skill-sources/my-skills-20261016/`,
@@ -21,7 +21,7 @@ não um mecanismo de atualização automática nem certificação de execução.
 | [env](../skills/env/SKILL.md) | Ambientes locais com worktree, Docker e isolamento por projeto. | Selecionada no DevOps, preservando manifesto, contexto explícito e autorizações. |
 | [development-test-workbook](../skills/development-test-workbook/SKILL.md) | Roteiro manual em Excel com dados, evidências e backlog. | Selecionada no pacote de aceite: obrigatória para produzir o .xlsx dos cenários 2/3; opcional no bug. |
 | [implementar-snapshots](../skills/implementar-snapshots/SKILL.md) | Construir/corrigir funcionalidade de snapshots full/tiny. | Selecionada condicionalmente para backend/fullstack quando essa funcionalidade for a tarefa; não é ferramenta de restore avulso. |
-| [security-audit](../skills/security-audit/SKILL.md) | Modelo de ameaças, auditoria e verificação adversarial. | Já importada da mesma revisão externa; selecionada no AppSec com os limites de responsabilidade e acesso da v2. |
+| [security-audit](../skills/security-audit/SKILL.md) | Modelo de ameaças, auditoria e verificação adversarial. | Já importada da mesma revisão externa; selecionada no AppSec com os limites de responsabilidade e acesso do fluxo. |
 | [vps-deploy](../skills/vps-deploy/SKILL.md) | Operação e diagnóstico de VPS/Coolify por projeto. | Fora da execução dos três cenários: eles terminam na entrega da PR. Operação remota depende de outra tarefa autorizada. |
 | [limpar-orbstack](../skills/limpar-orbstack/SKILL.md) | Auditoria e remoção de ambientes concluídos. | Fora da execução dos três cenários: abrir PR não prova integração nem autoriza limpeza. |
 
@@ -32,28 +32,28 @@ não um mecanismo de atualização automática nem certificação de execução.
 | Skill de origem | Finalidade | Decisão | Motivo ou condição |
 |---|---|---|---|
 | [agent-browser](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/agent-browser/SKILL.md) | Automação web/Electron e exploração de interfaces. | Copiada sem alterações; indicação condicional. | Reprodução/exploração web nos devs fullstack/web, UI/UX e QA/E2E. Exige CLI e guias dinâmicos disponíveis; não foi encontrado no PATH local. MCP continua preferido para operações do serviço; navegador serve à prova da interface. |
-| [blog-cost-charts](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/blog-cost-charts/SKILL.md) | Gráficos de custo/desempenho para blog bilíngue. | Fora do escopo. | Acoplada ao blog Hugo, ao bucket do autor e à leitura de segredos do shell; não resolve etapa de entrega de software da v2. |
+| [blog-cost-charts](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/blog-cost-charts/SKILL.md) | Gráficos de custo/desempenho para blog bilíngue. | Fora do escopo. | Acoplada ao blog Hugo, ao bucket do autor e à leitura de segredos do shell; não resolve etapa de entrega de software do fluxo. |
 | [clonedeps](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/clonedeps/SKILL.md) | Inspecionar código-fonte de dependências relevantes. | Candidata a adaptação; não incorporada. | Útil na investigação, mas exige @librarian, estado .slim e alterações em AGENTS/.ignore; a adaptação proposta está abaixo. |
 | [codemap](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/codemap/SKILL.md) | Mapeamento hierárquico de repositório desconhecido. | Candidata a adaptação; não incorporada. | Caminho fixo do OpenCode, agentes fixer, mapas por pasta e hashes persistentes. Não convém impor esse custo a toda investigação. |
-| [deepwork](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/deepwork/SKILL.md) | Orquestração de trabalhos grandes em fases. | Não selecionada. | Define outro protocolo de agentes, estado local, gates e commits; concorreria com a coordenação já desenhada na v2. |
+| [deepwork](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/deepwork/SKILL.md) | Orquestração de trabalhos grandes em fases. | Não selecionada. | Define outro protocolo de agentes, estado local, gates e commits; concorreria com a coordenação já desenhada no fluxo. |
 | [effect](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/effect/SKILL.md) | Desenvolvimento com Effect v4/effect-smol. | Específica de outro contexto. | Pressupõe esse stack, diretórios e helpers de teste do OpenCode. Só reavaliar para um projeto que realmente os use; não instalar o stack por causa da skill. |
 | [fact-check](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/fact-check/SKILL.md) | Verificação factual de artigos em duas passagens. | Fora do escopo. | Voltada a textos editoriais, com CLIs/modelos de terceiros e fanout de verificadores; não substitui análise de requisitos, QA ou auditoria de código. |
-| [github-resolution](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/github-resolution/SKILL.md) | Executar correções e resolver tickets auditados. | Copiada; somente chamada manual. | Fora do fluxo Bezalel. Preservado o conteúdo; metadado de invocação explícita acrescentado. Conferir aprovação real e compatibilidade com as auditorias adaptadas; ver guia manual. |
+| [github-resolution](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/github-resolution/SKILL.md) | Executar correções e resolver tickets auditados. | Copiada; somente chamada manual. | Fora do fluxo da DreamTeam. Preservado o conteúdo; metadado de invocação explícita acrescentado. Conferir aprovação real e compatibilidade com as auditorias adaptadas; ver guia manual. |
 | [humanizer](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/humanizer/SKILL.md) | Revisar redação preservando conteúdo e voz. | Copiada integralmente; selecionada. | Modo incorporado serve para histórias, descrição de PR e instruções ao humano. Opcional; não decide requisitos, valida fatos ou reescreve decisões já submetidas. |
 | [improve-codebase-architecture](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/improve-codebase-architecture/SKILL.md) | Encontrar módulos rasos e oportunidades de aprofundamento. | Candidata a adaptação; não incorporada. | Pressupõe CONTEXT.md/ADRs e agente Explore; contém links para grill-with-docs ausente deste repositório. Nossa clean-architecture já cobre a revisão corrente. |
 | [iss-audit](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/iss-audit/SKILL.md) | Verificar relatos, reprodução, causa e adequação de issues. | Copiada e adaptada com autorização; selecionada. | Qualificação PM separada da investigação dev. Preserva evidência/refutação e retira resolução/merge obrigatórios, acesso amplo e decisões automáticas de produto. |
 | [loop-engineering](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/loop-engineering/SKILL.md) | Entrevista e monitoramento de loops de execução. | Não selecionada. | Depende de runtime, callbacks e agentes externos concretos; não é um procedimento portátil para este refinamento documental. |
 | [post-refactor](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/post-refactor/SKILL.md) | Revisar regressões e qualidade após refatorações. | Não selecionada nesta rodada. | Há sobreposição com clean-code, clean-architecture e QA; também encaminha a especialistas @explorer/@oracle/@fixer/@designer. Reavaliar se houver lacuna concreta. |
 | [pr-audit](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/pr-audit/SKILL.md) | Auditar alegações, código e segurança de PRs. | Copiada e adaptada com autorização; selecionada. | Revisão TL do candidato integrado, antes ou depois da PR, sem editar/testar/mesclar. Preserva conferência de alegações, fronteiras, consumidores, regressões e validade de provas. |
-| [pr-bump](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/pr-bump/SKILL.md) | Consolidar atualizações de dependências de bots. | Copiada; somente chamada manual. | Fora do fluxo Bezalel. Conteúdo original com exemplos Rails/Bundler e metadado explícito; confirmar stack e autorização antes de uso. |
+| [pr-bump](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/pr-bump/SKILL.md) | Consolidar atualizações de dependências de bots. | Copiada; somente chamada manual. | Fora do fluxo da DreamTeam. Conteúdo original com exemplos Rails/Bundler e metadado explícito; confirmar stack e autorização antes de uso. |
 | [pr-post-audit](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/pr-post-audit/SKILL.md) | Auditar a composição após merges. | Copiada como apoio manual autorizado. | Dependência de release e github-resolution em certos casos. Fora das etapas dos três cenários; conteúdo original e interface preservados, política explícita acrescentada. |
-| [reflect](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/reflect/SKILL.md) | Analisar fricções recorrentes e sugerir melhorias. | Copiada; somente chamada manual. | Fora do fluxo Bezalel. Conteúdo original e metadado explícito; avaliar padrões somente quando solicitado, sem criar agentes por inferência. |
-| [release](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/release/SKILL.md) | Versionar, publicar e verificar releases. | Copiada; somente chamada manual. | Fora do fluxo Bezalel. Conteúdo original e metadado explícito; publicação/CI/limpeza dependem do pedido e regras do projeto. |
+| [reflect](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/reflect/SKILL.md) | Analisar fricções recorrentes e sugerir melhorias. | Copiada; somente chamada manual. | Fora do fluxo da DreamTeam. Conteúdo original e metadado explícito; avaliar padrões somente quando solicitado, sem criar agentes por inferência. |
+| [release](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/release/SKILL.md) | Versionar, publicar e verificar releases. | Copiada; somente chamada manual. | Fora do fluxo da DreamTeam. Conteúdo original e metadado explícito; publicação/CI/limpeza dependem do pedido e regras do projeto. |
 | [release-smoke-test](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/release-smoke-test/SKILL.md) | Testar artefato do oh-my-opencode-slim. | Específica de outro produto. | Empacota plugin, configura OpenCode/modelos e usa diretórios temporários próprios; não é um smoke test genérico dos projetos do Bezalel. |
-| [security-audit](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/security-audit/SKILL.md) | Auditoria de segurança por evidência. | Reutilizada da cópia existente. | Não houve recópia/atualização. O conteúdo já coincide com a revisão externa; limites de uso da v2 e diferenças preexistentes estão abaixo. |
+| [security-audit](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/security-audit/SKILL.md) | Auditoria de segurança por evidência. | Reutilizada da cópia existente. | Não houve recópia/atualização. O conteúdo já coincide com a revisão externa; limites de uso do fluxo e diferenças preexistentes estão abaixo. |
 | [simplify](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/simplify/SKILL.md) | Simplificar código preservando comportamento. | Não incorporada; mantida clean-code. | Comparação concluída e recomendação comunicada antes: clean-code já cobre simplificação, comportamento e escopo, além de erros, contratos e concorrência. Evita duplicar a mesma passagem. |
 | [verification-planning](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/verification-planning/SKILL.md) | Planejar um caminho de evidências por afirmação e risco. | Copiada integralmente; selecionada com condição. | Usar quando as capacidades/caminho são conhecidos pelo projeto. Se depender do @librarian citado no original e ele não existir, registrar a limitação; não criar um agente para satisfazê-la. |
-| [worktrees](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/worktrees/SKILL.md) | Orquestrar trabalho paralelo por worktrees OMO. | Não selecionada. | Sobrepõe ENV e define outros caminhos, donos, confirmações e integração pelo orquestrador. Manter ENV e o dev integrador da v2. |
+| [worktrees](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a/worktrees/SKILL.md) | Orquestrar trabalho paralelo por worktrees OMO. | Não selecionada. | Sobrepõe ENV e define outros caminhos, donos, confirmações e integração pelo orquestrador. Manter ENV e o dev integrador do fluxo. |
 
 ## Cópias realizadas e preservação
 
@@ -95,7 +95,7 @@ aprovação de tarefas futuras nem certificam decisões humanas.
 ## Uso manual fora do fluxo
 
 As cinco novas skills manuais e suas condições estão no
-[guia de uso manual](bezalel-skills-uso-manual.md). Não são uma continuação
+[guia de uso manual](skills-uso-manual.md). Não são uma continuação
 automática após a PR. A política `allow_implicit_invocation: false` foi registrada
 nos adaptadores; sua interpretação no aplicativo não foi certificada.
 
@@ -130,7 +130,7 @@ Ainda não há skill portátil específica de DB Reviewer/modelagem e migrations
 nesses conjuntos. Os processos e ferramentas de verificação continuam exigidos;
 uma skill opcional indisponível não dispensa evidência obrigatória.
 
-A [relação por processo e etapa](bezalel-v2-skills.md) registra as 11 skills
+A [relação por processo e etapa](dream-team-skills.md) registra as 11 skills
 indicadas em 24 etapas de 16 processos. Os 20 processos, 60 etapas, responsáveis,
 decisões e caminhos permanecem. Os [contratos e adaptadores](README.md) usam essa
 seleção; as skills não foram alteradas na conversão. Não houve execução de produto,
