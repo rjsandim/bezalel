@@ -1,0 +1,7 @@
+interface:
+  display_name: "Reflexão sobre o trabalho"
+  short_description: "Uso manual para avaliar melhorias recorrentes"
+  default_prompt: "Use $reflect para avaliar padrões deste trabalho e propor melhorias apoiadas em evidências."
+
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,7 @@
+{
+  "name": "bezalel",
+  "version": "2.0.0-d6b9e45e77da1729",
+  "description": "Agentes do Company Flow v2 e skills para entrega de software.",
+  "skills": "./skills/",
+  "hooks": "./hooks/codex.json"
+}

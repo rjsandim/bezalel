@@ -1,0 +1,7 @@
+interface:
+  display_name: "Resolução de tickets"
+  short_description: "Uso manual para executar resoluções autorizadas"
+  default_prompt: "Use $github-resolution para executar as resoluções auditadas dentro do escopo autorizado."
+
+policy:
+  allow_implicit_invocation: false

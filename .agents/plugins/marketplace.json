@@ -1,0 +1,20 @@
+{
+  "name": "bezalel",
+  "interface": {
+    "displayName": "Bezalel"
+  },
+  "plugins": [
+    {
+      "name": "bezalel",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

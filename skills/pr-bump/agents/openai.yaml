@@ -1,0 +1,7 @@
+interface:
+  display_name: "Atualização de dependências"
+  short_description: "Uso manual para consolidar atualizações de bots"
+  default_prompt: "Use $pr-bump para avaliar e consolidar as atualizações de dependências autorizadas."
+
+policy:
+  allow_implicit_invocation: false

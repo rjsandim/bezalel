@@ -1,0 +1,7 @@
+interface:
+  display_name: "Clean Code"
+  short_description: "Corrige código em desenvolvimento com Clean Code"
+  default_prompt: "Use $clean-code para revisar e corrigir o código desta tarefa, preservando os contratos existentes e validando as mudanças relevantes."
+
+policy:
+  allow_implicit_invocation: true

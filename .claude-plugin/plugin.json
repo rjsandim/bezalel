@@ -1,0 +1,42 @@
+{
+  "name": "bezalel",
+  "version": "2.0.0-d6b9e45e77da1729",
+  "description": "Agentes do Company Flow v2 e skills para entrega de software.",
+  "author": {
+    "name": "Bezalel"
+  },
+  "agents": [
+    "./contracts/claude/bezalel-produto.md",
+    "./contracts/claude/bezalel-coordenador.md",
+    "./contracts/claude/bezalel-infraestrutura.md",
+    "./contracts/claude/bezalel-dev-fullstack.md",
+    "./contracts/claude/bezalel-backend.md",
+    "./contracts/claude/bezalel-frontend-web.md",
+    "./contracts/claude/bezalel-mobile.md",
+    "./contracts/claude/bezalel-qa.md",
+    "./contracts/claude/bezalel-appsec.md"
+  ],
+  "skills": [
+    "./skills/agent-browser",
+    "./skills/clean-architecture",
+    "./skills/clean-code",
+    "./skills/development-test-workbook",
+    "./skills/humanizer",
+    "./skills/implementar-snapshots",
+    "./skills/iss-audit",
+    "./skills/pr-audit",
+    "./skills/security-audit",
+    "./skills/verification-planning"
+  ],
+  "commands": [
+    "./commands/bezalel-env.md",
+    "./commands/bezalel-github-resolution.md",
+    "./commands/bezalel-limpar-orbstack.md",
+    "./commands/bezalel-pr-bump.md",
+    "./commands/bezalel-pr-post-audit.md",
+    "./commands/bezalel-reflect.md",
+    "./commands/bezalel-release.md",
+    "./commands/bezalel-vps-deploy.md"
+  ],
+  "hooks": "./hooks/claude.json"
+}

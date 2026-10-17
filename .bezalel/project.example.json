@@ -1,0 +1,20 @@
+{
+  "schema_version": 2,
+  "project": "exemplo-sem-servicos-conectados",
+  "context": {
+    "architecture": "docs/architecture.md",
+    "business": "docs/business.md"
+  },
+  "interfaces": [
+    "api",
+    "web"
+  ],
+  "checks": {
+    "test": [],
+    "lint": [],
+    "build": []
+  },
+  "production_branches": {
+    "principal": "CONFIGURAR_BRANCH_REAL"
+  }
+}

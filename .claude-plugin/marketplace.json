@@ -1,0 +1,14 @@
+{
+  "name": "bezalel",
+  "description": "Agentes do Company Flow v2 e skills para entrega de software.",
+  "owner": {
+    "name": "Bezalel"
+  },
+  "plugins": [
+    {
+      "name": "bezalel",
+      "source": "./",
+      "description": "Agentes do Company Flow v2 e skills para entrega de software."
+    }
+  ]
+}
