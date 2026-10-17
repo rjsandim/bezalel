@@ -1,14 +1,14 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "bezalel",
-  "version": "2.0.0-86504140a2195f72",
-  "description": "Fluxo de desenvolvimento Bezalel v2, equipe DreamTeam e skills.",
+  "version": "2.0.0-56f4e48cf0fd8f8f",
+  "description": "Plugin Bezalel com a equipe DreamTeam, fluxo de desenvolvimento e skills.",
   "extensions": {
     "com.openai": {
       "hooks": "./hooks/codex.json",
       "interface": {
         "displayName": "Bezalel",
-        "shortDescription": "Fluxo de desenvolvimento Bezalel v2, equipe DreamTeam e skills.",
+        "shortDescription": "Plugin Bezalel com a equipe DreamTeam, fluxo de desenvolvimento e skills.",
         "developerName": "Bezalel",
         "category": "Productivity"
       }

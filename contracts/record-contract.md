@@ -1,10 +1,13 @@
-# Contrato local da entrega v2
+# Contrato local da entrega
 
 O registro é um **snapshot opcional das declarações da issue**, para conferência
 local. A issue e suas submissões continuam sendo a fonte de requisitos, decisões
 e evidências. Não é necessário manter um MD paralelo por demanda. O
 [modelo](templates/delivery.example.json) é incompleto por intenção; não contém
 aprovações ou resultados fictícios.
+
+O campo `schema_version: 2` identifica o formato dos dados, tanto no registro
+quanto na configuração do projeto. Ele não é uma versão da equipe ou dos agentes.
 
 Guarde o snapshot em `.bezalel/deliveries/<id>.local.json`; incorpore
 `/deliveries/*.local.json` ao `.bezalel/.gitignore`. Referências privadas não entram
@@ -13,7 +16,7 @@ issue, não fontes concorrentes. O validador só lê arquivos, não acessa servi
 
 ## Configuração do projeto
 
-O [modelo v2](../.bezalel/project.example.json) declara `project`, documentos reais
+O [modelo](../.bezalel/project.example.json) declara `project`, documentos reais
 em `context.architecture/business`, interfaces, `checks.test/lint/build` como
 listas de argumentos e `production_branches` como mapa repositório → branch real.
 Não presuma main/master. Os nomes de repositórios precisam coincidir com os do
@@ -27,7 +30,7 @@ python3 .bezalel/base/scripts/check_delivery.py --project . --record .bezalel/de
 
 | Etapa | Declarações exigidas |
 |---|---|
-| `plan` | Registro v2, cenário, URL de issue e papéis existentes. Pode ser intenção incompleta; não libera execução. |
+| `plan` | Registro, cenário, URL de issue e papéis existentes. Pode ser intenção incompleta; não libera execução. |
 | `investigate` | Critérios/dependências, devs e dono da integração, isolamento; feature exige escopo humano aprovado. |
 | `implement` | Acrescenta investigação do escopo, UI/UX quando afetada e situação de banco resolvida. |
 | `accept` | Candidato integrado, checks prévios, revisão TL, AppSec, QA e roteiro pronto para execução humana. |
@@ -123,7 +126,7 @@ Correção retorna ao TL/dev, depois integração e verificações afetadas.
 Todos exigem `reason`, `evidence` do estado real e decisão humana. Descarte ou
 comportamento esperado exigem `issue_state: closed`; adiamento/transferência,
 `open`, `owner` e `resume_condition`. Transferência usa `target` de outro cenário
-v2 e `target_started_evidence` do destino iniciado na mesma issue.
+e `target_started_evidence` do destino iniciado na mesma issue.
 `disposition_subject(record)` vincula a decisão à issue, tipo, motivo, destino,
 dono e retomada, sem confundir observação técnica de estado com decisão humana.
 
@@ -141,5 +144,5 @@ não preencha sucesso para converter registros antigos.
 
 Os checks são estruturais. A autenticação humana, independência real, veracidade
 da evidência, adequação da cobertura e conteúdo do Excel dependem do executor e
-do operador. O fluxo completo está em [Bezalel v2](bezalel-v2.md);
+do operador. O fluxo completo está em [DreamTeam](dream-team.md);
 este esquema não é um runtime, agendador, autorização ou substituto do fluxo.

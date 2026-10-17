@@ -49,6 +49,7 @@ def manual_skill(path):
 
 
 def desired(project, base, platforms, automatic, contract_dir='agents'):
+    contract_root = (base / contract_dir).resolve()
     catalog = read_json(base / contract_dir / 'catalog.json')
     if catalog.get('schema_version') != 2 or len(catalog.get('roles', {})) != 9:
         raise DistributionError('Catálogo de agentes incompatível.')
@@ -80,13 +81,19 @@ def desired(project, base, platforms, automatic, contract_dir='agents'):
         if not re.fullmatch('[a-z0-9-]+', role):
             raise DistributionError('Nome de agente inválido.')
         for platform in platforms:
-            adapter = inside(base / contract_dir, entry[platform])
+            adapter = inside(contract_root, entry[platform])
             suffix = '.toml' if platform == 'codex' else '.md'
-            entries['.' + platform + '/agents/bezalel-' + role + suffix] = {
+            if (adapter.parent != contract_root / platform or adapter.suffix != suffix
+                    or not re.fullmatch('[a-z0-9-]+', adapter.stem)):
+                raise DistributionError('Caminho de adaptador inválido no catálogo.')
+            target = '.' + platform + '/agents/' + adapter.name
+            if target in entries:
+                raise DistributionError('Adaptador duplicado no catálogo.')
+            entries[target] = {
                 'kind': 'file', 'content': adapter.read_text()}
     instructions = '\n'.join([
         '## Uso do Bezalel neste projeto', '',
-        '- Bezalel é o fluxo de desenvolvimento; DreamTeam é a equipe de agentes.',
+        '- Bezalel é o plugin; DreamTeam é a equipe de agentes de desenvolvimento.',
         '- Leia `.bezalel/project.json` e seus documentos de arquitetura e negócio.',
         '- Use `.bezalel/base/agents/README.md`, o contrato do papel atribuído e',
         '  `.bezalel/base/agents/' + catalog['company_flow']['source'] + '`; selecione skills pela relação',
@@ -97,7 +104,7 @@ def desired(project, base, platforms, automatic, contract_dir='agents'):
         '- Scripts e referências partem da pasta real da skill carregada.',
         '- Ao mudar comandos, estrutura ou regras do projeto, atualize seu README e',
         '  AGENTS.md/CLAUDE.md. Preserve as instruções próprias fora deste bloco.',
-        '- Esta instalação não concede acesso nem inicia o fluxo Bezalel automaticamente.',
+        '- Esta instalação não concede acesso nem inicia o fluxo da DreamTeam automaticamente.',
     ])
     instructions = instructions.replace('.bezalel/base/agents/', '.bezalel/base/' + contract_dir + '/')
     for name in ['AGENTS.md', *(['CLAUDE.md'] if 'claude' in platforms else [])]:

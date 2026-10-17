@@ -1,6 +1,6 @@
 {
   "name": "bezalel",
-  "description": "Fluxo de desenvolvimento Bezalel v2, equipe DreamTeam e skills.",
+  "description": "Plugin Bezalel com a equipe DreamTeam, fluxo de desenvolvimento e skills.",
   "owner": {
     "name": "Bezalel"
   },
@@ -8,7 +8,7 @@
     {
       "name": "bezalel",
       "source": "./",
-      "description": "Fluxo de desenvolvimento Bezalel v2, equipe DreamTeam e skills."
+      "description": "Plugin Bezalel com a equipe DreamTeam, fluxo de desenvolvimento e skills."
     }
   ]
 }

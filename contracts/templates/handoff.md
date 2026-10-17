@@ -14,4 +14,4 @@ Use este formato na issue, sem abrir um MD paralelo por demanda.
 
 O recebedor confere versão, contexto e prova. Handoff não aprova produto, banco,
 risco, aceite ou efeitos externos. Reutilize resultados válidos; mudanças exigem
-revalidação somente do que foi afetado, conforme [R1–R10](../bezalel-v2.md).
+revalidação somente do que foi afetado, conforme [R1–R10](../dream-team.md).

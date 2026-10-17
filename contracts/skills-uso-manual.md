@@ -3,7 +3,7 @@
 As cinco skills abaixo foram copiadas a pedido de Rafael em 16/10/2026, da revisão
 `7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a` de
 [akitaonrails/my-skills](https://github.com/akitaonrails/my-skills/tree/7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a).
-**Nenhuma é indicada nas etapas do fluxo Bezalel.** A conclusão de uma auditoria
+**Nenhuma é indicada nas etapas do fluxo da DreamTeam.** A conclusão de uma auditoria
 ou a entrega da PR não dispara essas rotinas.
 
 | Skill | Uso pretendido | Condições concretas |

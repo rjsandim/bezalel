@@ -1,20 +1,20 @@
 {
   "name": "bezalel",
-  "version": "2.0.0-86504140a2195f72",
-  "description": "Fluxo de desenvolvimento Bezalel v2, equipe DreamTeam e skills.",
+  "version": "2.0.0-56f4e48cf0fd8f8f",
+  "description": "Plugin Bezalel com a equipe DreamTeam, fluxo de desenvolvimento e skills.",
   "author": {
     "name": "Bezalel"
   },
   "agents": [
-    "./contracts/claude/bezalel-produto.md",
-    "./contracts/claude/bezalel-coordenador.md",
-    "./contracts/claude/bezalel-infraestrutura.md",
-    "./contracts/claude/bezalel-dev-fullstack.md",
-    "./contracts/claude/bezalel-backend.md",
-    "./contracts/claude/bezalel-frontend-web.md",
-    "./contracts/claude/bezalel-mobile.md",
-    "./contracts/claude/bezalel-qa.md",
-    "./contracts/claude/bezalel-appsec.md"
+    "./contracts/claude/dream-team-produto.md",
+    "./contracts/claude/dream-team-coordenador.md",
+    "./contracts/claude/dream-team-infraestrutura.md",
+    "./contracts/claude/dream-team-dev-fullstack.md",
+    "./contracts/claude/dream-team-backend.md",
+    "./contracts/claude/dream-team-frontend-web.md",
+    "./contracts/claude/dream-team-mobile.md",
+    "./contracts/claude/dream-team-qa.md",
+    "./contracts/claude/dream-team-appsec.md"
   ],
   "skills": [
     "./skills/agent-browser",

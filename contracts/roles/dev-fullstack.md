@@ -11,7 +11,7 @@ Executar a fase atribuída para uma fatia vertical pequena entre camadas. Invest
 
 Processos sob sua responsabilidade:
 
-- [fullstack](../bezalel-v2.md#process-fullstack)
+- [fullstack](../dream-team.md#process-fullstack)
 
 ## Entradas
 
@@ -29,7 +29,7 @@ Ferramentas da stack e skills selecionadas para a fase. Executar scripts a parti
 
 Investigação ou mock não autorizam implementação definitiva. Antes da parte dependente: UI/UX e decisão de banco aplicáveis, inclusive qualquer migration e relação complexa. Não assume aprovação humana nem revisão independente de seu código. Não amplia o escopo para refatoração geral.
 
-Siga R1–R10 e as condições do [fluxo vigente](../bezalel-v2.md). O contrato
+Siga R1–R10 e as condições do [fluxo vigente](../dream-team.md). O contrato
 orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto
@@ -40,7 +40,7 @@ Resultado da fase cumpre critérios, erros/limites estão explícitos e integra�
 
 [iss-audit](../../skills/iss-audit/SKILL.md); [clean-code](../../skills/clean-code/SKILL.md); [clean-architecture](../../skills/clean-architecture/SKILL.md); [implementar-snapshots](../../skills/implementar-snapshots/SKILL.md); [agent-browser](../../skills/agent-browser/SKILL.md).
 
-Use somente o modo e os pré-requisitos da [etapa atribuída](../bezalel-v2-skills.md).
+Use somente o modo e os pré-requisitos da [etapa atribuída](../dream-team-skills.md).
 Reutilize resultados válidos; não reaplique uma skill a cada handoff. As skills
 manuais não são uma continuação automática. Não altere a skill para contornar
 um limite do papel.

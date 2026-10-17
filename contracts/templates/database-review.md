@@ -14,4 +14,4 @@ Status inicial: **aguardando revisão**. Estrutura, qualquer migration ou
 transformação complexa de relações exige decisão humana antes da implementação
 dependente. Proposta revisável, fonte da decisão e versão ficam vinculadas na
 issue. Este modelo e o parecer técnico não aprovam a mudança. Veja
-[proposta de banco](../bezalel-v2.md#process-bank).
+[proposta de banco](../dream-team.md#process-bank).

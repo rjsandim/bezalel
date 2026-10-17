@@ -1,6 +1,6 @@
 # Bezalel para Codex e Claude Code
 
-Bezalel é o fluxo de desenvolvimento; DreamTeam é sua equipe de nove agentes.
+Bezalel é o plugin; DreamTeam é sua equipe de nove agentes de desenvolvimento.
 Pacote gerado. Não edite este cache: altere a fonte e publique uma nova revisão.
 Os contratos portáteis ficam em [contracts/README.md](contracts/README.md).
 As skills originais são preservadas. Os agentes nativos carregam seus contratos.

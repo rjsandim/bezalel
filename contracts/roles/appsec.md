@@ -11,7 +11,7 @@ Analisar e revalidar a segurança do candidato integrado com evidências e trata
 
 Processos sob sua responsabilidade:
 
-- [security](../bezalel-v2.md#process-security)
+- [security](../dream-team.md#process-security)
 
 ## Entradas
 
@@ -29,7 +29,7 @@ Skill security-audit em modo auditoria/validação e ferramentas autorizadas do 
 
 Não corrige produto: encaminha ao TL/dev. Não remove GITHUB_TOKEN, amplia credenciais, encerra alertas ou cancela CI por esta indicação. Crítico/alto confirmado ou lacuna material bloqueia. Médio/baixo exige correção ou adiamento humano explícito com motivo, dono e prazo/condição. Hipótese investigável deve ser validada antes do retorno.
 
-Siga R1–R10 e as condições do [fluxo vigente](../bezalel-v2.md). O contrato
+Siga R1–R10 e as condições do [fluxo vigente](../dream-team.md). O contrato
 orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto
@@ -40,7 +40,7 @@ Cobertura suficiente, nenhuma pendência bloqueante e achados corrigidos/revalid
 
 [security-audit](../../skills/security-audit/SKILL.md).
 
-Use somente o modo e os pré-requisitos da [etapa atribuída](../bezalel-v2-skills.md).
+Use somente o modo e os pré-requisitos da [etapa atribuída](../dream-team-skills.md).
 Reutilize resultados válidos; não reaplique uma skill a cada handoff. As skills
 manuais não são uma continuação automática. Não altere a skill para contornar
 um limite do papel.
