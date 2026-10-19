@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "scenario": "bug",
   "issue": {
     "url": "https://github.com/EXEMPLO/PROJETO/issues/1",

@@ -51,7 +51,7 @@ def manual_skill(path):
 def desired(project, base, platforms, automatic, contract_dir='agents'):
     contract_root = (base / contract_dir).resolve()
     catalog = read_json(base / contract_dir / 'catalog.json')
-    if catalog.get('schema_version') != 2 or len(catalog.get('roles', {})) != 9:
+    if catalog.get('schema_version') != 3 or len(catalog.get('roles', {})) != 9:
         raise DistributionError('Catálogo de agentes incompatível.')
     entries = {}
     for path in sorted((base / 'skills').iterdir()):
@@ -96,11 +96,17 @@ def desired(project, base, platforms, automatic, contract_dir='agents'):
         '- Bezalel é o plugin; DreamTeam é a equipe de agentes de desenvolvimento.',
         '- Leia `.bezalel/project.json` e seus documentos de arquitetura e negócio.',
         '- Use `.bezalel/base/agents/README.md`, o contrato do papel atribuído e',
-        '  `.bezalel/base/agents/' + catalog['company_flow']['source'] + '`; selecione skills pela relação',
-        '  `.bezalel/base/agents/' + catalog['company_flow']['skills'] + '`.',
+        '  `.bezalel/base/agents/' + catalog['workflow']['source'] + '`; selecione skills pela relação',
+        '  `.bezalel/base/agents/' + catalog['workflow']['skills'] + '`.',
         '- Atribua trabalho aos agentes pertinentes quando a tarefa autorizar delegação.',
         '  TL coordena/revisa; um dev integra; QA e AppSec verificam independentemente.',
-        '  Aprovação humana não pode ser simulada. Merge/deploy/publicação são manuais.',
+        '  Aprovação humana não pode ser simulada. Merge e deploy são manuais.',
+        '- O fluxo é local. Banco exige HTML revisável; após decisão final registrada,',
+        '  exclua a cópia temporária, preservando resumo e decisão fora dela.',
+        '- Ao concluir desenvolvimento/validações técnicas, abra a PR com roteiro, pronta para revisão e sem draft,',
+        '  salvo restrição expressa; aceite humano vem na PR. Após aprovação ou aviso',
+        '  humano, confirme merge no serviço antes de fechar issues e executar env destroy',
+        '  no ambiente associado à branch da tarefa, com preservação e limites da skill.',
         '- Scripts e referências partem da pasta real da skill carregada.',
         '- Ao mudar comandos, estrutura ou regras do projeto, atualize seu README e',
         '  AGENTS.md/CLAUDE.md. Preserve as instruções próprias fora deste bloco.',
@@ -341,7 +347,7 @@ def main():
                     extra['.bezalel/project.json'] = {'kind': 'file', 'content': (base / '.bezalel/project.example.json').read_text()}
                 ignore = inside(project, '.bezalel/.gitignore')
                 rules = ignore.read_text() if ignore.exists() else ''
-                additions = [p for p in ['/base/', '/install.local.json', '/update.lock', '/vps-deploy.local.json', '/deliveries/*.local.json'] if p not in rules.splitlines()]
+                additions = [p for p in ['/base/', '/install.local.json', '/update.lock', '/vps-deploy.local.json', '/deliveries/*.local.json', '/reviews/'] if p not in rules.splitlines()]
                 if additions:
                     extra['.bezalel/.gitignore'] = {'kind': 'file', 'content': rules.rstrip('\n') + '\n' + '\n'.join(additions) + '\n'}
                 reconcile(project, base, state, platforms, not args.no_auto_update, revision, extra=extra)

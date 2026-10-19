@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
 import check_delivery as delivery
 import check_repository as repository
+import plugin
 
 class DeliveryContractTests(unittest.TestCase):
 
@@ -82,7 +83,7 @@ class DeliveryContractTests(unittest.TestCase):
 
     def ready_to_handoff(self):
         self.ready_to_deliver()
-        self.record['pull_requests'] = [{'repository': 'principal', 'url': 'https://github.com/example/fixture/pull/1', 'base': 'production', 'head': 'fixture-head-1', 'state': 'open', 'verified_at': '2026-01-01T12:00:00+00:00', 'ci': {'status': 'pending', 'evidence': 'fixture://ci-after-open'}}]
+        self.record['pull_requests'] = [{'repository': 'principal', 'url': 'https://github.com/example/fixture/pull/1', 'base': 'production', 'head': 'fixture-head-1', 'state': 'open', 'draft': False, 'verified_at': '2026-01-01T12:00:00+00:00', 'ci': {'status': 'pending', 'evidence': 'fixture://ci-after-open'}}]
         self.record['handoff'] = self.result(next_steps='Humano acompanha CI e decide merge/deploy.')
 
     def validate(self, stage='deliver'):
@@ -157,9 +158,19 @@ class DeliveryContractTests(unittest.TestCase):
 
     def database_decision(self, impact):
         self.ready_to_implement()
-        proposal = self.write('proposal.md', 'Proposta sintética.')
-        subject = 'proposal:' + delivery.file_digest(proposal)
-        self.record['database'].update({impact: True, 'proposal': 'proposal.md', 'proposal_ref': 'fixture://issue-proposal', 'approval': self.decision(subject), 'review': {'status': 'passed', 'tool': 'DB Reviewer', 'subject': subject, 'evidence': 'fixture://db-review'}})
+        proposal = self.write('.bezalel/reviews/proposal.html', '<!doctype html><html lang="pt-BR"><body>Estrutura sintética antes/depois.</body></html>')
+        database = self.record['database']
+        database.update({impact: True, 'proposal': '.bezalel/reviews/proposal.html',
+                         'proposal_sha256': delivery.file_digest(proposal), 'base_ref': 'fixture-base-1',
+                         'scope': delivery.scope_subject(self.record['issue']),
+                         'summary': 'Fixture: coluna proposta; não representa banco real.',
+                         'proposal_ref': 'fixture://task-proposal'})
+        subject = delivery.proposal_subject(database)
+        database['review'] = {'status': 'passed', 'reviewer': 'fixture-tl', 'subject': subject, 'evidence': 'fixture://technical-review'}
+        self.validate('database')
+        database['approval'] = self.decision(subject)
+        proposal.unlink()
+        database['cleanup'] = {'status': 'deleted', 'deleted_at': '2026-01-01T12:01:00+00:00', 'evidence': 'fixture://deleted-after-decision'}
         return proposal
 
     def test_each_database_trigger_requires_human_approval(self):
@@ -171,15 +182,15 @@ class DeliveryContractTests(unittest.TestCase):
                 with self.assertRaises(delivery.ContractError):
                     self.validate('implement')
 
-    def test_complex_relations_require_db_reviewer(self):
+    def test_complex_relations_require_identified_technical_review(self):
         self.database_decision('complex_relations')
         del self.record['database']['review']
         with self.assertRaises(delivery.ContractError):
             self.validate('implement')
 
     def test_database_change_invalidates_approval(self):
-        path = self.database_decision('schema_change')
-        path.write_text('Proposta alterada')
+        self.database_decision('schema_change')
+        self.record['database']['base_ref'] = 'fixture-base-changed'
         with self.assertRaisesRegex(delivery.ContractError, 'versão aprovada'):
             self.validate('implement')
 
@@ -196,6 +207,189 @@ class DeliveryContractTests(unittest.TestCase):
         self.record['database']['approval'] = {'decision': 'approved'}
         with self.assertRaises(delivery.ContractError):
             self.validate('implement')
+
+    def test_html_review_adjustment_and_deletion_have_distinct_gates(self):
+        path = self.database_decision('schema_change')
+        self.validate('implement')
+        path.write_text('<!doctype html><html><body>Proposta ajustada.</body></html>')
+        with self.assertRaises(delivery.ContractError):
+            self.validate('database')
+        self.record['database']['proposal_sha256'] = delivery.file_digest(path)
+        self.validate('database')
+        with self.assertRaises(delivery.ContractError):
+            self.validate('implement')
+        self.record['database']['approval'] = self.decision(delivery.proposal_subject(self.record['database']))
+        with self.assertRaises(delivery.ContractError):
+            self.validate('implement')  # HTML ainda não foi excluído.
+        path.unlink()
+        self.validate('implement')
+
+    def test_html_cleanup_requires_evidence_after_real_decision(self):
+        self.database_decision('migration')
+        original = deepcopy(self.record['database']['cleanup'])
+        for change in [{'status': 'pending'}, {'evidence': ''}, {'deleted_at': '2026-01-01T11:59:00+00:00'}]:
+            self.record['database']['cleanup'] = {**original, **change}
+            with self.assertRaises(delivery.ContractError):
+                self.validate('implement')
+        self.record['database']['cleanup'] = original
+        self.record['database']['approval']['decision'] = 'rejected'
+        with self.assertRaises(delivery.ContractError):
+            self.validate('implement')
+
+    def test_html_path_cannot_escape_or_follow_a_link_even_after_deletion(self):
+        self.database_decision('schema_change')
+        original = self.record['database']['proposal']
+        for path in ['proposal.md', '../proposal.html', '.bezalel/reviews/../outside.html']:
+            self.record['database']['proposal'] = path
+            with self.assertRaises(delivery.ContractError):
+                self.validate('implement')
+        self.record['database']['proposal'] = original
+        (self.project / original).symlink_to(self.project / 'absent.html')
+        with self.assertRaises(delivery.ContractError):
+            self.validate('implement')
+
+    def ready_to_finish(self):
+        self.ready_to_handoff()
+        self.record['pull_requests'][0].update(state='merged', merged_at='2026-01-01T12:02:00+00:00',
+            verified_at='2026-01-01T12:03:00+00:00', merge_commit='fixture-squash-commit', evidence='fixture://github-query')
+        environment = {'project': 'fixture', 'repository': 'principal', 'branch': 'feat/example',
+                       'worktree': str(self.project / 'worktree'), 'name': 'feature-example',
+                       'docker_context': 'fixture-context', 'ownership_evidence': 'fixture://saved-env-identity'}
+        self.record['environment'] = environment
+        self.record['completion'] = {
+            'trigger': {'kind': 'merge_reported', 'actor_type': 'human', 'actor': 'fixture-human',
+                        'source': 'fixture://message', 'recorded_at': '2026-01-01T12:01:00+00:00', 'candidate': self.candidate},
+            'scope_complete': True, 'scope_evidence': 'fixture://all-scope-resolved',
+            'issues': [{'url': self.record['issue']['url'], 'state': 'closed',
+                        'verified_at': '2026-01-01T12:04:00+00:00', 'evidence': 'fixture://issue-query'}],
+            'environment': {'target': delivery.environment_subject(environment), 'status': 'destroyed',
+                            'worktree_removed': True, 'preservation_evidence': 'fixture://verified-backup',
+                            'command_evidence': 'fixture://destroy-result', 'evidence': 'fixture://removed-targets',
+                            'verified_at': '2026-01-01T12:05:00+00:00'}}
+
+    def test_approval_or_merge_report_never_substitutes_verified_merge(self):
+        self.ready_to_finish()
+        for kind in ['approved', 'merge_reported']:
+            self.record['completion']['trigger']['kind'] = kind
+            for state in ['open', 'closed', 'unknown']:
+                self.record['pull_requests'][0]['state'] = state
+                with self.assertRaises(delivery.ContractError):
+                    self.validate('merged')
+        self.record['pull_requests'][0]['state'] = 'merged'
+        self.validate('merged')
+        self.validate('finish')
+
+    def test_post_merge_query_must_cover_current_version_and_follow_message(self):
+        self.ready_to_finish()
+        original = deepcopy(self.record['pull_requests'][0])
+        for change in [{'head': 'other-head'}, {'base': 'other-base'}, {'merge_commit': ''},
+                       {'evidence': ''}, {'verified_at': '2026-01-01T12:00:00+00:00'}]:
+            self.record['pull_requests'][0] = {**original, **change}
+            with self.assertRaises(delivery.ContractError):
+                self.validate('merged')
+
+    def test_all_repository_merges_are_required_before_cleanup(self):
+        self.ready_to_finish()
+        self.config['production_branches']['web'] = 'production'
+        self.record['candidate']['repositories'].append({'name': 'web', 'base': 'production', 'head': 'web-head'})
+        self.record['completion']['trigger']['candidate'] = delivery.candidate_subject(self.record['candidate'], self.config)
+        with self.assertRaises(delivery.ContractError):
+            self.validate('merged')
+        self.record['pull_requests'].append({**self.record['pull_requests'][0], 'repository': 'web',
+                                           'url': 'https://github.com/example/web/pull/2', 'head': 'web-head', 'state': 'open'})
+        with self.assertRaises(delivery.ContractError):
+            self.validate('merged')
+        self.record['pull_requests'][1]['state'] = 'merged'
+        self.validate('finish')
+
+    def test_closure_failure_or_remaining_scope_blocks_complete_cleanup(self):
+        self.ready_to_finish()
+        self.record['completion']['issues'][0]['state'] = 'open'
+        self.validate('merged')
+        with self.assertRaises(delivery.ContractError):
+            self.validate('finish')
+        self.record['completion']['issues'][0]['state'] = 'closed'
+        self.record['completion']['scope_complete'] = False
+        with self.assertRaises(delivery.ContractError):
+            self.validate('finish')
+
+    def test_missing_issue_and_unmanaged_environment_are_explicitly_not_applicable(self):
+        self.record['issue']['url'] = None
+        self.ready_to_handoff()
+        self.validate('handoff')
+        self.record['issue']['url'] = 'https://github.com/example/fixture/issues/1'
+        self.ready_to_finish()
+        self.record['issue']['url'] = None
+        self.record['completion']['issues'] = []
+        self.record['environment'] = {'status': 'not_applicable', 'reason': 'Fixture sem ENV', 'evidence': 'fixture://no-env'}
+        self.record['completion']['environment'] = {'status': 'not_applicable', 'evidence': 'fixture://confirmed-no-env'}
+        self.validate('finish')
+
+    def test_destroy_result_must_match_saved_target_and_preservation(self):
+        self.ready_to_finish()
+        original = deepcopy(self.record['completion']['environment'])
+        for change in [{'target': 'other'}, {'preservation_evidence': ''}, {'status': 'partial'},
+                       {'worktree_removed': False}, {'verified_at': '2026-01-01T12:00:00+00:00'}]:
+            self.record['completion']['environment'] = {**original, **change}
+            with self.assertRaises(delivery.ContractError):
+                self.validate('finish')
+        self.record['completion']['environment'] = original
+        self.record['environment']['branch'] = 'production'
+        self.record['completion']['environment']['target'] = delivery.environment_subject(self.record['environment'])
+        with self.assertRaises(delivery.ContractError):
+            self.validate('finish')
+
+    def test_finish_does_not_require_deleted_worktree_artifacts(self):
+        self.ready_to_finish()
+        (self.project / self.record['manual_test']['path']).unlink()
+        (self.project / self.record['pr_draft']).unlink()
+        self.validate('finish')
+
+    def test_feature_without_github_issues_preserves_stories_and_human_scope(self):
+        self.feature()
+        self.record['issue']['url'] = None
+        self.record['issue']['stories'][0]['url'] = None
+        self.record['issue']['approval'] = self.decision(delivery.scope_subject(self.record['issue']))
+        self.ready_to_handoff()
+        self.validate('handoff')
+        del self.record['issue']['approval']
+        with self.assertRaises(delivery.ContractError):
+            self.validate('handoff')
+
+    def test_disposition_without_issue_cannot_fabricate_remote_closure(self):
+        self.record['issue']['url'] = None
+        self.record.pop('blocker', None)
+        self.record['disposition'] = {'kind': 'discarded', 'reason': 'Fixture encerrada',
+                                      'evidence': 'fixture://message', 'issue_state': 'not_applicable'}
+        self.record['disposition']['approval'] = self.decision(delivery.disposition_subject(self.record))
+        self.validate('close')
+        self.record['disposition']['issue_state'] = 'closed'
+        with self.assertRaises(delivery.ContractError):
+            self.validate('close')
+
+    def test_finish_cli_uses_saved_record_without_running_commands_or_requiring_old_files(self):
+        self.ready_to_finish()
+        for path in [self.record['manual_test']['path'], self.record['pr_draft'], *self.config['context'].values()]:
+            (self.project / path).unlink()
+        marker = self.project / 'must-not-run'
+        self.config['checks']['test'] = [sys.executable, '-c', 'from pathlib import Path; Path(' + repr(str(marker)) + ').touch()']
+        self.write('.bezalel/project.json', json.dumps(self.config))
+        self.write('.bezalel/deliveries/fixture.local.json', json.dumps(self.record))
+        result = subprocess.run([sys.executable, '-B', str(ROOT / 'scripts/check_delivery.py'), '--project', str(self.project),
+                                 '--record', '.bezalel/deliveries/fixture.local.json', '--stage', 'finish'], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(marker.exists())
+
+    def test_native_package_delivery_checker_reads_packaged_contracts(self):
+        self.ready_to_handoff()
+        self.record.pop('acceptance', None)
+        self.write('.bezalel/deliveries/fixture.local.json', json.dumps(self.record))
+        package = self.project / 'native-package'
+        plugin.build(ROOT, package)
+        result = subprocess.run([sys.executable, '-B', str(package / 'scripts/check_delivery.py'),
+                                 '--project', str(self.project), '--record', '.bezalel/deliveries/fixture.local.json',
+                                 '--stage', 'handoff'], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_all_three_scenarios_complete_synthetic_handoff(self):
         for scenario in ['bug', 'improvement', 'feature']:
@@ -311,21 +505,23 @@ class DeliveryContractTests(unittest.TestCase):
             self.validate('accept')
 
     def test_package_is_not_human_acceptance(self):
-        self.ready_to_accept()
-        self.validate('accept')
+        self.ready_to_handoff()
+        self.record.pop('acceptance', None)
+        self.validate('deliver')
+        self.validate('handoff')
         with self.assertRaises(delivery.ContractError):
-            self.validate('deliver')
+            self.validate('accepted')
 
     def test_human_acceptance_requires_execution_and_current_workbook(self):
-        self.ready_to_deliver()
+        self.ready_to_handoff()
         self.record['acceptance']['execution_evidence'] = ''
         with self.assertRaises(delivery.ContractError):
-            self.validate()
+            self.validate('accepted')
         self.record['acceptance']['execution_evidence'] = 'fixture://not-real'
         path = self.project / self.record['manual_test']['path']
         path.write_bytes(path.read_bytes() + b'changed')
         with self.assertRaises(delivery.ContractError):
-            self.validate()
+            self.validate('accepted')
 
     def test_missing_pr_or_wrong_base_blocks_handoff(self):
         self.ready_to_handoff()
@@ -334,6 +530,22 @@ class DeliveryContractTests(unittest.TestCase):
             self.record['pull_requests'] = prs
             with self.assertRaises(delivery.ContractError):
                 self.validate('handoff')
+
+    def test_open_draft_or_unverified_readiness_blocks_handoff_and_acceptance(self):
+        self.ready_to_handoff()
+        pr = self.record['pull_requests'][0]
+        for value in [True, None, 'false', 0]:
+            with self.subTest(draft=value):
+                pr['draft'] = value
+                for stage in ['handoff', 'accepted']:
+                    with self.assertRaisesRegex(delivery.ContractError, 'draft false'):
+                        self.validate(stage)
+        pr.pop('draft')
+        with self.assertRaises(delivery.ContractError):
+            self.validate('handoff')
+        pr['draft'] = False
+        self.validate('handoff')
+        self.validate('accepted')
 
     def test_post_open_ci_may_be_pending_or_failed_when_reported(self):
         self.ready_to_handoff()
@@ -447,7 +659,7 @@ class DeliveryContractTests(unittest.TestCase):
     def test_catalog_roles_and_human_boundary(self):
         catalog = delivery.read_json(ROOT / 'agents/catalog.json')
         self.assertEqual(set(catalog['roles']), {'produto', 'coordenador', 'infraestrutura', 'dev-fullstack', 'backend', 'frontend-web', 'mobile', 'qa', 'appsec'})
-        self.assertEqual(sum((len(r['processes']) for r in catalog['roles'].values())), 16)
+        self.assertEqual(sum((len(r['processes']) for r in catalog['roles'].values())), 17)
         self.assertEqual(len(catalog['external_actors']['aprovador-humano']['processes']), 4)
         for role in ['aprovador-humano', 'observador-negocio']:
             self.record['roles'] = [role]

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+  <title>Proposta de alteração de banco — modelo</title>
+  <style>
+    :root { color-scheme: light; font: 16px/1.6 system-ui, sans-serif; color: #182536; background: #f3f6fa; }
+    body { max-width: 1120px; margin: auto; padding: 32px 24px 64px; }
+    header, section { background: #fff; border: 1px solid #d4dce7; border-radius: 12px; padding: 24px; margin: 0 0 20px; }
+    h1 { font-size: 2rem; line-height: 1.2; margin: 12px 0; }
+    h2 { font-size: 1.3rem; margin-top: 0; } h3 { font-size: 1rem; }
+    .label { color: #315a87; font-weight: 700; letter-spacing: .04em; }
+    .status { display: inline-block; background: #fff0c9; color: #604400; padding: 5px 12px; border-radius: 24px; }
+    .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .panel { background: #f8fafc; padding: 16px; border: 1px solid #d4dce7; border-radius: 8px; min-width: 0; }
+    .notice { border-left: 4px solid #315a87; padding-left: 16px; }
+    .scroll { overflow-x: auto; } table { border-collapse: collapse; width: 100%; text-align: left; }
+    th, td { padding: 10px; border-bottom: 1px solid #d4dce7; vertical-align: top; }
+    th { background: #edf3fa; } code, pre { font-size: .9rem; } pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .pending { color: #604400; } footer { color: #4c5c70; font-size: .9rem; }
+    @media (max-width: 700px) { body { padding: 16px; } .columns { grid-template-columns: 1fr; } header, section { padding: 18px; } }
+    @media print { body { max-width: none; padding: 0; background: white; } section { break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="label">Bezalel · DreamTeam</div>
+    <h1>Proposta de alteração de banco</h1>
+    <p class="status">Modelo não preenchido — não submetido à aprovação</p>
+    <p>Substitua este conteúdo pela proposta real da tarefa. Não use exemplos como evidência.</p>
+    <p><strong>Tarefa e versão:</strong> PREENCHER · <strong>Repositório/base/commit:</strong> PREENCHER</p>
+    <p><strong>Fontes:</strong> PREENCHER caminhos reais de schema, migrations e contratos do projeto.</p>
+  </header>
+  <section aria-labelledby="need">
+    <h2 id="need">O que precisa mudar e por quê</h2>
+    <p class="pending">PREENCHER necessidade, comportamento observável e limite do escopo.</p>
+    <p><strong>Classificação:</strong> PREENCHER estrutura / migration / dados / relações complexas.</p>
+    <p><strong>Alternativas:</strong> PREENCHER a alternativa mais simples e o motivo da escolha.</p>
+  </section>
+  <section aria-labelledby="structure">
+    <h2 id="structure">Estrutura atual e proposta</h2>
+    <p>Detalhe tabelas, colunas, tipos, nulabilidade, valores padrão, chaves, índices e restrições. Mostre relações e cardinalidades; use um diagrama inline quando ajudar. Identifique explicitamente o que permanece.</p>
+    <div class="columns">
+      <div class="panel"><h3>Estado atual, na base identificada</h3><pre>PREENCHER estrutura real e relacionamentos.
+Se a fonte não estiver disponível, registrar a lacuna; não inventar estrutura.</pre></div>
+      <div class="panel"><h3>Estado proposto</h3><pre>PREENCHER a mesma estrutura com as diferenças marcadas.
+Mudança somente de dados: manter estrutura e explicar seleção/transformação.</pre></div>
+    </div>
+    <div class="scroll"><table>
+      <caption>Diferenças que precisam de decisão</caption>
+      <thead><tr><th scope="col">Objeto</th><th scope="col">Ação</th><th scope="col">Antes → depois</th><th scope="col">Motivo e impacto</th></tr></thead>
+      <tbody><tr><td>PREENCHER</td><td>Adicionar / alterar / remover / manter</td><td>PREENCHER</td><td>PREENCHER</td></tr></tbody>
+    </table></div>
+  </section>
+  <section aria-labelledby="impact">
+    <h2 id="impact">Dados existentes, consumidores e riscos</h2>
+    <ul>
+      <li><strong>Dados/backfill:</strong> PREENCHER seleção, volume estimado e origem da estimativa, preservação e repetição.</li>
+      <li><strong>Contratos e compatibilidade:</strong> PREENCHER APIs, web, mobile e outros consumidores afetados.</li>
+      <li><strong>Locks e desempenho:</strong> PREENCHER riscos, evidências e limites conhecidos.</li>
+      <li><strong>Relações complexas:</strong> PREENCHER revisor e parecer sobre esta versão, ou justificar não aplicável.</li>
+    </ul>
+  </section>
+  <section aria-labelledby="plan">
+    <h2 id="plan">Ordem de execução, validação e recuperação</h2>
+    <ol>
+      <li>PREENCHER sequência proposta entre interface, banco e consumidores; dependências e trabalho independente.</li>
+      <li>PREENCHER verificações antes/depois e critérios que demonstram sucesso sem perder dados.</li>
+      <li>PREENCHER recuperação/rollback, limitações e preservação necessária.</li>
+    </ol>
+    <p class="notice">Este plano é uma proposta. Não execute a mudança dependente antes da aprovação humana da versão exata.</p>
+  </section>
+  <section aria-labelledby="decision">
+    <h2 id="decision">Decisão solicitada</h2>
+    <p>PREENCHER os pontos concretos que o humano deve aprovar ou ajustar, indicando alternativas e consequências.</p>
+    <p>A resposta é dada na conversa ou issue da tarefa. Este HTML não possui botão que simule aprovação.</p>
+    <p>Ajuste solicitado: atualizar a proposta e reapresentar. Após aprovação ou rejeição final, registrar a decisão, base, versão, resumo e hash fora deste arquivo; depois excluir as cópias temporárias da tarefa e verificar a exclusão.</p>
+  </section>
+  <footer>Template do Bezalel. Preserve este modelo no pacote; exclua somente o HTML gerado para a tarefa após a decisão final. Não inclua credenciais, dados privados, scripts ou recursos externos.</footer>
+</body>
+</html>

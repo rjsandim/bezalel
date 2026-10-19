@@ -1,6 +1,6 @@
 # Skills e procedimentos por etapa do fluxo da DreamTeam
 
-As **18 skills estão presentes no Bezalel**. Destas, **11 orientam métodos em 24 das 60 etapas**, distribuídas por 16 dos 20 processos. As demais etapas mantêm pré-condições, encaminhamentos e decisões, reutilizando o resultado do método já aplicado. Os quatro processos humanos não recebem execução por skill.
+As **18 skills estão presentes no Bezalel**. Destas, **11 orientam métodos em 24 das 63 etapas**, distribuídas por 16 dos 21 processos. As demais etapas mantêm pré-condições, encaminhamentos e decisões, reutilizando o resultado do método já aplicado. Os quatro processos humanos não recebem execução por skill.
 
 O fluxo define o que entregar, quem responde, quando avançar e como retomar. A skill reúne o procedimento técnico. Uma mesma auditoria/plano pode atravessar várias etapas sem ser reiniciada. As descrições atuais estão na [fonte canônica](dream-team.md); o [inventário](skills-inventario.md) registra todas as origens e decisões.
 
@@ -17,7 +17,7 @@ do executor. As cinco skills manuais, vps-deploy e limpar-orbstack ficam fora do
 |---|---|---|
 | [iss-audit](../skills/iss-audit/SKILL.md) | Separar fatos/hipóteses; investigar, reproduzir e refutar causas no modo dev. | PM qualifica; dev investiga depois do isolamento; humano decide regra/escopo. |
 | [verification-planning](../skills/verification-planning/SKILL.md) | Escolher provas por afirmação/risco, custo e validade; reutilizar o plano existente. | Donos da execução, independência QA e critérios obrigatórios. |
-| [env](../skills/env/SKILL.md) | Avaliar e operar ambiente conforme manifesto, contexto e referências de pools. | Autorização, prova das dimensões de isolamento e retorno ao TL. |
+| [env](../skills/env/SKILL.md) | Avaliar e operar ambiente conforme manifesto, contexto e referências de pools. | Isolamento durante o trabalho; após merge/issue, preservação e destroy do alvo registrado, com resultado e retorno ao TL. |
 | [clean-code](../skills/clean-code/SKILL.md) | Clareza, simplificação, contratos e correção do código tocado. | Escopo autorizado e distinção entre dev que altera e TL que revisa. |
 | [clean-architecture](../skills/clean-architecture/SKILL.md) | Analisar responsabilidades/fronteiras e orientar a menor mudança pertinente. | Regras do projeto, aprovação de banco e integração dos consumidores reais. |
 | [implementar-snapshots](../skills/implementar-snapshots/SKILL.md) | Implementar a funcionalidade com seleção, sanitização, proteção e verificação. | Só usar nessa tarefa específica; não é autorização de restore ou leitura de produção. |
@@ -27,7 +27,7 @@ do executor. As cinco skills manuais, vps-deploy e limpar-orbstack ficam fora do
 | [development-test-workbook](../skills/development-test-workbook/SKILL.md) | Derivar casos, gerar e conferir o .xlsx pelo contrato da pasta. | Mesmo candidato; Excel obrigatório em melhoria/feature; execução humana ainda pendente. |
 | [humanizer](../skills/humanizer/SKILL.md) | Revisar redação quando necessário, preservando o conteúdo. | Critérios, fatos, decisões e registros de execução não são reescritos. |
 
-Não foi transferida para uma skill genérica a revisão de banco/DB Reviewer, a avaliação completa de acessibilidade/mobile, a integração final, o aceite ou a abertura de PR. Essas atividades precisam de regras, ferramentas ou decisões que as skills atuais não cobrem integralmente.
+Não foi transferida para uma skill genérica a decisão humana de banco, a avaliação completa de acessibilidade/mobile, a integração final, o aceite ou a abertura de PR. Essas atividades precisam de regras, ferramentas ou decisões que as skills atuais não cobrem integralmente.
 
 ## Relação dos processos
 
@@ -38,7 +38,7 @@ Não foi transferida para uma skill genérica a revisão de banco/DB Reviewer, a
 | Definir e conduzir o escopo da feature | [iss-audit](../skills/iss-audit/SKILL.md), [humanizer](../skills/humanizer/SKILL.md) | 1 — Registrar visão e histórias |
 | Decidir regra ou escopo | Nenhuma | Decisão/execução humana. |
 | Coordenar a entrega | [verification-planning](../skills/verification-planning/SKILL.md), [clean-architecture](../skills/clean-architecture/SKILL.md) | 2 — Definir o próximo resultado e suas condições |
-| Preparar ou recuperar o ambiente | [env](../skills/env/SKILL.md) | 1 — Conferir alvos e autorização; 2 — Preparar e comprovar isolamento |
+| Preparar, recuperar ou encerrar o ambiente | [env](../skills/env/SKILL.md) | 1 — Conferir alvos e autorização; 2 — Executar a operação pertinente |
 | Executar contribuição fullstack | [iss-audit](../skills/iss-audit/SKILL.md), [clean-code](../skills/clean-code/SKILL.md), [clean-architecture](../skills/clean-architecture/SKILL.md), [implementar-snapshots](../skills/implementar-snapshots/SKILL.md), [agent-browser](../skills/agent-browser/SKILL.md) | 2 — Executar a fase atribuída |
 | Executar contribuição backend | [iss-audit](../skills/iss-audit/SKILL.md), [clean-code](../skills/clean-code/SKILL.md), [clean-architecture](../skills/clean-architecture/SKILL.md), [implementar-snapshots](../skills/implementar-snapshots/SKILL.md) | 2 — Executar a fase atribuída |
 | Executar contribuição web | [iss-audit](../skills/iss-audit/SKILL.md), [clean-code](../skills/clean-code/SKILL.md), [clean-architecture](../skills/clean-architecture/SKILL.md), [agent-browser](../skills/agent-browser/SKILL.md) | 2 — Executar a fase atribuída |
@@ -57,3 +57,5 @@ Não foi transferida para uma skill genérica a revisão de banco/DB Reviewer, a
 Os passos sem skill específica fazem controle do fluxo, decisão humana ou reaproveitam
 resultados válidos. Ao mudar uma indicação, alinhe fluxo, esta relação e catálogo;
 o checker confere a cobertura por processo, não a qualidade semântica da seleção.
+
+O processo **Conferir merge e encerrar a tarefa** não executa uma skill própria: TL consulta PRs e issues e passa ao DevOps a limpeza pelo processo de ambiente. O HTML de banco é temporário; a decisão e o resumo sobrevivem à exclusão.

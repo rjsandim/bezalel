@@ -1,32 +1,11 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "execution": "agent_contracts",
-  "company_flow": {
-    "company_id": "534d1f66-90a5-462d-bf78-29c6ccf9ef94",
-    "revision": 1179,
-    "source": "dream-team.md",
-    "skills": "dream-team-skills.md",
-    "scenarios": [
-      {
-        "id": "072ed464-456f-4ac6-ae71-b3befd441822",
-        "name": "1 • Bug — investigar e entregar a correção"
-      },
-      {
-        "id": "dd7c337d-52cd-40ac-831f-27d7406d2f65",
-        "name": "2 • Melhoria — delimitar e validar a mudança"
-      },
-      {
-        "id": "a92c3bfb-2d6e-466e-a94a-3a5714dad560",
-        "name": "3 • Feature — aprovar e entregar o conjunto"
-      }
-    ]
-  },
   "roles": {
     "produto": {
       "file": "roles/produto.md",
       "kind": "delivery",
       "display_name": "Product Manager",
-      "company_flow_role_id": "4bb78990-d145-46b4-b911-a49beff62f4b",
       "processes": [
         {
           "key": "bug",
@@ -58,13 +37,13 @@
         "humanizer"
       ],
       "codex": "codex/dream-team-produto.toml",
-      "claude": "claude/dream-team-produto.md"
+      "claude": "claude/dream-team-produto.md",
+      "id": "4bb78990-d145-46b4-b911-a49beff62f4b"
     },
     "coordenador": {
       "file": "roles/coordenador.md",
       "kind": "delivery",
       "display_name": "Tech Lead",
-      "company_flow_role_id": "cc7a23e0-2ac7-432b-91dc-66bbeea85aca",
       "processes": [
         {
           "key": "plan",
@@ -105,6 +84,11 @@
           "skills": [
             "humanizer"
           ]
+        },
+        {
+          "key": "postMerge",
+          "id": "7c70981f-8903-47e9-847d-8ffbde0f41f1",
+          "skills": []
         }
       ],
       "skills": [
@@ -116,13 +100,13 @@
         "humanizer"
       ],
       "codex": "codex/dream-team-coordenador.toml",
-      "claude": "claude/dream-team-coordenador.md"
+      "claude": "claude/dream-team-coordenador.md",
+      "id": "cc7a23e0-2ac7-432b-91dc-66bbeea85aca"
     },
     "infraestrutura": {
       "file": "roles/infraestrutura.md",
       "kind": "delivery",
       "display_name": "Engenheiro DevOps",
-      "company_flow_role_id": "5b5765f9-16d8-4c3f-aaa6-87259affea50",
       "processes": [
         {
           "key": "env",
@@ -136,13 +120,13 @@
         "env"
       ],
       "codex": "codex/dream-team-infraestrutura.toml",
-      "claude": "claude/dream-team-infraestrutura.md"
+      "claude": "claude/dream-team-infraestrutura.md",
+      "id": "5b5765f9-16d8-4c3f-aaa6-87259affea50"
     },
     "dev-fullstack": {
       "file": "roles/dev-fullstack.md",
       "kind": "delivery",
       "display_name": "Desenvolvedor fullstack",
-      "company_flow_role_id": "569b69d4-cb29-4283-9e18-4eae9d9ce306",
       "processes": [
         {
           "key": "fullstack",
@@ -164,13 +148,13 @@
         "agent-browser"
       ],
       "codex": "codex/dream-team-dev-fullstack.toml",
-      "claude": "claude/dream-team-dev-fullstack.md"
+      "claude": "claude/dream-team-dev-fullstack.md",
+      "id": "569b69d4-cb29-4283-9e18-4eae9d9ce306"
     },
     "backend": {
       "file": "roles/backend.md",
       "kind": "delivery",
       "display_name": "Desenvolvedor backend",
-      "company_flow_role_id": "8d6ff12f-df6e-4591-a813-5d13f5eb7949",
       "processes": [
         {
           "key": "backend",
@@ -190,13 +174,13 @@
         "implementar-snapshots"
       ],
       "codex": "codex/dream-team-backend.toml",
-      "claude": "claude/dream-team-backend.md"
+      "claude": "claude/dream-team-backend.md",
+      "id": "8d6ff12f-df6e-4591-a813-5d13f5eb7949"
     },
     "frontend-web": {
       "file": "roles/frontend-web.md",
       "kind": "delivery",
       "display_name": "Desenvolvedor frontend web",
-      "company_flow_role_id": "8beb1f6e-8ad4-470e-b6fc-cf3dd22b0ea7",
       "processes": [
         {
           "key": "web",
@@ -216,13 +200,13 @@
         "agent-browser"
       ],
       "codex": "codex/dream-team-frontend-web.toml",
-      "claude": "claude/dream-team-frontend-web.md"
+      "claude": "claude/dream-team-frontend-web.md",
+      "id": "8beb1f6e-8ad4-470e-b6fc-cf3dd22b0ea7"
     },
     "mobile": {
       "file": "roles/mobile.md",
       "kind": "delivery",
       "display_name": "Desenvolvedor mobile",
-      "company_flow_role_id": "b99885ab-857d-436f-9fd2-6c4bc4f0b5a8",
       "processes": [
         {
           "key": "mobile",
@@ -240,13 +224,13 @@
         "clean-architecture"
       ],
       "codex": "codex/dream-team-mobile.toml",
-      "claude": "claude/dream-team-mobile.md"
+      "claude": "claude/dream-team-mobile.md",
+      "id": "b99885ab-857d-436f-9fd2-6c4bc4f0b5a8"
     },
     "qa": {
       "file": "roles/qa.md",
       "kind": "delivery",
       "display_name": "Engenheiro de QA",
-      "company_flow_role_id": "47628627-92df-4d54-9065-82b4a6d9cb25",
       "processes": [
         {
           "key": "ui",
@@ -269,13 +253,13 @@
         "verification-planning"
       ],
       "codex": "codex/dream-team-qa.toml",
-      "claude": "claude/dream-team-qa.md"
+      "claude": "claude/dream-team-qa.md",
+      "id": "47628627-92df-4d54-9065-82b4a6d9cb25"
     },
     "appsec": {
       "file": "roles/appsec.md",
       "kind": "delivery",
       "display_name": "Especialista em Segurança de Aplicações (AppSec)",
-      "company_flow_role_id": "a1971dcb-d1b6-4226-b0b1-8122a46e0475",
       "processes": [
         {
           "key": "security",
@@ -289,7 +273,8 @@
         "security-audit"
       ],
       "codex": "codex/dream-team-appsec.toml",
-      "claude": "claude/dream-team-appsec.md"
+      "claude": "claude/dream-team-appsec.md",
+      "id": "a1971dcb-d1b6-4226-b0b1-8122a46e0475"
     }
   },
   "external_actors": {
@@ -297,7 +282,6 @@
       "file": "actors/aprovador-humano.md",
       "kind": "human",
       "display_name": "APROVADOR HUMANO",
-      "company_flow_role_id": "f846e7b0-f729-4ada-b1fa-fee244da6885",
       "processes": [
         {
           "key": "product",
@@ -319,7 +303,26 @@
           "id": "fd173525-c768-49a1-8fec-b62537e0e0a6",
           "skills": []
         }
-      ]
+      ],
+      "id": "f846e7b0-f729-4ada-b1fa-fee244da6885"
     }
+  },
+  "workflow": {
+    "source": "dream-team.md",
+    "skills": "dream-team-skills.md",
+    "scenarios": [
+      {
+        "id": "072ed464-456f-4ac6-ae71-b3befd441822",
+        "name": "1 • Bug — investigar e entregar a correção"
+      },
+      {
+        "id": "dd7c337d-52cd-40ac-831f-27d7406d2f65",
+        "name": "2 • Melhoria — delimitar e validar a mudança"
+      },
+      {
+        "id": "a92c3bfb-2d6e-466e-a94a-3a5714dad560",
+        "name": "3 • Feature — aprovar e entregar o conjunto"
+      }
+    ]
   }
 }

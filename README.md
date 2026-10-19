@@ -2,7 +2,7 @@
 
 **Bezalel** é o plugin completo de agentes e skills.
 **DreamTeam** é sua equipe de nove agentes para corrigir bugs e desenvolver melhorias e features.
-**Company Flow** é a ferramenta visual usada para modelar e revisar seus processos.
+O fluxo é mantido nos arquivos do pacote, sem depender de ferramenta externa de modelagem.
 
 O plugin reúne a DreamTeam, seu fluxo de desenvolvimento e 18 skills, incluindo nove
 importações com conteúdo preservado e duas auditorias adaptadas.
@@ -69,18 +69,36 @@ e metadado de invocação explícita; não são chamadas pelas etapas do fluxo.
 
 A [DreamTeam](agents/README.md) contém contratos e adaptadores para Product
 Manager, Tech Lead, DevOps, desenvolvedores fullstack/backend/web/mobile, QA e
-AppSec. O aprovador humano é externo. Os [20 processos do fluxo](agents/dream-team.md)
+AppSec. O aprovador humano é externo. Os [21 processos do fluxo](agents/dream-team.md)
 são distribuídos por responsabilidade no [catálogo](agents/catalog.json); não há
 um agente para cada etapa. O TL coordena e revisa; um dev assume a integração
 inteira. QA e AppSec verificam independentemente dos autores.
 
 O percurso é intenção/qualificação → planejamento e isolamento → investigação →
 interface/banco quando aplicáveis → implementação e integração → revisão TL,
-AppSec e QA → roteiro e aceite humano → PRs e próximos passos manuais. Estrutura,
-qualquer migration e relações complexas exigem proposta/decisão humana exatas
-antes da implementação dependente. Merge e deploy permanecem manuais.
+AppSec e QA → roteiro → PR aberta → aceite humano na PR. Ao receber aprovação ou
+aviso de merge, TL verifica o merge no serviço, fecha/verifica issues concluídas
+quando existirem e encaminha o encerramento do ambiente ao DevOps. Abertura de PR
+faz parte do desenvolvimento solicitado: PR normal, pronta para revisão, sem draft. Não exige nova pergunta após validação,
+salvo restrição expressa. Aprovação não prova merge. Merge e deploy continuam manuais.
 
-A issue é a fonte da demanda. Os [modelos](agents/templates/user-story.md) ajudam
+Estrutura, qualquer migration ou relações complexas exigem uma proposta baseada
+no schema/migrations e commit reais do projeto. O [template HTML](agents/templates/database-review.html)
+mostra estrutura atual e proposta, diferenças, impactos, alternativas e recuperação.
+A cópia da tarefa fica em `.bezalel/reviews/`, ignorada no Git; confira a regra
+`/reviews/` no `.bezalel/.gitignore` antes de gerar. Ajustes são reapresentados.
+Após decisão final, registre resumo, base, versão, hash e decisão na issue/conversa
+antes de excluir/verificar o HTML temporário. O template do pacote permanece.
+
+O pedido `env destroy {{current-worktree-branch}}` é resolvido pelo registro da
+branch/worktree da tarefa: o nome do ambiente pode ser diferente da branch. DevOps
+confere o vínculo e executa o destroy da skill com confirmação exata de projeto e
+ambiente, após preservar dados/arquivos necessários fora da worktree. Sem ambiente
+registrado, informe não aplicável. Falhas, arquivos locais ou commits que impeçam
+remoção mantêm pendência; squash/rebase não autoriza força. Não há limpeza geral,
+remoção de pools/imagens compartilhados ou destruição pelo simples aceite da PR.
+
+A issue existente é a fonte da demanda; sem issue, use a conversa e a PR. Os [modelos](agents/templates/user-story.md) ajudam
 na redação de requisitos, proposta e handoff, sem exigir MD paralelo por tarefa.
 O [registro](agents/record-contract.md) é um snapshot local opcional para
 conferência: investigação, UI/banco, candidato, revisões, risco, aceite e PRs.
@@ -158,8 +176,8 @@ explícita existente, além das cinco skills manuais fora do fluxo.
 
 ### Atualizar e iniciar uma sessão
 
-**Instalações anteriores à renomeação dos arquivos e agentes:** o validador antigo
-exigia nomes fixos e recusa essa atualização. Use o atualizador de uma cópia nova
+**Instalações anteriores ao catálogo local e ao novo encerramento:** o validador
+antigo espera o contrato anterior e recusa essa atualização. Use o atualizador de uma cópia nova
 do Bezalel uma vez, sem trocar manualmente a base instalada:
 
 ```sh
@@ -169,8 +187,10 @@ python3 -B /caminho/bezalel-atualizador/scripts/project.py update --project /cam
 
 Escolha uma pasta nova para o clone, fora da base do projeto. Esse comando mantém
 as verificações de customizações, valida a nova árvore e atualiza o registro e as
-referências juntos. Os agentes passam a usar `dream-team-<id>`; os arquivos antigos
-gerenciados são removidos somente se não houver customizações. Depois dessa
+referências juntos. O catálogo passa a usar `workflow` e IDs locais; os arquivos antigos gerenciados
+são removidos somente se não houver customizações. O registro opcional de entrega
+usa formato 3, com HTML temporário e encerramento pós-merge; configurações de
+projeto continuam no formato 2. Não converta aprovações antigas inventando provas. Depois dessa
 migração, use os comandos abaixo normalmente.
 Plugins nativos recebem os arquivos renomeados pela atualização do plugin.
 

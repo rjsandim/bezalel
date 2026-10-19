@@ -17,7 +17,7 @@ não um mecanismo de atualização automática nem certificação de execução.
 | Skill | Finalidade | Indicação |
 |---|---|---|
 | [clean-code](../skills/clean-code/SKILL.md) | Revisão e correção do código alterado, com verificações proporcionais. | Selecionada para devs e revisão TL; no TL, somente análise sem edição. |
-| [clean-architecture](../skills/clean-architecture/SKILL.md) | Responsabilidades, fronteiras, dependências e contratos. | Selecionada quando houver impacto arquitetural; apoio à proposta de banco sem substituir o DB Reviewer. |
+| [clean-architecture](../skills/clean-architecture/SKILL.md) | Responsabilidades, fronteiras, dependências e contratos. | Selecionada quando houver impacto arquitetural; apoio à proposta de banco sem substituir o parecer técnico das relações complexas. |
 | [env](../skills/env/SKILL.md) | Ambientes locais com worktree, Docker e isolamento por projeto. | Selecionada no DevOps, preservando manifesto, contexto explícito e autorizações. |
 | [development-test-workbook](../skills/development-test-workbook/SKILL.md) | Roteiro manual em Excel com dados, evidências e backlog. | Selecionada no pacote de aceite: obrigatória para produzir o .xlsx dos cenários 2/3; opcional no bug. |
 | [implementar-snapshots](../skills/implementar-snapshots/SKILL.md) | Construir/corrigir funcionalidade de snapshots full/tiny. | Selecionada condicionalmente para backend/fullstack quando essa funcionalidade for a tarefa; não é ferramenta de restore avulso. |
@@ -126,12 +126,11 @@ pré-condições, caso e resultado. Uma jornada pelo browser não substitui regr
 automatizada persistente, prova de serviços/persistência, avaliação completa de
 acessibilidade ou testes de aplicativo mobile nativo.
 
-Ainda não há skill portátil específica de DB Reviewer/modelagem e migrations
-nesses conjuntos. Os processos e ferramentas de verificação continuam exigidos;
-uma skill opcional indisponível não dispensa evidência obrigatória.
+A revisão de modelagem e migrations usa as fontes reais do projeto e parecer
+técnico identificado; não exige uma ferramenta específica de modelagem.
+Uma skill opcional indisponível não dispensa evidência obrigatória.
 
 A [relação por processo e etapa](dream-team-skills.md) registra as 11 skills
-indicadas em 24 etapas de 16 processos. Os 20 processos, 60 etapas, responsáveis,
-decisões e caminhos permanecem. Os [contratos e adaptadores](README.md) usam essa
+indicadas em 24 etapas de 16 processos. O fluxo atual tem 21 processos e 63 etapas, incluindo a conferência pós-merge. Os [contratos e adaptadores](README.md) usam essa
 seleção; as skills não foram alteradas na conversão. Não houve execução de produto,
 produção, publicação ou infraestrutura para validar o pacote.
