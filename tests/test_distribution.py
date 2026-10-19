@@ -176,7 +176,7 @@ class DistributionTests(unittest.TestCase):
 
     def test_published_revision_renames_flow_references_together(self):
         source, consumer, base, state = self.connected()
-        flow = dist.read_json(source / 'agents/catalog.json')['company_flow']
+        flow = dist.read_json(source / 'agents/catalog.json')['workflow']
         renamed = {flow['source']: 'fluxo-renomeado.md', flow['skills']: 'metodos-renomeados.md'}
         for path in [source / 'README.md', source / 'AGENTS.md', *(source / 'agents').rglob('*')]:
             if path.is_file() and path.suffix in {'.md', '.json', '.toml'}:

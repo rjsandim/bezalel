@@ -1,21 +1,21 @@
 # DreamTeam — equipe de agentes do Bezalel
 
-DreamTeam é a equipe de nove agentes do plugin **Bezalel**. Company Flow é a
-ferramenta usada para representar seu fluxo de desenvolvimento visualmente.
+DreamTeam é a equipe de nove agentes do plugin **Bezalel**. Seu fluxo é mantido
+neste pacote, sem envio obrigatório a ferramenta externa.
 
 Os agentes definem papéis; o [fluxo](dream-team.md) define processos e
 condições; as [skills](dream-team-skills.md) descrevem métodos. O contexto de
 arquitetura e negócio pertence ao projeto consumidor em `.bezalel/project.json`.
 O [catálogo](catalog.json) relaciona nove agentes e o aprovador humano externo aos
-20 processos da revisão 1179, sem criar um agente por etapa.
+21 processos locais, sem criar um agente por etapa.
 
 ## Papéis
 
 | Agente | Processos | Responsabilidade |
 |---|---|---|
 | [Product Manager](roles/produto.md) | bug, improvement, feature | Qualificar intenção, versionar escopo e registrar destinos nas issues. |
-| [Tech Lead](roles/coordenador.md) | plan, bank, review, package, pr | Coordenar e revisar; preparar proposta/aceite e entregar PRs. Não implementa nem testa. |
-| [Engenheiro DevOps](roles/infraestrutura.md) | env | Comprovar isolamento e preparar/recuperar o ambiente autorizado. |
+| [Tech Lead](roles/coordenador.md) | plan, bank, review, package, pr, postMerge | Coordenar e revisar; preparar HTML/roteiro, abrir PRs e conferir merge/issues. Não implementa nem testa. |
+| [Engenheiro DevOps](roles/infraestrutura.md) | env | Comprovar isolamento e preparar/recuperar o ambiente e encerrá-lo após merge verificado. |
 | [Desenvolvedor fullstack](roles/dev-fullstack.md) | fullstack | Investigar, preparar ou implementar uma fatia vertical pequena. |
 | [Desenvolvedor backend](roles/backend.md) | backend | Regras, dados, mocks e contratos de serviços. |
 | [Desenvolvedor frontend web](roles/frontend-web.md) | web | Telas, estados, acessibilidade e integração web. |
@@ -60,8 +60,8 @@ credenciais ou alteração de permissões. Instale-os conforme o
 Os nomes e caminhos dos adaptadores ficam no catálogo e coincidem entre as duas
 plataformas. O fluxo e sua relação de skills usam o prefixo `dream-team`; inventário
 e guia de uso manual são documentos gerais do plugin, sem prefixo. Os campos
-`company_flow` e `company_flow_role_id` mantêm a correspondência com a ferramenta
-visual. O plugin e seus comandos manuais continuam usando `bezalel`.
+`workflow` e `id` descrevem o fluxo e identidades locais; não exigem consulta
+ou sincronização externa. O plugin e seus comandos manuais continuam usando `bezalel`.
 
 O formato segue a [documentação oficial de agentes](https://learn.chatgpt.com/docs/agent-configuration/subagents):
 arquivos por projeto ficam em `.codex/agents/`; permissões e MCPs vêm da sessão
@@ -83,6 +83,16 @@ TL e especialistas segue o fluxo. Peça delegação aos agentes pertinentes quan
 suportada/autorizada pelo aplicativo. Não use os agentes de entrega para executar
 merge, deploy ou as skills reservadas ao uso manual.
 
+## Entrega e encerramento
+
+Concluir validações técnicas abre a PR com roteiro pronto. Aceite humano vem na PR;
+aprovação ou aviso de merge faz o TL consultar o serviço. Somente com todos os
+merges confirmados e escopo concluído, fechar/verificar issues existentes e passar
+para DevOps o encerramento do ambiente associado à branch registrada. Falha ou
+limpeza parcial permanece pendente; não inventar issue, ambiente ou resultado.
+Para banco, apresentar HTML com estrutura/diferenças e, após decisão final
+registrada, excluir a cópia temporária da tarefa. Ajuste exige nova apresentação.
+
 ## Registros e validação
 
 O [contrato de registro](record-contract.md) permite conferir um snapshot local
@@ -91,6 +101,7 @@ não executa os comandos do projeto, consulta GitHub ou autentica pessoas.
 
 O teste estrutural cobre catálogo, processos, skills, adaptadores e links. Os testes
 sintéticos cobrem interrupção/retomada nos três cenários, candidato alterado,
-investigação, banco/UI, revisões, segurança, aceite e PRs. Eles não substituem o
+investigação, HTML/decisão/exclusão, banco/UI, revisões, segurança, PR antes do
+aceite e encerramento somente após merge confirmado. Eles não substituem o
 piloto com ferramentas reais e decisões humanas reais. Ausência de uma capacidade
 é registrada; nenhuma dependência é instalada silenciosamente.

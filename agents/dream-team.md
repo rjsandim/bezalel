@@ -1,18 +1,18 @@
 # DreamTeam — fluxo de desenvolvimento
 
 Fonte canônica do fluxo de desenvolvimento da [DreamTeam](README.md), equipe de
-agentes do plugin Bezalel. São três cenários, 20 processos reutilizáveis e 60
-etapas, com 18 processos em cada cenário; os quatro devs são opções de especialidade.
+agentes do plugin Bezalel. São três cenários, 21 processos reutilizáveis e 63
+etapas, com 19 processos em cada cenário; os quatro devs são opções de especialidade.
 Os contratos em [agents](README.md) distribuem os processos por responsabilidade,
 sem criar um agente por etapa. O aprovador humano é externo.
 
 ## Regras comuns
 
-Na ferramenta Company Flow, estas regras ficam uma única vez na descrição de **Coordenar a entrega**, reutilizada pelos três cenários. Cada atividade usa as pré-condições do destino, inclusive nas retomadas. Condições locais complementam, sem substituir, o procedimento e estas regras.
+Estas regras são a fonte local comum aos três cenários. O fluxo é mantido neste repositório e não exige envio, sincronização ou aprovação em serviço de modelagem. Cada atividade usa as pré-condições do destino, inclusive nas retomadas. Condições locais complementam, sem substituir, o procedimento e estas regras.
 
 ### R1 Registro e autorização
 
-Usar a mesma issue como registro da intenção, escopo, decisões e evidências; anexos ficam vinculados. Registrar o mínimo antes de qualquer destino. Efeitos externos dependem da autorização concreta da tarefa, aproveitando a já concedida. Ausência de acesso/autorização mantém pendência e rascunho verificável. O mapa documenta responsabilidades; não executa ferramentas, autentica pessoas ou concede permissão.
+Usar a mesma issue, quando existir, como registro da intenção, escopo, decisões e evidências; sem issue, usar a conversa da tarefa e depois a PR. Referências à issue nas etapas seguem essa regra; não criar issue fictícia ou obrigatória apenas para encerrar. Anexos ficam vinculados. Registrar o mínimo antes de qualquer destino. Efeitos externos dependem da autorização concreta da tarefa, aproveitando a já concedida. Ausência de acesso/autorização mantém pendência e rascunho verificável. O mapa documenta responsabilidades; não executa ferramentas, autentica pessoas ou concede permissão.
 
 ### R2 Responsabilidade e evidência
 
@@ -36,7 +36,7 @@ Com interface afetada: telas/contrato → mock exercitável → QA de UI/UX, ant
 
 ### R7 Revisões proporcionais
 
-Entrega implementada exige integração completa, revisão TL, AppSec, QA independente e aceite humano, na mesma versão. TL define verificações por impacto; devs executam as próprias e QA confronta/amplia a cobertura. Técnica não pertinente aceita justificativa; teste obrigatório falho/não executado bloqueia. QA da feature cobre histórias e jornadas globais no mesmo processo. Nenhuma contribuição parcial libera a revisão final do conjunto.
+Abrir a PR assim que integração completa, revisão TL, AppSec, QA independente, checks prévios e roteiro estiverem prontos na mesma versão. O aceite funcional humano ocorre na PR aberta; não o exigir para publicar a PR, nem simulá-lo ao abrir ou verificar merge. TL define verificações por impacto; devs executam as próprias e QA confronta/amplia a cobertura. Técnica não pertinente aceita justificativa; teste obrigatório falho/não executado bloqueia. QA da feature cobre histórias e jornadas globais no mesmo processo. Nenhuma contribuição parcial libera a revisão final do conjunto.
 
 ### R8 Segurança
 
@@ -46,9 +46,11 @@ AppSec distingue hipótese, confirmação, severidade, confiança e cobertura. V
 
 Decisão humana registra interação real, identidade, fonte, data/fuso e conteúdo/versão. Reaproveitar decisão que já cubra o objeto; ambiguidade exige esclarecimento. Rejeitar solução não cancela a intenção. PM trata revisão parcial, adiamento integral, descarte, reabertura e transferência na entrada do cenário: adiar mantém issue aberta com dono/retomada; descartar fecha e verifica somente itens abrangidos/exclusivos; reabrir requer orientação humana. Transferência exige destino iniciado/verificado na mesma issue antes de encerrar origem; use o percurso vigente do destino. Estados sem implementação dispensam PR/scan fictícios.
 
-### R10 Entrega e validade final
+### R10 PR, aceite e encerramento
 
-Aceite refere-se ao candidato e roteiro realmente executados pelo humano. Antes da PR e até entregar as orientações, TL compara candidato e evidências: sem mudança material, reutiliza os pareceres; diferença material retorna à atividade responsável, inclusive AppSec quando houver impacto ou dúvida de segurança. Abrir/verificar todas as PRs para a branch de produção indicada pelo projeto e entregar links/validações/pendências/próximos passos. Checks prévios obrigatórios passam antes da abertura. CI acionado somente pela abertura é informado no estado observado, inclusive pendente/falho; sem espera/correção automática posterior. Rafael conduz manualmente merge, deploy e ações de produção.
+Concluídos desenvolvimento e validações técnicas, publicar a branch da tarefa e abrir/verificar todas as PRs para as bases reais configuradas, sem pedir uma nova autorização apenas para abrir a PR. Restrição expressa do usuário ou do repositório, acesso ausente ou check prévio falho mantém pendência concreta. CI que só inicia pela PR é informado no estado observado. Entregar o roteiro para aceite na PR aberta; aprovação refere-se à versão examinada e não autoriza o agente a fazer merge ou deploy.
+
+Quando o usuário aprovar a entrega ou informar que fez merge, TL consulta o serviço novamente e confirma todas as PRs e respectivos base/head/merge commit. Aprovação, branch removida ou PR fechada não provam merge. Sem merge confirmado, manter issue e ambiente e informar a pendência; não fazer polling ou agendar acompanhamento por inferência. Merge confirmado permite fechar/verificar somente issues do escopo realmente concluído e encaminhar ao DevOps o encerramento do ambiente da branch da tarefa. Limpeza segue o contrato da skill, incluindo preservação, identificação do alvo e bloqueios; parcialidade permanece registrada. Merge e deploy continuam humanos.
 
 ## Seleção de skills nas etapas
 
@@ -67,11 +69,11 @@ O [inventário completo](skills-inventario.md) registra origem, cópias e adapta
 
 Foco: separar hipótese, comportamento esperado e defeito; investigar antes de definir a menor correção segura. Diagnóstico suficiente é a investigação obrigatória. Residual de produto fica vinculado; suspeita/achado de segurança precisa de tratamento. Humano decide regra, comportamento esperado e reclassificação. Transferências permitidas: 2 ou 3, iniciadas/verificadas pelo PM na mesma issue.
 
-**Percurso:** PM qualifica a intenção e resolve decisões de produto necessárias → TL delimita investigação → DevOps comprova ambiente → devs investigam → TL confirma plano → interface/mock e UI/UX quando pertinentes, banco na ordem definida → devs implementam e integram → TL revisa o conjunto → AppSec analisa → QA valida → TL prepara roteiro → humano executa/aceita → TL confere, abre/verifica PRs e entrega próximos passos.
+**Percurso:** PM qualifica a intenção e resolve decisões de produto necessárias → TL delimita investigação → DevOps comprova ambiente → devs investigam → TL confirma plano → interface/mock e UI/UX quando pertinentes, banco na ordem definida → devs implementam e integram → TL revisa o conjunto → AppSec analisa → QA valida → TL prepara roteiro → TL abre/verifica PRs e apresenta roteiro → humano avalia → ao aprovar ou avisar merge, TL confere merge/fecha issues aplicáveis → DevOps encerra o ambiente identificado.
 
 **QA específico:** Validar reprodução original, correção, regressões e integração da versão; considerar acesso/dados de outros usuários. Relato não reproduzido não significa ausência de defeito.
 
-**Resultado:** Com implementação: todas as PRs necessárias abertas/verificadas para a branch de produção real, na versão validada e aceita, com orientação manual entregue a Rafael. Sem implementação: destinos documentados pelo PM e estados verificados. Espera/revisão/bloqueio não são conclusão. Merge, deploy e produção permanecem manuais.
+**Resultado:** Com implementação: todas as PRs necessárias abertas/verificadas para a branch de produção real, na versão tecnicamente validada, com roteiro e orientação entregues a Rafael. Encerramento posterior exige merge consultado no serviço, issues aplicáveis verificadas e ambiente tratado conforme o processo pós-merge. Sem implementação: destinos documentados pelo PM e estados verificados. Espera/revisão/bloqueio não são conclusão. Merge, deploy e produção permanecem manuais.
 
 ### 2 Melhoria delimitar e validar a mudança
 
@@ -79,11 +81,11 @@ Foco: separar hipótese, comportamento esperado e defeito; investigar antes de d
 
 Foco: resultado observável e escopo pequeno, confirmado pelo TL após investigação de comportamento, contratos e dependências. Mudança de regra/escopo precisa de decisão humana; aproveitar o pedido já claro. Se a investigação revelar trabalho de feature, humano decide transferência a 3 e PM inicia/verifica o destino na mesma issue. Roteiro de aceite em Excel .xlsx real.
 
-**Percurso:** PM qualifica a intenção e resolve decisões de produto necessárias → TL delimita investigação → DevOps comprova ambiente → devs investigam → TL confirma plano → interface/mock e UI/UX quando pertinentes, banco na ordem definida → devs implementam e integram → TL revisa o conjunto → AppSec analisa → QA valida → TL prepara roteiro → humano executa/aceita → TL confere, abre/verifica PRs e entrega próximos passos.
+**Percurso:** PM qualifica a intenção e resolve decisões de produto necessárias → TL delimita investigação → DevOps comprova ambiente → devs investigam → TL confirma plano → interface/mock e UI/UX quando pertinentes, banco na ordem definida → devs implementam e integram → TL revisa o conjunto → AppSec analisa → QA valida → TL prepara roteiro → TL abre/verifica PRs e apresenta roteiro → humano avalia → ao aprovar ou avisar merge, TL confere merge/fecha issues aplicáveis → DevOps encerra o ambiente identificado.
 
 **QA específico:** Validar benefício/critério esperado, limites acordados e regressões do comportamento existente na integração real.
 
-**Resultado:** Com implementação: todas as PRs necessárias abertas/verificadas para a branch de produção real, na versão validada e aceita, com orientação manual entregue a Rafael. Sem implementação: destinos documentados pelo PM e estados verificados. Espera/revisão/bloqueio não são conclusão. Merge, deploy e produção permanecem manuais.
+**Resultado:** Com implementação: todas as PRs necessárias abertas/verificadas para a branch de produção real, na versão tecnicamente validada, com roteiro e orientação entregues a Rafael. Encerramento posterior exige merge consultado no serviço, issues aplicáveis verificadas e ambiente tratado conforme o processo pós-merge. Sem implementação: destinos documentados pelo PM e estados verificados. Espera/revisão/bloqueio não são conclusão. Merge, deploy e produção permanecem manuais.
 
 ### 3 Feature aprovar e entregar o conjunto
 
@@ -91,11 +93,11 @@ Foco: resultado observável e escopo pequeno, confirmado pelo TL após investiga
 
 Foco: principal e histórias curtas vinculadas, critérios individuais/globais, dependências e um dev integrador. Humano aprova o escopo vN; PM confere e entrega a mesma versão ao TL antes da investigação/planejamento técnico. Investigar viabilidade obrigatoriamente e confirmar plano do conjunto. Uma única atividade de QA verifica histórias e depois jornadas globais na feature completa. Roteiro de aceite em Excel .xlsx real.
 
-**Percurso:** PM registra principal/histórias → humano decide vN → PM entrega ao TL → TL delimita investigação → DevOps comprova ambiente → devs investigam → TL confirma plano → interface/mock e UI/UX quando pertinentes, banco na ordem definida → devs implementam e integram → TL revisa o conjunto → AppSec analisa → QA valida → TL prepara roteiro → humano executa/aceita → TL confere, abre/verifica PRs e entrega próximos passos.
+**Percurso:** PM registra principal/histórias → humano decide vN → PM entrega ao TL → TL delimita investigação → DevOps comprova ambiente → devs investigam → TL confirma plano → interface/mock e UI/UX quando pertinentes, banco na ordem definida → devs implementam e integram → TL revisa o conjunto → AppSec analisa → QA valida → TL prepara roteiro → TL abre/verifica PRs e apresenta roteiro → humano avalia → ao aprovar ou avisar merge, TL confere merge/fecha issues aplicáveis → DevOps encerra o ambiente identificado.
 
 **QA específico:** No mesmo candidato completo, validar critérios de cada história e depois jornadas globais, dependências e integração entre serviços. Uma história isolada aprovada não conclui a feature.
 
-**Resultado:** Com implementação: todas as PRs necessárias abertas/verificadas para a branch de produção real, na versão validada e aceita, com orientação manual entregue a Rafael. Sem implementação: destinos documentados pelo PM e estados verificados. Espera/revisão/bloqueio não são conclusão. Merge, deploy e produção permanecem manuais.
+**Resultado:** Com implementação: todas as PRs necessárias abertas/verificadas para a branch de produção real, na versão tecnicamente validada, com roteiro e orientação entregues a Rafael. Encerramento posterior exige merge consultado no serviço, issues aplicáveis verificadas e ambiente tratado conforme o processo pós-merge. Sem implementação: destinos documentados pelo PM e estados verificados. Espera/revisão/bloqueio não são conclusão. Merge, deploy e produção permanecem manuais.
 
 ## Procedimentos dos responsáveis
 
@@ -109,7 +111,7 @@ Os identificadores curtos abaixo organizam a correspondência documental; não s
 
 Entrada e manutenção do cenário 1: relato, decisões de produto e destinos sem correção. Referência: regras comuns no processo Coordenar a entrega.
 
-1. **Garantir a issue mínima.** Localizar/criar e verificar a mesma issue, com relato e fonte. Decisão integral de adiamento/descarte segue diretamente ao destino; retomada reabre/verifica o objeto autorizado.
+1. **Garantir o registro mínimo.** Localizar/verificar a issue existente, ou registrar relato e fonte na conversa da tarefa quando não houver issue. Criar issue somente se fizer parte do pedido. Decisão integral de adiamento/descarte segue ao destino; retomada reabre/verifica o objeto existente autorizado.
 
 2. **Definir a necessidade.** Aplicar iss-audit no modo PM para qualificar necessidade, esperado/observado, impacto, perfis/dados, hipóteses e critérios. Não exigir causa comprovada para investigar. Dúvida de regra, esperado ou reclassificação exige decisão humana. Usar humanizer somente se a redação precisar de revisão.
 
@@ -142,7 +144,7 @@ Entrada e manutenção do cenário 1: relato, decisões de produto e destinos se
 
 Entrada e manutenção do cenário 2: melhoria do comportamento existente com benefício e limite claros.
 
-1. **Garantir a issue mínima.** Localizar/criar e verificar a mesma issue, inclusive em transferência; registrar intenção, fonte e decisão existente. Retomada, adiamento e descarte seguem R9.
+1. **Garantir o registro mínimo.** Localizar/verificar a issue existente ou usar a conversa da tarefa, inclusive em transferência; registrar intenção, fonte e decisão. Criar issue somente se fizer parte do pedido. Retomada, adiamento e descarte seguem R9.
 
 2. **Definir resultado e limites.** Aplicar iss-audit no modo PM para definir benefício, comportamento atual/desejado, critérios, exclusões e dependências, usuários/perfis, dados e integrações pertinentes. Encaminhar dúvidas de segurança. TL confirma o impacto limitado após investigar; mudança de regra/escopo exige humano, aproveitando pedido já inequívoco. humanizer é opcional para revisar a redação.
 
@@ -175,7 +177,7 @@ Entrada e manutenção do cenário 2: melhoria do comportamento existente com be
 
 Entrada e manutenção do cenário 3: visão e histórias aprovadas como conjunto, com um responsável pela integração.
 
-1. **Registrar visão e histórias.** Garantir issue principal mínima. Aplicar iss-audit no modo PM para qualificar visão, necessidades, limites, perfis/dados/integrações e questões de segurança. Vincular histórias curtas com critérios individuais, dependências e exclusões; a principal reúne critérios globais. humanizer pode revisar a redação antes de submeter a versão.
+1. **Registrar visão e histórias.** Identificar a demanda principal na issue existente ou conversa. Aplicar iss-audit no modo PM para qualificar visão, necessidades, limites, perfis/dados/integrações e questões de segurança. Vincular histórias curtas com referências distintas, critérios individuais, dependências e exclusões; a principal reúne critérios globais. Não inventar URLs ou criar issues só para satisfazer o contrato. humanizer pode revisar a redação antes de submeter a versão.
 
 2. **Submeter ou conferir a versão do escopo.** Registrar visão/limites/prioridades e histórias em comentários vN na principal e em cada história, preservando o conteúdo submetido. Obter decisão humana sobre esse conjunto antes do planejamento técnico. Mudança material cria vN+1 e confere decisão correspondente; aproveitar resposta já explícita que cubra a mudança/resultante.
 
@@ -235,13 +237,13 @@ Planejamento, atribuição e retomada do cenário ativo. Regras transversais na 
 
 2. **Definir o próximo resultado e suas condições.** Para a atividade pendente, registrar fase, dono, entrada, evidência e dependências. Aplicar verification-planning quando não trivial; clean-architecture apenas para fronteiras/dependências afetadas. Classificar estrutura, migrations e complexidade de relações; seguir R6 e justificar dispensa de banco. Dados simples exigem plano autorizado/versionado de seleção, filtros/volume, validação, repetição e recuperação. Resolver dúvida técnica com prova do dono; dúvida material persistente ou de regra/escopo/autorização vai a PM/humano. Trabalho independente de banco pendente exige justificativa, tarefas/donos e retomada verificáveis; dúvida bloqueia dependentes.
 
-3. **Encaminhar ou retomar pela condição comprovada.** Encaminhar somente a atividade necessária, respeitando R6–R8 e a ordem integração completa → revisão → AppSec → QA → pacote → aceite → PR. Retomar o ponto pendente com provas ainda válidas; complemento não conclui atividade nem libera gate. Mudança de código/composição exige os controles afetados. Residual de segurança segue AppSec/tratamento; residual de produto fica vinculado sem ampliar escopo. Pendência mantém dono/retomada, sem ciclo automático.
+3. **Encaminhar ou retomar pela condição comprovada.** Encaminhar somente a atividade necessária, respeitando R6–R8 e a ordem integração completa → revisão → AppSec → QA → pacote → PR → aceite → conferência de merge → encerramento. Retomar o ponto pendente com provas ainda válidas; complemento não conclui atividade nem libera gate. Mudança de código/composição exige os controles afetados. Residual de segurança segue AppSec/tratamento; residual de produto fica vinculado sem ampliar escopo. Pendência mantém dono/retomada, sem ciclo automático.
 
 **Pronto:** próximo resultado, responsável, versão e pré-condições identificados; todas as condições do destino satisfeitas. Conclusão de tarefa não aprova a entrega inteira. Aplicam-se as regras comuns R1–R10 da descrição.
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Ambiente: preparar ou recuperar | Encaminhamento | Preparar ou recuperar o ambiente |
+| Ambiente: preparar ou recuperar | Encaminhamento | Preparar, recuperar ou encerrar o ambiente |
 | Tarefa ao dev fullstack | Encaminhamento | Executar contribuição fullstack |
 | Tarefa ao dev backend | Encaminhamento | Executar contribuição backend |
 | Tarefa ao dev web | Encaminhamento | Executar contribuição web |
@@ -253,7 +255,7 @@ Planejamento, atribuição e retomada do cenário ativo. Regras transversais na 
 | Consulta ou revalidação AppSec | Encaminhamento | Analisar ou revalidar segurança |
 | QA: retomar ou completar prova | Encaminhamento | Validar critérios e jornadas |
 | QA válido: preparar aceite | Encaminhamento | Preparar o aceite humano |
-| Aceite válido: retomar entrega da PR | Encaminhamento | Abrir PRs e entregar próximos passos |
+| Pacote válido: abrir ou retomar PR | Encaminhamento | Abrir PRs e entregar próximos passos |
 | Pendência atribuída; aguardar | Estado próprio | Estado descrito na saída; não encaminha outro processo |
 
 **Condições locais das etapas:**
@@ -264,23 +266,24 @@ Planejamento, atribuição e retomada do cenário ativo. Regras transversais na 
 
 <a id="process-env"></a>
 
-### Preparar ou recuperar o ambiente
+### Preparar, recuperar ou encerrar o ambiente
 
 **Referência:** `env`. **Responsável:** Engenheiro DevOps.
 
-Avaliação, preparação e prova de isolamento no mesmo procedimento. Usar a skill ENV carregada e seu contrato de bancos compartilhados; detalhes operacionais pertencem à skill.
+Preparação/recuperação durante o trabalho e encerramento somente após a conferência pós-merge. Usar a skill env carregada e seu contrato de bancos compartilhados; não implementar outro destruidor de ambientes.
 
-1. **Conferir alvos e autorização.** Usar env para conferir projeto, manifesto/base/contexto, recursos e ação solicitada pelo TL: preparar, reutilizar ou recuperar. Delimitar autorização e pré-requisitos; impedimento segue R4.
+1. **Conferir alvos e autorização.** Usar env para conferir projeto, manifesto/base/contexto, recursos e ação: preparar, reutilizar, recuperar ou encerrar. Registrar durante a tarefa repositório, branch da worktree, caminho, ambiente associado e contexto Docker. Na limpeza, receber prova de merge e tratamento das issues; resolver `{{current-worktree-branch}}` pela branch da tarefa registrada, não pela branch do terminal após trocar de diretório. Conferir a associação exata no estado da skill; branch e nome do ambiente podem diferir. Ausência/ambiguidade mantém pendência, sem adivinhar nomes ou criar ambiente para destruí-lo.
 
-2. **Preparar e comprovar isolamento.** Aplicar o procedimento de env e, quando houver pools, sua referência de bancos compartilhados. Entregar prova de isolamento de arquivos, banco, filas, portas e storage conforme R5; arquivos sempre comprovados, demais dimensões não aplicáveis somente com motivo. Em pools, comprovar recursos/credenciais próprios, configuração dos consumidores e recusa de acesso cruzado. Preservar dados/configurações; não usar produção nem limpeza como teste.
+2. **Executar a operação pertinente.** Aplicar o procedimento de env e, quando houver pools, sua referência de bancos compartilhados. Entregar prova de isolamento de arquivos, banco, filas, portas e storage conforme R5; arquivos sempre comprovados, demais dimensões não aplicáveis somente com motivo. Em pools, comprovar recursos/credenciais próprios, configuração dos consumidores e recusa de acesso cruzado. Preservar dados/configurações; não usar produção nem limpeza como teste. Para encerrar, preservar arquivos rastreados/não rastreados/ignorados, commits, dados e backups necessários fora da worktree; verificar a preservação. Executar o destroy da skill no projeto correto com o nome de ambiente associado e confirmação exata `projeto/ambiente`, a partir de um diretório que não será removido. Não usar força, excluir por prefixo ou remover pools/imagens/infraestrutura compartilhada. Squash/rebase pode impedir a prova de ancestralidade: não contornar a proteção; conservar worktree/branch e reportar o que ficou pendente. `--keep-worktree` permite apenas o encerramento parcial autorizado do ambiente após preservar dados, nunca declarar remoção completa da worktree.
 
-3. **Entregar provas e ponto de retomada.** Entregar ao TL identificação do ambiente, versões, provas e limitações, sem credenciais. Na recuperação, indicar mudanças e evidências invalidadas; não reiniciar investigação automaticamente.
+3. **Entregar provas e ponto de retomada.** Entregar ao TL identificação, versões, provas e limitações. Na preparação/recuperação, comprovar isolamento e indicar provas invalidadas. No encerramento, verificar recursos removidos e preservados, worktree/branch e resultado da skill; falha ou remoção parcial mantém pendência. Se já destruído, conferir o registro e a ausência dos alvos, sem repetir por nome aproximado. Sem ambiente gerenciado, registrar não aplicável com evidência; não usar limpeza genérica como substituta.
 
-**Pronto:** isolamento comprovado e finalidade identificada; avaliação documental ou container existente não bastam.
+**Pronto:** preparação/recuperação com isolamento comprovado; ou encerramento do alvo exato confirmado, com preservação e resultado documentados. Remoção parcial não é conclusão completa.
 
 | Saída | Tipo | Destino |
 |---|---|---|
 | Ambiente/prova entregue: TL | Conclusão da atividade | Coordenar a entrega |
+| Encerramento conferido: TL | Conclusão da atividade | Conferir merge e encerrar a tarefa |
 | Impedimento ou decisão necessária: TL | Impedimento/reprovação | Coordenar a entrega |
 
 **Condições locais das etapas:**
@@ -398,25 +401,27 @@ Preparar telas/estados/contratos mobile e exercitá-los com mock combinado com b
 
 **Referência:** `bank`. **Responsável:** Tech Lead.
 
-Proposta revisável somente quando estrutura, migration ou transformação complexa de relações exige decisão. Classificação técnica e plano simples de dados ficam na coordenação; não criar uma proposta vazia.
+Proposta HTML temporária quando há estrutura, qualquer migration ou transformação complexa de relações. A fonte é o código/schema/migrations da base real identificada no projeto; não consultar produção para produzir a proposta.
 
-1. **Conferir impacto e classificação.** Identificar estrutura, operações de dados, artefatos/migrations, relações e consumidores. Qualquer mudança estrutural ou migration, inclusive de dados, exige aprovação prévia. Transformação complexa de relações por dados também exige proposta, DB Reviewer e decisão prévia, mesmo por script/comando. Complexidade considera integridade, cardinalidade, acoplamento e consumidores do conjunto; quantidade de tabelas/registros não decide sozinha. Dúvida técnica volta ao TL com pergunta/prova; persistindo materialmente ou envolvendo regra/autorização, TL apresenta ao humano.
+1. **Conferir impacto e base.** Identificar repositório, commit/base, estrutura, dados, relações, consumidores e escopo. Toda migration, inclusive de dados, exige decisão anterior à implementação dependente. Relações complexas exigem parecer técnico identificado do TL ou revisor competente disponível, sem ferramenta específica obrigatória. Falta de fonte/evidência material bloqueia; não inventar estado atual.
 
-2. **Preparar a alternativa revisável.** DB Reviewer é obrigatório para relações complexas; nos demais casos, usar proporcionalmente ao risco ou propor na issue. Com estrutura, comparar com a master identificada da ferramenta, sem alterá-la; sem estrutura, analisar modelo e vínculos/seleção antes/depois, sem inventar schema. Entregar alternativas, consumidores, compatibilidade, locks/volumes, ordem, validação e recuperação. clean-architecture apoia contratos/fronteiras; verification-planning apoia o plano de provas, sem substituir DB Reviewer. Ferramenta/base obrigatória ausente ou incapaz bloqueia; não implementar para demonstrar a proposta.
+2. **Preparar o HTML revisável.** Partir do [template HTML](templates/database-review.html) e salvar somente a cópia da tarefa em `.bezalel/reviews/database-<tarefa>-<versao>.html`. Antes de gerar, conferir/adicionar `/reviews/` ao `.bezalel/.gitignore` preservando regras existentes; a cópia não entra em Git. Mostrar estrutura atual e proposta lado a lado: tabelas, colunas/tipos/nulabilidade/defaults, chaves, índices, restrições e relações/cardinalidades; identificar adições, alterações, remoções e o que permanece. Em mudança só de dados, mostrar seleção e transformação antes/depois, sem inventar mudança estrutural. Explicar necessidade, alternativas, consumidores, compatibilidade, migração/backfill, locks/volume, validação e recuperação. clean-architecture apoia fronteiras; verification-planning apoia provas. HTML autocontido, UTF-8, sem scripts remotos, credenciais ou dados pessoais; inspecionar a renderização antes de apresentar. Não implementar a migration para ilustrar a proposta.
 
-3. **Submeter a versão exata.** Publicar vN e conteúdo/referências recuperáveis na issue; exportar representação/comparação se necessário. Preservar texto UTF-8 e anexos; registrar SHA-256 em comentário separado para identificar o conteúdo, sem tratá-lo como aprovação. Encaminhar ao humano. Alteração material de conteúdo/base exige nova decisão; decisão anterior exata válida pode ser reaproveitada após conferência.
+3. **Submeter e preservar a decisão.** Apresentar o HTML acessível, base/escopo e versão exatos ao humano. Registrar referência, resumo suficiente da estrutura/diferenças, hash dos bytes e eventual parecer na issue ou conversa; hash não é aprovação. Ajuste solicitado mantém a proposta pendente: atualizar o HTML, identificar nova versão e reapresentar. Após aprovação ou rejeição final, registrar a interação real e o conteúdo decidido fora do HTML, excluir somente as cópias temporárias dessa proposta e verificar a ausência. Falha de registro ou exclusão mantém pendência; não remover o template do pacote. Nova mudança material exige novo HTML e decisão.
 
-**Pronto:** proposta exata revisável com análise adequada; nenhuma implementação dependente iniciada.
+**Pronto:** HTML apresentado com base e conteúdo verificáveis; após decisão final, registro preservado e cópias temporárias excluídas. Aprovação não é inferida da exclusão.
 
 | Saída | Tipo | Destino |
 |---|---|---|
 | Proposta identificada: decisão humana | Conclusão da atividade | Decidir a proposta de banco |
-| Prova, classificação ou ferramenta insuficiente: TL | Impedimento/reprovação | Coordenar a entrega |
+| Ajuste solicitado | Encaminhamento | Preparar a proposta de banco |
+| Fonte, registro ou exclusão pendente | Impedimento/reprovação | Coordenar a entrega |
 
 **Condições locais das etapas:**
 
-- Etapa 1 → **Prova, classificação ou ferramenta insuficiente: TL**: Classificação não está sustentada ou falta decisão de regra/escopo/autorização.
-- Etapa 2 → **Prova, classificação ou ferramenta insuficiente: TL**: Modelo/base, ferramenta obrigatória ou evidência necessária está indisponível/incapaz.
+- Etapa 1 → **Fonte, registro ou exclusão pendente**: Base/estrutura real ou análise necessária indisponível.
+- Etapa 3 → **Ajuste solicitado**: Humano pede reformulação; não interpretar como aprovação ou rejeição final.
+- Etapa 3 → **Fonte, registro ou exclusão pendente**: Não foi possível preservar a decisão ou excluir o HTML após a decisão final.
 
 <a id="process-bankDecision"></a>
 
@@ -424,24 +429,27 @@ Proposta revisável somente quando estrutura, migration ou transformação compl
 
 **Referência:** `bankDecision`. **Responsável:** APROVADOR HUMANO.
 
-Decisão humana anterior à criação de migrations, implementação estrutural ou transformação complexa de relações por dados.
+Decisão sobre o HTML apresentado antes da implementação dependente, incluindo estrutura e diferença entre estado atual e proposta.
 
-1. **Ler o conteúdo submetido.** Conferir vN, conteúdo identificado, comparação/modelo, efeitos sobre dados/consumidores, alternativas e recuperação. Esclarecer lacunas antes de decidir.
+1. **Conferir conteúdo e alcance.** Examinar HTML, base/versão, estrutura, impactos, alternativas e limites. Esclarecer lacunas antes de decidir; não requer envio a outra ferramenta.
 
-2. **Decidir a versão exata.** Aprovar ou solicitar reformulação/rejeitar solução, com interação real identificada. Aprovação anterior permanece utilizável somente se conteúdo/base/escopo pertinentes continuam cobertos. Não confundir recusa técnica com descarte da intenção.
+2. **Decidir a versão exata.** Aprovar, pedir ajuste ou rejeitar a proposta final em interação real. Pedido de ajuste volta ao TL para novo HTML e nova avaliação; não é autorização para implementar. Aprovação anterior só vale para o conteúdo/base/escopo que efetivamente cobre.
 
-3. **Devolver ao TL.** Registrar decisão e referências. Aprovação libera somente a mudança aprovada e dependentes com demais condições satisfeitas; TL retoma interface pendente ou implementação conforme o plano. Mudança de conteúdo exige reavaliar a aprovação.
+3. **Devolver ao TL.** TL preserva decisão e resumo, exclui/verifica o HTML temporário após decisão final e só então retoma interface ou implementação dependente com demais condições satisfeitas. Rejeição não cancela a intenção automaticamente; TL/PM tratam o próximo passo. Se o humano voltar a mudar a proposta, reapresentar uma nova versão.
 
-**Pronto:** decisão real vinculada ao conteúdo exato; silêncio não autoriza. Trabalho independente segue R6, sem antecipar a parte pendente.
+**Pronto:** decisão final identificada ou ajuste claramente solicitado; nenhum agente decide pelo humano.
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Decisão registrada: TL | Conclusão da atividade | Coordenar a entrega |
-| Aguardando decisão ou esclarecimento | Estado próprio | Estado descrito na saída; não encaminha outro processo |
+| Aprovação final registrada | Encaminhamento | Coordenar a entrega, após excluir o HTML |
+| Ajuste solicitado | Encaminhamento | Preparar a proposta de banco |
+| Rejeição final | Encaminhamento | Coordenar a entrega, após registrar e excluir o HTML |
+| Aguardando decisão ou esclarecimento | Estado próprio | Permanecer nesta atividade |
 
 **Condições locais das etapas:**
 
-- Etapa 2 → **Aguardando decisão ou esclarecimento**: Decisão ausente, ambígua ou sem vínculo verificável com a proposta.
+- Etapa 2 → **Aguardando decisão ou esclarecimento**: Resposta ausente, ambígua ou de outra versão.
+- Etapa 2 → **Ajuste solicitado**: Alteração solicitada sem aprovação do conteúdo novo.
 
 <a id="process-ui"></a>
 
@@ -594,13 +602,13 @@ Pacote único de evidências e roteiro manual para o candidato validado. Nos cen
 
 2. **Preparar roteiro e acesso.** Aplicar development-test-workbook para produzir e conferir o .xlsx real/acessível dos cenários 2/3; no bug, usar quando o roteiro proporcional for Excel. Sem Excel, manter versão, ambiente, pré-condições/dados, critérios, passos, esperado e observado/status, executor/data e evidências. Casos humanos permanecem não executados, sem herdar QA. Preparar acesso autorizado sem segredos.
 
-3. **Apresentar o pacote.** Apresentar pacote, links, instruções, limites e decisões pendentes; humanizer pode revisar apenas a apresentação. Solicitar execução e aceite do conjunto identificado. Falha de acesso/apresentação mantém pendência.
+3. **Apresentar o pacote.** Apresentar pacote, links, instruções, limites e decisões pendentes; humanizer pode revisar apenas a apresentação. Encaminhar a abertura da PR com roteiro pronto para o humano executar e avaliar. Falha de acesso/apresentação mantém pendência.
 
 **Pronto:** QA integral válido e pacote realmente acessível, com casos humanos ainda não executados.
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Roteiro e candidato apresentados: humano | Conclusão da atividade | Executar roteiro e decidir aceite |
+| Roteiro e candidato preparados: PR | Conclusão da atividade | Abrir PRs e entregar próximos passos |
 | Versão, prova ou acesso insuficiente: TL | Impedimento/reprovação | Coordenar a entrega |
 
 **Condições locais das etapas:**
@@ -614,7 +622,7 @@ Pacote único de evidências e roteiro manual para o candidato validado. Nos cen
 
 **Referência:** `accept`. **Responsável:** APROVADOR HUMANO.
 
-Aceite funcional externo sobre a versão apresentada. A execução do humano permanece distinta do QA.
+Aceite funcional externo na PR já aberta, sobre a versão apresentada. A execução do humano permanece distinta do QA; abertura de PR não depende deste aceite.
 
 1. **Conferir candidato e roteiro.** Abrir pacote/ambiente identificados; esclarecer impedimentos de acesso, dados ou versão antes de executar.
 
@@ -626,7 +634,7 @@ Aceite funcional externo sobre a versão apresentada. A execução do humano per
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| Aceite registrado: entregar PR | Conclusão da atividade | Abrir PRs e entregar próximos passos |
+| Aceite registrado: conferir merge | Conclusão da atividade | Conferir merge e encerrar a tarefa |
 | Falha, impedimento ou ajuste: TL | Encaminhamento | Coordenar a entrega |
 | Roteiro ou decisão pendente | Estado próprio | Estado descrito na saída; não encaminha outro processo |
 
@@ -643,19 +651,20 @@ Aceite funcional externo sobre a versão apresentada. A execução do humano per
 
 **Referência:** `pr`. **Responsável:** Tech Lead.
 
-Conclusão com todas as PRs necessárias abertas/verificadas para as bases de produção reais e orientação manual entregue. Junta conferência final de versões/checks e abertura.
+Entrega técnica com todas as PRs necessárias abertas/verificadas assim que desenvolvimento e validações terminarem. O aceite humano e a conferência de merge vêm depois, na PR; manter o ambiente para essa avaliação.
 
-1. **Conferir autorização, candidato e evidências.** Identificar repositórios e branch de produção nas instruções do projeto, sem presumir nome. Conferir autorização concreta para publicar branch/abrir PR, candidato completo, banco/UI/UX, review, AppSec, QA e aceite; todos na versão correspondente. Comparar composição, base/head/diff, contratos, schema/dados, dependências/configuração. Sem mudança material, reutilizar pareceres e aceite; diferença material ou dúvida de impacto exige revalidação afetada. Checks obrigatórios disponíveis antes da abertura precisam passar.
+1. **Conferir autorização, candidato e evidências.** Identificar repositórios e branch de produção nas instruções do projeto, sem presumir nome. A adoção deste fluxo com o pedido de desenvolvimento inclui publicar a branch da tarefa e abrir a PR após as validações, salvo restrição expressa do usuário/projeto. Conferir candidato completo, banco/UI/UX, review, AppSec, QA e roteiro; todos na versão correspondente. Aceite funcional posterior não bloqueia a abertura. Comparar composição, base/head/diff, contratos, schema/dados, dependências/configuração. Sem mudança material, reutilizar pareceres válidos; diferença material ou dúvida de impacto exige revalidação afetada. Checks obrigatórios disponíveis antes da abertura precisam passar.
 
 2. **Abrir e verificar as PRs reais.** Publicar somente branches autorizadas e abrir/verificar todas as PRs necessárias com base/head, issues e evidências corretos; humanizer pode revisar a descrição antes da publicação. Preservar PRs já abertas e retomar somente o faltante após falha, sem duplicar. Sem verificação, manter pendência; divergência confirmada volta ao TL/revalidação. Não habilitar auto-merge.
 
-3. **Conferir até o handoff e orientar Rafael.** Reler estado/base/head das PRs e candidato até o handoff: divergência confirmada, inclusive pós-abertura, retorna à coordenação. Informar CI disparado apenas pela PR no estado observado, inclusive pendente/falho e distinguindo checks prévios, sem espera/correção automática posterior. Entregar links, ordem de integração/liberação, validações, riscos/pendências e passos manuais de merge/deploy/dados/recuperação; humanizer pode revisar a orientação. Concluir com todas as PRs verificadas e orientação apresentada.
+3. **Conferir até o handoff e orientar Rafael.** Reler estado/base/head das PRs e candidato até o handoff: divergência confirmada, inclusive pós-abertura, retorna à coordenação. Informar CI disparado apenas pela PR no estado observado, inclusive pendente/falho e distinguindo checks prévios, sem espera/correção automática posterior. Entregar links, ordem de integração/liberação, validações, riscos/pendências e passos manuais de merge/deploy/dados/recuperação; humanizer pode revisar a orientação. Concluir a entrega técnica com todas as PRs verificadas e roteiro apresentado. Rejeição ou ajuste humano posterior retoma correção e validações afetadas na mesma PR; aprovação ou aviso de merge retoma a conferência pós-merge.
 
 **Pronto:** todas as PRs e próximo passo manual entregues para a versão validada. PR aberta não prova merge, deploy ou publicação em produção.
 
 | Saída | Tipo | Destino |
 |---|---|---|
-| PRs verificadas e orientação entregue | Estado próprio | Estado descrito na saída; não encaminha outro processo |
+| PRs verificadas e roteiro entregue | Encaminhamento | Executar roteiro e decidir aceite |
+| Aprovação ou aviso de merge recebido | Encaminhamento | Conferir merge e encerrar a tarefa |
 | Versão divergente ou revalidação necessária: TL | Impedimento/reprovação | Coordenar a entrega |
 | Abertura, verificação ou orientação pendente | Estado próprio | Estado descrito na saída; não encaminha outro processo |
 
@@ -668,6 +677,36 @@ Conclusão com todas as PRs necessárias abertas/verificadas para as bases de pr
 - Etapa 3 → **Versão divergente ou revalidação necessária: TL**: Antes do handoff, foi confirmada divergência material ou nova questão de segurança, mesmo com PR já aberta.
 - Etapa 3 → **Abertura, verificação ou orientação pendente**: Orientação não entregue ou estado das PRs não verificável, sem divergência confirmada.
 - Etapa 3 → **PRs verificadas e orientação entregue**: Todas as PRs necessárias foram abertas/verificadas no candidato válido e a orientação foi apresentada a Rafael.
+
+<a id="process-postMerge"></a>
+
+### Conferir merge e encerrar a tarefa
+
+**Referência:** `postMerge`. **Responsável:** Tech Lead.
+
+Retomada por aprovação humana da entrega ou aviso de merge, sem serviço de monitoramento. Pode ocorrer depois de outra sessão; reutilizar identidade das PRs, candidato e branch da tarefa, nunca o diretório atual como único indício.
+
+1. **Consultar todas as PRs da entrega.** Registrar a interação humana e consultar GitHub pelo MCP/API/CLI disponível. Confirmar repositório, URL, base, head validado, estado merged, data e commit de merge para cada PR. PR aprovada, fechada sem merge, inacessível ou com versão divergente impede fechamento/limpeza; informar o estado e aguardar nova orientação ou evento real. Não executar merge, auto-merge, deploy ou polling por inferência.
+
+2. **Encerrar somente o escopo concluído.** Confirmar que todas as PRs necessárias foram mergeadas e que não resta trabalho nas issues abrangidas. Fechar a issue existente e as histórias integralmente resolvidas; reler e verificar o estado. Se já fechada automaticamente, apenas verificar. Sem issue, registrar não aplicável. Não fechar história alheia, intenção residual ou principal com pendências; falha mantém a retomada registrada e precede a limpeza.
+
+3. **Encaminhar e conferir o encerramento do ambiente.** Passar ao DevOps a identidade registrada de projeto/branch/worktree/ambiente, evidência de merge e estado das issues. O pedido deste fluxo autoriza encerrar somente esse ambiente após preservar o necessário. Receber e registrar resultado, alvos removidos/preservados e pendências. Guardar evidências na conversa/PR/issue ou fora da worktree antes da remoção. Se não houver ambiente gerenciado, registrar a verificação; não simular destruição. Falha de limpeza não reabre uma issue resolvida nem repete o fechamento.
+
+**Pronto:** merges reais verificados, issues aplicáveis conferidas e ambiente encerrado ou comprovadamente não aplicável. Branch/worktree preservada por bloqueio significa encerramento parcial, informado ao usuário.
+
+| Saída | Tipo | Destino |
+|---|---|---|
+| Merge ainda não comprovado | Estado próprio | Aguardar orientação/evento real, preservando ambiente e issues |
+| Versão divergente ou trabalho restante | Encaminhamento | Coordenar a entrega |
+| Issues verificadas: encerrar ambiente | Encaminhamento | Preparar, recuperar ou encerrar o ambiente |
+| Encerramento concluído | Estado próprio | Informar resultado final |
+| Encerramento parcial | Estado próprio | Registrar bloqueio, dono e condição de retomada |
+
+**Condições locais das etapas:**
+
+- Etapa 1 → **Merge ainda não comprovado**: Qualquer PR necessária não está mergeada/verificável.
+- Etapa 2 → **Encerramento parcial**: Falha ao fechar/verificar issue; não passar à limpeza.
+- Etapa 3 → **Encerramento parcial**: Preservação, identificação ou execução da limpeza ficou incompleta.
 
 ## Diferenças aplicadas nas participações
 
@@ -695,18 +734,10 @@ Conclusão com todas as PRs necessárias abertas/verificadas para as bases de pr
 - **Validar critérios e jornadas**: No mesmo candidato completo, validar critérios de cada história e depois jornadas globais, dependências e integração entre serviços. Uma história isolada aprovada não conclui a feature.
 - **Preparar o aceite humano**: Arquivo Excel .xlsx real, acessível e vinculado ao candidato; casos humanos começam não executados.
 
-## Correspondência com o MCP
+## Fonte e manutenção
 
-Empresa **Fluxo de IA**, `534d1f66-90a5-462d-bf78-29c6ccf9ef94`.
-A revisão **1179** é a referência de conversão. O [catálogo](catalog.json) associa
-os IDs estáveis de cargos, cenários e processos aos contratos e às skills.
-Os nomes nesta documentação omitem os sufixos históricos de versão presentes na
-ferramenta visual; esses rótulos não versionam agentes. Essa diferença de nomenclatura
-foi conferida na revisão indicada, sem alterar procedimentos ou o conteúdo do MCP.
-Os três cenários são 1 — Bug, 2 — Melhoria e 3 — Feature; os 74 processos
-antigos que ainda existem no catálogo visual não integram este pacote de execução.
-
-Em mudanças acordadas do fluxo, releia o MCP, preserve alterações concorrentes e
-confira procedimentos, decisões, condições e conexões nos dois sentidos.
-Validação estrutural não prova equivalência semântica. Os arquivos são a fonte
-canônica; agentes, skills e adaptadores não autenticam decisões nem concedem acesso.
+Este documento, o catálogo e os contratos dos papéis são as fontes do fluxo.
+Mantenha cenários, etapas, decisões, condições e referências coerentes entre os
+arquivos. IDs existentes permanecem estáveis; não é necessário enviar propostas
+ou sincronizar o fluxo com um serviço externo. O checker confere estrutura e
+vínculos, sem provar equivalência semântica, decisão humana ou execução real.

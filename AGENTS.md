@@ -3,10 +3,10 @@
 Este arquivo instrui contribuições no repositório. Papéis e contratos ficam em
 `agents/`; são contratos e adaptadores de agentes, sem runtime próprio de autorização.
 
-Bezalel é o plugin completo; DreamTeam é a equipe de agentes; Company Flow é a
-ferramenta visual. Use `dream-team` nos arquivos e adaptadores da equipe, sem
+Bezalel é o plugin completo; DreamTeam é a equipe de agentes. O fluxo é local,
+sem envio ou sincronização obrigatória com serviço de modelagem. Use `dream-team` nos arquivos e adaptadores da equipe, sem
 sufixo de versão. Documentos gerais de skills não precisam de prefixo do plugin.
-Preserve os IDs da correspondência com a ferramenta. Ao renomear arquivos,
+Preserve os IDs estáveis do catálogo local. Ao renomear arquivos,
 atualize catálogo, links, adaptadores e instruções gerenciadas; confira a migração
 das instalações existentes. O validador e o instalador usam os caminhos do catálogo.
 
@@ -56,8 +56,11 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
 - User story deve ser curta e compreensível, com necessidade, critérios observáveis,
   dependências e responsável pela integração inteira. Especialistas são opcionais.
 - Gates exigem evidência de isolamento de arquivos/banco/filas/portas/storage;
-  mudança estrutural de banco exige proposta revisável e aprovação humana anterior
-  à implementação, vinculada à versão exata. Sem mudança, registre não aplicável.
+  estrutura, qualquer migration ou relações complexas exigem HTML temporário com
+  estrutura/diferenças antes/depois, base real e aprovação humana anterior à
+  implementação. Ajuste exige reapresentação. Após decisão final, preserve resumo,
+  base, versão e decisão na issue/conversa e exclua/verifique o HTML da tarefa,
+  mantendo o template do pacote. Sem mudança aplicável, registre não aplicável.
 - Não fabrique aprovações ou resultados para satisfazer validadores. JSON não prova
   identidade nem autorização; um runtime deve conferir a interação humana real.
 - QA independente amplia cenários e confronta comportamento, não só a suíte do dev.
@@ -70,13 +73,19 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   nomenclatura. Processos e skills atribuídos devem corresponder à fonte canônica.
 - Observação de produção/negócio está fora deste pacote. Não ative coleta, leia
   produção ou faça correções como teste da base. Ausência de dados não é zero eventos.
-- PR é etapa prevista de entrega, mas publicação/merge/deploy exigem autorização
-  concreta da tarefa. Quando ausente, prepare rascunho local e registre a pendência.
+- Ao concluir desenvolvimento e validações técnicas, publique a branch da tarefa
+  e abra/verifique a PR, sem perguntar novamente apenas para a abertura, salvo
+  restrição expressa. O aceite funcional humano ocorre na PR aberta; merge e deploy
+  continuam manuais. Aprovação ou aviso de merge aciona consulta ao serviço: só com
+  todos os merges confirmados, fechar/verificar issues do escopo concluído e
+  executar env destroy no ambiente associado à branch da tarefa. Preserve dados,
+  arquivos e commits; respeite alvo, confirmação e bloqueios da skill. Não adivinhe
+  ambiente pela branch do terminal nem force remoção após squash/rebase.
 
 - Em mudanças que afetem o fluxo da DreamTeam, use a [fonte canônica](agents/dream-team.md):
-  arquivos são a fonte canônica; releia a revisão visual, preserve alterações
-  concorrentes e confira etapas/decisões/condições nos dois sentidos. Diferencie
-  checker estrutural de revisão semântica e registre divergências preexistentes.
+  confira etapas/decisões/condições entre contratos, catálogo e instruções locais.
+  Não envie propostas ou sincronize o fluxo com ferramenta externa. Diferencie
+  checker estrutural de revisão semântica; arquivos não provam decisões ou execução.
 
 ## Manutenção das instruções e da adoção
 
@@ -103,7 +112,8 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   continuar escrevendo após o retorno; aplique a restrição por comando, sem alterar
   a configuração persistente do usuário ou do projeto.
 - `scripts/plugin.py` gera o pacote nativo: contratos em `contracts/`, adaptadores
-  Claude explicitamente listados e TOMLs Codex conectados ao projeto. Não coloque
+  Claude explicitamente listados, TOMLs Codex conectados ao projeto e checker de
+  entrega capaz de ler o catálogo em `contracts/`. Não coloque
   contratos/humano numa pasta descoberta como agentes. Skills originais permanecem
   idênticas; comandos Claude de invocação manual só referenciam seus originais.
 - Os workflows consultam o Akita e **abrem PR para revisão humana**; somente a
@@ -123,7 +133,7 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
 - Na entrega, informe quais instruções foram atualizadas e as limitações verificadas.
   Diferencie automação preparada, instalada e executada. Hooks precisam da confiança
   do aplicativo; não a conceda via edição de configuração. A distribuição de arquivos
-  não sincroniza o MCP. Mudanças do fluxo seguem a conferência nos dois sentidos.
+  atualiza somente o pacote e os vínculos gerenciados no projeto.
 
 ## Configuração e segurança
 

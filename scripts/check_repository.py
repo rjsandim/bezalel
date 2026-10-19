@@ -78,10 +78,10 @@ def validate_agents():
     expected_roles = {"produto", "coordenador", "infraestrutura", "dev-fullstack", "backend", "frontend-web", "mobile", "qa", "appsec"}
     try:
         catalog = read_json(ROOT / "agents/catalog.json")
-        require(isinstance(catalog, dict) and set(catalog) == {"schema_version", "execution", "company_flow", "roles", "external_actors"}, "Catálogo de agentes inválido.")
-        require(catalog["schema_version"] == 2 and catalog["execution"] == "agent_contracts", "Catálogo não pode declarar runtime implementado.")
+        require(isinstance(catalog, dict) and set(catalog) == {"schema_version", "execution", "workflow", "roles", "external_actors"}, "Catálogo de agentes inválido.")
+        require(catalog["schema_version"] == 3 and catalog["execution"] == "agent_contracts", "Catálogo não pode declarar runtime implementado.")
         require(isinstance(catalog["roles"], dict) and set(catalog["roles"]) == expected_roles, "Catálogo deve conter os nove agentes ativos do fluxo, incluindo AppSec.")
-        flow = catalog["company_flow"]
+        flow = catalog["workflow"]
         source = local_file(ROOT / "agents", flow["source"], "Fluxo").read_text()
         require(re.findall(r"^### (R\d+) ", source, re.M) == ["R" + str(n) for n in range(1, 11)], "Preserve as dez regras comuns do fluxo.")
         local_file(ROOT / "agents", flow["skills"], "Relação de skills")
@@ -93,10 +93,10 @@ def validate_agents():
                 procedure = block.split("**Pronto:**", 1)[0]
                 require(re.findall(r"^([123])\. \*\*", procedure, re.M) == ["1", "2", "3"], "Cada processo deve preservar suas três etapas.")
                 sections[match[1]] = (match[2], procedure)
-        require(len(sections) == 20, "O fluxo deve cobrir os 20 processos previstos.")
+        require(len(sections) == 21, "O fluxo deve cobrir os 21 processos previstos.")
         scenarios = flow["scenarios"]
         require(isinstance(scenarios, list) and len(scenarios) == 3 and len({x["id"] for x in scenarios}) == 3, "Declare três cenários distintos.")
-        require(text(flow["company_id"]) and type(flow["revision"]) is int, "Declare empresa e revisão visual conferidas.")
+        require(set(flow) == {"source", "skills", "scenarios"}, "Fluxo local não deve depender de serviço de modelagem.")
         actors = catalog["external_actors"]
         require(isinstance(actors, dict) and set(actors) == {"aprovador-humano"}, "Mantenha o humano externo ao catálogo de agentes.")
         skills_available = {p.parent.name for p in (ROOT / "skills").glob("*/SKILL.md")}
@@ -108,7 +108,7 @@ def validate_agents():
             require(path.parent == ROOT / "agents" / ("actors" if human else "roles"), "Contrato fora da pasta prevista.")
             content = path.read_text()
             require(text(entry["display_name"]) and re.search(r"^# " + re.escape(entry["display_name"]) + r"$", content, re.M), "Nome de apresentação diverge do contrato.")
-            role_ids.append(entry["company_flow_role_id"])
+            role_ids.append(entry["id"])
             required_skills = set()
             require(isinstance(entry["processes"], list) and entry["processes"], "Papel sem processos.")
             for process in entry["processes"]:
@@ -145,8 +145,8 @@ def validate_agents():
             require(len(front.splitlines()) == 2 and text(front.splitlines()[1].removeprefix('description: ').strip('"')), "Adaptador Claude amplia configurações não previstas.")
             require('agents/' + entry['file'] in body and 'agents/' + flow['source'] in body, "Adaptador Claude deve carregar contrato e fluxo.")
         require(len(role_ids) == len(set(role_ids)) == 10, "Identidades dos cargos duplicadas.")
-        require(len(process_keys) == len(set(process_keys)) == 20 and set(process_keys) == set(sections), "Processo órfão ou duplicado no catálogo.")
-        require(len(process_ids) == len(set(process_ids)) == 20, "IDs de processos duplicados.")
+        require(len(process_keys) == len(set(process_keys)) == 21 and set(process_keys) == set(sections), "Processo órfão ou duplicado no catálogo.")
+        require(len(process_ids) == len(set(process_ids)) == 21, "IDs de processos duplicados.")
         require(declared == set((ROOT / "agents/roles").glob("*.md")), "Contrato de agente órfão.")
         require(adapters == set((ROOT / "agents/codex").glob("*.toml")), "Adaptador de agente órfão.")
         require(claude_adapters == set((ROOT / 'agents/claude').glob('*.md')), "Adaptador Claude órfão.")

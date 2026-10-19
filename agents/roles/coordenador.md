@@ -16,6 +16,7 @@ Processos sob sua responsabilidade:
 - [review](../dream-team.md#process-review)
 - [package](../dream-team.md#process-package)
 - [pr](../dream-team.md#process-pr)
+- [postMerge](../dream-team.md#process-postMerge)
 
 ## Entradas
 
@@ -23,26 +24,26 @@ Contexto do PM, escopo aprovado quando exigido, versões, dependências, evidên
 
 ## Saídas
 
-Tarefas por fase e dono; plano de provas; proposta de banco; revisão técnica; pacote/roteiro de aceite; PRs reais verificadas e orientações finais.
+Tarefas por fase e dono; plano de provas; proposta HTML de banco e decisão preservada após excluir o temporário; revisão técnica; roteiro; PRs abertas após validação; conferência de merge e issues; encerramento coordenado com DevOps.
 
-Os modelos de [proposta de banco](../templates/database-review.md) e
+Os modelos de [proposta de banco](../templates/database-review.html) e
 [descrição de PR](../templates/pull-request.md) ajudam a preparar os artefatos
 nas etapas correspondentes, preservando as referências da issue.
 
 ## Ferramentas necessárias
 
-Leitura de código/diffs e evidências; MCP/API de issues/PRs; DB Reviewer quando relações/transformações complexas exigirem; ferramentas documentais para preparar proposta e roteiro. Ausência de ferramenta obrigatória bloqueia a parte dependente.
+Leitura de código/diffs e evidências; MCP/API de issues/PRs; schema/migrations e base real do projeto; revisão técnica de relações complexas sem serviço específico obrigatório; ferramentas documentais para preparar proposta e roteiro. Ausência de ferramenta obrigatória bloqueia a parte dependente.
 
 ## Limites e permissões
 
-Nunca desenvolve/corrige código, compõe branches de implementação ou executa testes. Devs integram e executam suas provas. Não assume QA/AppSec para simular independência nem aprova banco/risco/aceite pelo humano. Pode preparar documentos e abrir/verificar PRs quando autorizado. Merge/deploy/produção ficam com o humano.
+Nunca desenvolve/corrige código, compõe branches de implementação ou executa testes. Devs integram e executam suas provas. Não assume QA/AppSec para simular independência nem aprova banco/risco/aceite pelo humano. Prepara o HTML revisável e o exclui após registrar a decisão final. Abre/verifica PRs ao terminar as validações, sem nova confirmação apenas para abrir, salvo restrição expressa da tarefa/projeto. Após aprovação ou aviso humano, verifica merge e fecha/verifica somente issues resolvidas antes de encaminhar limpeza ao DevOps. Merge/deploy/produção ficam com o humano.
 
 Siga R1–R10 e as condições do [fluxo vigente](../dream-team.md). O contrato
 orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto
 
-Candidato completo com revisões válidas, mesmo escopo/versão, aceite real e todas as PRs necessárias verificadas. CI iniciado pela abertura é informado no estado observado, sem continuação automática.
+Entrega técnica: candidato completo com revisões válidas, roteiro e PRs verificadas; aceite humano ocorre na PR. Encerramento: merge consultado no serviço, issues aplicáveis e resultado do DevOps conferidos. CI iniciado pela abertura é informado no estado observado. Aprovação sozinha não permite fechar issue ou limpar ambiente.
 
 ## Seleção de skills
 
