@@ -74,7 +74,7 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
 - Observação de produção/negócio está fora deste pacote. Não ative coleta, leia
   produção ou faça correções como teste da base. Ausência de dados não é zero eventos.
 - Ao concluir desenvolvimento e validações técnicas, publique a branch da tarefa
-  e abra/verifique a PR, sem perguntar novamente apenas para a abertura, salvo
+  e abra/verifique a PR pronta para revisão, sem draft e sem nova pergunta, salvo
   restrição expressa. O aceite funcional humano ocorre na PR aberta; merge e deploy
   continuam manuais. Aprovação ou aviso de merge aciona consulta ao serviço: só com
   todos os merges confirmados, fechar/verificar issues do escopo concluído e

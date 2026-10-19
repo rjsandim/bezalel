@@ -103,7 +103,7 @@ def desired(project, base, platforms, automatic, contract_dir='agents'):
         '  Aprovação humana não pode ser simulada. Merge e deploy são manuais.',
         '- O fluxo é local. Banco exige HTML revisável; após decisão final registrada,',
         '  exclua a cópia temporária, preservando resumo e decisão fora dela.',
-        '- Ao concluir desenvolvimento/validações técnicas, abra a PR com roteiro,',
+        '- Ao concluir desenvolvimento/validações técnicas, abra a PR com roteiro, pronta para revisão e sem draft,',
         '  salvo restrição expressa; aceite humano vem na PR. Após aprovação ou aviso',
         '  humano, confirme merge no serviço antes de fechar issues e executar env destroy',
         '  no ambiente associado à branch da tarefa, com preservação e limites da skill.',

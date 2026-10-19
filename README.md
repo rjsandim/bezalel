@@ -79,7 +79,7 @@ interface/banco quando aplicáveis → implementação e integração → revis�
 AppSec e QA → roteiro → PR aberta → aceite humano na PR. Ao receber aprovação ou
 aviso de merge, TL verifica o merge no serviço, fecha/verifica issues concluídas
 quando existirem e encaminha o encerramento do ambiente ao DevOps. Abertura de PR
-faz parte do desenvolvimento solicitado; não exige nova pergunta após validação,
+faz parte do desenvolvimento solicitado: PR normal, pronta para revisão, sem draft. Não exige nova pergunta após validação,
 salvo restrição expressa. Aprovação não prova merge. Merge e deploy continuam manuais.
 
 Estrutura, qualquer migration ou relações complexas exigem uma proposta baseada

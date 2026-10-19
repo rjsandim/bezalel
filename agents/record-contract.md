@@ -38,7 +38,7 @@ python3 .bezalel/base/scripts/check_delivery.py --project . --record .bezalel/de
 | `implement` | Acrescenta investigação do escopo, UI/UX quando afetada e situação de banco resolvida. |
 | `accept` | Candidato integrado, checks prévios, revisão TL, AppSec, QA e roteiro pronto para execução humana. |
 | `deliver` | Candidato tecnicamente validado, roteiro e rascunho da PR. Não exige aceite humano para abrir a PR. |
-| `handoff` | Acrescenta todas as PRs abertas/verificadas na base/head previstos, CI observado e orientações manuais. |
+| `handoff` | Acrescenta todas as PRs abertas/verificadas na base/head previstos, `draft: false`, CI observado e orientações manuais. |
 | `accepted` | Aceite humano da versão/roteiro realmente executados na PR aberta. Não prova merge. |
 | `merged` | Interação humana e consulta posterior ao serviço confirmando todas as PRs mergeadas na base/head previstos. |
 | `finish` | Acrescenta issues existentes fechadas/verificadas e resultado completo do destroy do alvo registrado, ou ambiente comprovadamente não aplicável. |
@@ -73,8 +73,8 @@ raiz são recusados; declarações de autorização não pertencem a este arquiv
 | `qa` | Parecer passado, revisor distinto, `criteria: [{id, status, evidence, candidate}]`, `additional_scenarios` fundamentados; feature também exige `journeys` globais. |
 | `manual_test` | `path` local e `candidate`. Melhoria/feature exigem `.xlsx`; bug segue a necessidade. Arquivo existente não comprova roteiro adequado ou executado. |
 | `acceptance` | Decisão humana sobre candidato e bytes do roteiro, mais `execution_evidence` da execução humana real. |
-| `pr_draft` | Caminho local para rascunho não vazio; não é uma PR publicada. |
-| `pull_requests` | Uma por repositório do candidato: `repository`, `url`, `base`, `head`, `state: open`, `verified_at` com fuso, `ci: {status, evidence}`. |
+| `pr_draft` | Caminho local para preparar a descrição; não é uma PR publicada nem autoriza entregá-la em modo draft. |
+| `pull_requests` | Uma por repositório do candidato: `repository`, `url`, `base`, `head`, `state: open`, `draft: false` confirmado no serviço, `verified_at` com fuso, `ci: {status, evidence}`. |
 | `handoff` | Resultado passado com candidato, `evidence` e `next_steps` manuais, incluindo CI pendente/falho. |
 | `environment` | Identidade do ambiente registrada durante a tarefa; ver encerramento abaixo. |
 | `completion` | Interação humana, merges, issues e resultado da limpeza, sem executar operações pelo checker. |

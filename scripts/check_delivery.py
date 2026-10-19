@@ -288,6 +288,7 @@ def verify_handoff(record, config, candidate):
     for pr in prs:
         repo = next(r for r in repos if r["name"] == pr["repository"])
         require(https_reference(pr.get("url")) and pr.get("base") == repo["base"] and pr.get("head") == repo["head"] and pr.get("state") == "open", "PR precisa estar aberta/verificada na base/head validados.")
+        require(pr.get("draft") is False, "PR precisa estar pronta para revisão, com draft false confirmado no serviço.")
         timestamp(pr.get("verified_at"))
         ci = pr.get("ci")
         require(isinstance(ci, dict) and ci.get("status") in {"passed", "pending", "failed", "not_applicable"} and text(ci.get("evidence")), "Informe CI pós-abertura no estado observado.")

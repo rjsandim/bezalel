@@ -85,7 +85,7 @@ merge, deploy ou as skills reservadas ao uso manual.
 
 ## Entrega e encerramento
 
-Concluir validações técnicas abre a PR com roteiro pronto. Aceite humano vem na PR;
+Concluir validações técnicas abre a PR normal, pronta para revisão e sem draft, com roteiro pronto. Aceite humano vem na PR;
 aprovação ou aviso de merge faz o TL consultar o serviço. Somente com todos os
 merges confirmados e escopo concluído, fechar/verificar issues existentes e passar
 para DevOps o encerramento do ambiente associado à branch registrada. Falha ou

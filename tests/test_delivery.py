@@ -83,7 +83,7 @@ class DeliveryContractTests(unittest.TestCase):
 
     def ready_to_handoff(self):
         self.ready_to_deliver()
-        self.record['pull_requests'] = [{'repository': 'principal', 'url': 'https://github.com/example/fixture/pull/1', 'base': 'production', 'head': 'fixture-head-1', 'state': 'open', 'verified_at': '2026-01-01T12:00:00+00:00', 'ci': {'status': 'pending', 'evidence': 'fixture://ci-after-open'}}]
+        self.record['pull_requests'] = [{'repository': 'principal', 'url': 'https://github.com/example/fixture/pull/1', 'base': 'production', 'head': 'fixture-head-1', 'state': 'open', 'draft': False, 'verified_at': '2026-01-01T12:00:00+00:00', 'ci': {'status': 'pending', 'evidence': 'fixture://ci-after-open'}}]
         self.record['handoff'] = self.result(next_steps='Humano acompanha CI e decide merge/deploy.')
 
     def validate(self, stage='deliver'):
@@ -530,6 +530,22 @@ class DeliveryContractTests(unittest.TestCase):
             self.record['pull_requests'] = prs
             with self.assertRaises(delivery.ContractError):
                 self.validate('handoff')
+
+    def test_open_draft_or_unverified_readiness_blocks_handoff_and_acceptance(self):
+        self.ready_to_handoff()
+        pr = self.record['pull_requests'][0]
+        for value in [True, None, 'false', 0]:
+            with self.subTest(draft=value):
+                pr['draft'] = value
+                for stage in ['handoff', 'accepted']:
+                    with self.assertRaisesRegex(delivery.ContractError, 'draft false'):
+                        self.validate(stage)
+        pr.pop('draft')
+        with self.assertRaises(delivery.ContractError):
+            self.validate('handoff')
+        pr['draft'] = False
+        self.validate('handoff')
+        self.validate('accepted')
 
     def test_post_open_ci_may_be_pending_or_failed_when_reported(self):
         self.ready_to_handoff()

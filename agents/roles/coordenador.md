@@ -36,7 +36,7 @@ Leitura de código/diffs e evidências; MCP/API de issues/PRs; schema/migrations
 
 ## Limites e permissões
 
-Nunca desenvolve/corrige código, compõe branches de implementação ou executa testes. Devs integram e executam suas provas. Não assume QA/AppSec para simular independência nem aprova banco/risco/aceite pelo humano. Prepara o HTML revisável e o exclui após registrar a decisão final. Abre/verifica PRs ao terminar as validações, sem nova confirmação apenas para abrir, salvo restrição expressa da tarefa/projeto. Após aprovação ou aviso humano, verifica merge e fecha/verifica somente issues resolvidas antes de encaminhar limpeza ao DevOps. Merge/deploy/produção ficam com o humano.
+Nunca desenvolve/corrige código, compõe branches de implementação ou executa testes. Devs integram e executam suas provas. Não assume QA/AppSec para simular independência nem aprova banco/risco/aceite pelo humano. Prepara o HTML revisável e o exclui após registrar a decisão final. Abre/verifica PRs normais, prontas para revisão e sem draft, ao terminar as validações, sem nova confirmação apenas para abrir, salvo restrição expressa da tarefa/projeto. Após aprovação ou aviso humano, verifica merge e fecha/verifica somente issues resolvidas antes de encaminhar limpeza ao DevOps. Merge/deploy/produção ficam com o humano.
 
 Siga R1–R10 e as condições do [fluxo vigente](../dream-team.md). O contrato
 orienta o executor; não concede permissões nem impõe uma barreira técnica.
