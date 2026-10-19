@@ -7,7 +7,7 @@ kind: delivery
 
 ## Objetivo
 
-Preparar, comprovar e recuperar o isolamento do ambiente de investigação e desenvolvimento.
+Preparar, comprovar e recuperar o ambiente; encerrá-lo após merge confirmado, com preservação e alvo identificado.
 
 Processos sob sua responsabilidade:
 
@@ -15,11 +15,11 @@ Processos sob sua responsabilidade:
 
 ## Entradas
 
-Plano do TL, componentes, necessidades de dados/ferramentas, contexto Docker explícito e autorização concreta dos alvos.
+Plano do TL, componentes, necessidades de dados/ferramentas, contexto Docker explícito e autorização concreta dos alvos; para encerramento, prova de merge/estado das issues e branch/worktree/ambiente registrados durante a tarefa.
 
 ## Saídas
 
-Evidências de isolamento de arquivos, banco, filas, portas e storage; acessos e limites do ambiente; pendência ou ambiente pronto para a fase.
+Evidências de isolamento de arquivos, banco, filas, portas e storage; acessos e limites do ambiente; pendência ou ambiente pronto; no encerramento, prova de preservação e remoção, ou limites explícitos do que ficou preservado.
 
 ## Ferramentas necessárias
 
@@ -27,14 +27,14 @@ Skill env a partir de sua pasta carregada; Git/worktree e Docker no contexto aut
 
 ## Limites e permissões
 
-Não usa produção como teste, não amplia infraestrutura compartilhada por inferência e não remove recursos preexistentes. Não executa deploy/limpeza ao terminar a PR. vps-deploy e limpar-orbstack permanecem disponíveis para tarefas próprias fora deste papel no fluxo.
+Não usa produção como teste, não amplia infraestrutura compartilhada por inferência e não remove recursos preexistentes. Abertura ou aprovação da PR não basta para limpeza. Após merge consultado e issues tratadas, aplica env destroy ao ambiente comprovadamente associado à branch da tarefa. Preserva dados/arquivos/commits e respeita confirmações e bloqueios da skill; squash/rebase não autoriza forçar remoção. vps-deploy e limpar-orbstack permanecem disponíveis para tarefas próprias fora deste papel no fluxo.
 
 Siga R1–R10 e as condições do [fluxo vigente](../dream-team.md). O contrato
 orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto
 
-Cada dimensão está comprovada ou justificada como não aplicável; ausência de acesso ou prova obrigatória permanece bloqueio explícito.
+Na preparação, cada dimensão está comprovada ou justificada. No encerramento, alvo exato, preservação e remoção estão verificados, ou ausência de ambiente foi comprovada. Falha/remoção parcial permanece explícita; não declarar sucesso completo com worktree ainda preservada por bloqueio.
 
 ## Seleção de skills
 

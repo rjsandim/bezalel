@@ -21,11 +21,11 @@ Relato/necessidade, fontes, comportamento esperado e observado, critérios, dúv
 
 ## Saídas
 
-Issue real verificada; requisitos e critérios observáveis; escopo vN aprovado da feature e histórias vinculadas; destino verificado ou pendência com dono.
+Registro real na issue existente ou conversa da tarefa; requisitos e critérios observáveis; escopo vN aprovado da feature e histórias vinculadas; destino verificado ou pendência com dono.
 
 ## Ferramentas necessárias
 
-MCP/API do GitHub para issues e referências autorizadas; leitura do contexto de negócio. Não exige ambiente de implementação para registrar uma intenção.
+MCP/API do GitHub quando houver issues e referências autorizadas; leitura do contexto de negócio. Não exige ambiente de implementação para registrar uma intenção.
 
 ## Limites e permissões
 
