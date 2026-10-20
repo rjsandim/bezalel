@@ -42,7 +42,17 @@ antes de habilitar. As convenções de banco abaixo descrevem o modo `isolated`.
 - Dominio: `https://<nome>-<pasta>.<projeto>.local` (1 subdominio por pasta)
 - Rede: `envstack-proxy` · Traefik: `envstack-traefik` (compartilhados)
 - 1 Postgres/MySQL + 1 Redis por ambiente, compartilhados. 1 database por pasta backend (nome = pasta), user = `<projeto>`, senha `secret`. O banco e exposto no host numa **porta deterministica por ambiente** (33000-34999) p/ o IDE/DataGrip conectar.
-- `<nome>` em kebab-case (`^[a-z0-9][a-z0-9-]*$`).
+- Para criar, escolha uma descrição curta em minúsculas, sem acentos, com palavras
+  separadas por hífens: `corrigir-login`, `ajustar-cadastro-empresa`. Números são
+  permitidos quando significativos, como `migrar-php-84`; não acrescente sufixos
+  aleatórios ou prefixos de agente/tipo como `codex/`, `codex-` ou `feat/`.
+- Passe esse nome completo a `new`: branch, `.worktrees/<nome>`, nome do ambiente
+  e seu registro de estado usam a mesma identificação. Confira colisões; não
+  reutilize uma branch/ambiente alheio apenas porque o nome coincide.
+- O CLI valida caracteres compatíveis (`^[a-z0-9][a-z0-9-]*$`); a escolha de uma
+  descrição significativa cabe ao agente. Ele não acrescenta nem remove prefixos.
+  Para ambientes preexistentes, confira `worktree-branch` e preserve nomes/dados;
+  atualizar o Bezalel não renomeia recursos existentes.
 
 ## Placeholders no `.env.example`
 | Placeholder | Resolve |
@@ -72,7 +82,7 @@ Revise o manifesto e os artefatos antes de operar. Detect/init geram arquivos lo
 > Dica: para validar a geracao sem mexer em DNS/containers/sudo, use `ENV_DRY_RUN=1 bash "$SK/new.sh" sandbox` — gera worktree, compose e `.env` e para antes de subir.
 
 ## Roteiro: `new <nome> [serviço...|--all]`
-1. Valide o nome (kebab-case).
+1. Escolha a descrição curta conforme as convenções e confira o nome exato da branch, worktree e ambiente; não crie uma worktree paralela com prefixo do aplicativo.
 2. `bash "$SK/new.sh" <nome>` inicia o padrão do manifesto; argumentos selecionam outros serviços. Repetir `new` em ambiente existente delega ao start, sem regenerar arquivos.
 3. Relate o que está ativo e como ligar os serviços restantes. O catálogo de URLs não significa que todas estejam atendendo.
 

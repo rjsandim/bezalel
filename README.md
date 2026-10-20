@@ -90,8 +90,14 @@ A cópia da tarefa fica em `.bezalel/reviews/`, ignorada no Git; confira a regra
 Após decisão final, registre resumo, base, versão, hash e decisão na issue/conversa
 antes de excluir/verificar o HTML temporário. O template do pacote permanece.
 
+Novas branches, worktrees e ambientes ENV usam o mesmo nome: uma descrição curta
+em minúsculas, sem acentos, com palavras separadas por hífens, como `corrigir-login`
+ou `ajustar-cadastro-empresa`. Números cabem quando têm significado, como em
+`migrar-php-84`; não há sufixo aleatório obrigatório nem prefixos como `codex/`,
+`feat/` ou identificadores do agente. A pasta é `.worktrees/<nome>`.
+
 O pedido `env destroy {{current-worktree-branch}}` é resolvido pelo registro da
-branch/worktree da tarefa: o nome do ambiente pode ser diferente da branch. DevOps
+branch/worktree da tarefa: em ambientes preexistentes, o nome pode diferir da branch. DevOps
 confere o vínculo e executa o destroy da skill com confirmação exata de projeto e
 ambiente, após preservar dados/arquivos necessários fora da worktree. Sem ambiente
 registrado, informe não aplicável. Falhas, arquivos locais ou commits que impeçam
@@ -361,7 +367,7 @@ quando solicitado, e não etapas de instalação:
 bash "$SKILL_DIR/scripts/detect.sh"
 # Revise .envstack/stack.yaml antes de continuar.
 bash "$SKILL_DIR/scripts/init.sh"
-ENV_DRY_RUN=1 bash "$SKILL_DIR/scripts/new.sh" exemplo
+ENV_DRY_RUN=1 bash "$SKILL_DIR/scripts/new.sh" corrigir-login
 ```
 
 Detect/init geram arquivos locais. O dry run também cria worktree e resolve

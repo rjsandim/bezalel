@@ -140,6 +140,11 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
 - Segredos nunca entram em Git, exemplos, relatórios, chat ou saída de comandos.
   VPS usa `.bezalel/vps-deploy.local.json` por projeto, ignorado, e referência a
   `COOLIFY_API_TOKEN` no ambiente. Não leia/preencha credenciais reais para testar.
+- Novas branches/worktrees usam uma descrição curta em minúsculas, sem acentos,
+  separada por hífens, como `corrigir-login`; números só quando fizerem sentido.
+  Não acrescente prefixos de agente/tipo (`codex/`, `feat/`) nem sufixos aleatórios.
+  Use o mesmo nome na branch, em `.worktrees/<nome>` e no ambiente ENV.
+  Preserve nomes e vínculos de ambientes existentes; não renomeie recursos por inferência.
 - ENV usa `.envstack/stack.yaml`, contexto Docker explícito e base local verificável.
   Não acrescente fallback para contexto ativo, remoção por prefixo ou força.
 - Não altere DNS, CA, proxy, containers, volumes, imagens, cofres ou credenciais
