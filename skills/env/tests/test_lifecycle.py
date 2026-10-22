@@ -137,6 +137,33 @@ services:
     def observed(self):
         return json.loads(self.state.read_text())
 
+    def test_descriptive_name_is_shared_by_branch_worktree_and_environment(self):
+        for name in ['corrigir-login', 'migrar-php-84']:
+            with self.subTest(name=name):
+                self.command('new.sh', name, extra={'ENV_DRY_RUN': '1'})
+                worktree = self.repo / '.worktrees' / name
+                state = self.skill / 'state' / 'fixture' / name
+                branch = self.run_process(['git', '-C', str(worktree), 'branch', '--show-current']).stdout.strip()
+                self.assertEqual(branch, name)
+                self.assertEqual((state / 'worktree-branch').read_text().strip(), name)
+                self.assertIn('APP_NAME=' + name, (worktree / 'api/.env').read_text())
+                config = json.loads(self.run_process([
+                    DOCKER, 'compose', '-f', str(state / 'docker-compose.yml'),
+                    'config', '--format', 'json']).stdout)
+                self.assertEqual(config['name'], 'fixture-' + name)
+                self.assertEqual(config['services']['api']['container_name'], 'fixture-' + name + '-api')
+
+    def test_agent_prefix_is_rejected_before_creating_environment(self):
+        calls = self.observed()['calls']
+        branches = self.run_process(['git', 'branch', '--format=%(refname:short)']).stdout
+        for name in ['codex/corrigir-login', 'feat/corrigir-login']:
+            with self.subTest(name=name):
+                self.command('new.sh', name, extra={'ENV_DRY_RUN': '1'}, expected=1)
+                self.assertFalse((self.repo / '.worktrees' / name).exists())
+                self.assertFalse((self.skill / 'state' / 'fixture' / name).exists())
+        self.assertEqual(self.observed()['calls'], calls)
+        self.assertEqual(self.run_process(['git', 'branch', '--format=%(refname:short)']).stdout, branches)
+
     def test_audited_renamed_worktree_branch_remains_updatable(self):
         self.run_process(['git', '-C', str(self.worktree), 'branch', '-m', 'feature/renamed'])
         (self.compose.parent / 'worktree-branch').write_text('feature/renamed\n')

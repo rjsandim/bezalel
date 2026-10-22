@@ -83,6 +83,15 @@ TL e especialistas segue o fluxo. Peça delegação aos agentes pertinentes quan
 suportada/autorizada pelo aplicativo. Não use os agentes de entrega para executar
 merge, deploy ou as skills reservadas ao uso manual.
 
+## Nomes de branches e ambientes
+
+Use uma descrição curta em minúsculas, sem acentos, separada por hífens, como
+`corrigir-login`. Números são permitidos quando têm significado. Não acrescente
+prefixos como `codex/` ou `feat/`, identificadores do agente ou sufixos aleatórios.
+A criação pela ENV mantém branch, `.worktrees/<nome>` e ambiente com o mesmo nome;
+preserve a associação real de ambientes preexistentes. Veja R5 e o processo de
+ambiente no [fluxo](dream-team.md#process-env).
+
 ## Entrega e encerramento
 
 Concluir validações técnicas abre a PR normal, pronta para revisão e sem draft, com roteiro pronto. Aceite humano vem na PR;
