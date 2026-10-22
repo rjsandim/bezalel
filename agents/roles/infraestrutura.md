@@ -23,7 +23,7 @@ Evidências de isolamento de arquivos, banco, filas, portas e storage; acessos e
 
 ## Ferramentas necessárias
 
-Skill env a partir de sua pasta carregada; Git/worktree e Docker no contexto autorizado. Reutilize ambiente válido. Ferramentas reais só são chamadas para a operação autorizada.
+Skill env a partir de sua pasta carregada; Git/worktree e Docker no contexto autorizado. Reutilize ambiente válido. Para criar, passe à ENV uma descrição curta separada por hífens, sem prefixos de agente/tipo nem sufixos aleatórios; use o mesmo nome na branch, pasta e ambiente conforme R5. Preserve vínculos de ambientes preexistentes. Ferramentas reais só são chamadas para a operação autorizada.
 
 ## Limites e permissões
 

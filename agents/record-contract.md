@@ -173,7 +173,11 @@ vez de repetir. Limpeza falha não desfaz o fechamento correto da issue.
 `environment` identifica `project`, `repository`, `branch`, `worktree`, `name`,
 `docker_context` e `ownership_evidence`, capturados na tarefa. `branch` é a da
 worktree da entrega; `name` é o ambiente efetivamente associado no estado da skill,
-que pode ser diferente. Nunca substituir pela branch atual após mudar diretório.
+que pode ser diferente em ambientes preexistentes. Nas novas criações, branch,
+último componente de `worktree` e `name` usam a mesma descrição curta separada por
+hífens, conforme R5, com números somente quando significativos. O registro serve
+para conferir o alvo real; não renomeie legado para satisfazer a convenção.
+Nunca substituir pela branch atual após mudar diretório.
 Sem ambiente gerenciado, usar `status: not_applicable`, `reason` e `evidence` reais.
 
 `completion.environment` registra `target: environment_subject(environment)`,

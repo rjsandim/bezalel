@@ -20,6 +20,11 @@ dois bancos lógicos por serviço. Para configurar ou migrar, leia
 
 - Diretório do repositório alvo, com pelo menos um commit; execute os comandos
   a partir dele. Os helpers também reconhecem worktrees desse repositório.
+- Para novas criações, nome descritivo curto em minúsculas e sem acentos, com
+  palavras separadas por hífens, como `corrigir-login`. Números só quando fizerem
+  sentido, como `migrar-php-84`. Não acrescente `codex/`, `feat/`, prefixos de
+  agente/tipo ou sufixos aleatórios. Passe o mesmo nome à skill: a branch, a pasta
+  `.worktrees/<nome>` e o ambiente coincidem. Preserve nomes e vínculos existentes.
 - Pasta desta skill (`SKILL_DIR`) resolvida a partir da instalação efetivamente
   carregada. Não use caminhos fixos de outro agente ou instalação antiga.
 - `.envstack/stack.yaml`: serviços, banco, `base_ref`, `engine` e `docker_context`.
