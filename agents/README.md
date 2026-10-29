@@ -33,9 +33,12 @@ futuras sem uso foram removidas; nenhuma coleta foi ativada.
 1. Leia o `AGENTS.md` do projeto, sua configuração e os documentos de contexto.
 2. Identifique cenário, issue real e versão; leia R1–R10 do fluxo e o contrato do
    papel. Fonte indisponível não autoriza inventar regra ou procedimento.
-3. Receba uma tarefa com objetivo/fase, dono, entrada/versão, entrega e condição de
+3. Quem inicia a conversa indica o modelo apropriado para a demanda e atribuições.
+   Aplique a [seleção proporcional de modelos](dream-team.md#seleção-proporcional-de-modelos):
+   priorize modelos menores que o inicial e explicite a escolha quando suportada.
+4. Receba uma tarefa com objetivo/fase, dono, entrada/versão, entrega e condição de
    conclusão. Carregue o procedimento pertinente e somente as skills necessárias.
-4. Registre resultado/evidência ou bloqueio e retomada na mesma issue, usando o
+5. Registre resultado/evidência ou bloqueio e retomada na mesma issue, usando o
    [handoff curto](templates/handoff.md). Não crie um MD paralelo por demanda.
 
 O TL seleciona apenas os especialistas necessários e um dev responsável pela

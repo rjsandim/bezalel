@@ -24,7 +24,7 @@ Contexto do PM, escopo aprovado quando exigido, versões, dependências, evidên
 
 ## Saídas
 
-Tarefas por fase e dono; plano de provas; proposta HTML de banco e decisão preservada após excluir o temporário; revisão técnica; roteiro; PRs abertas após validação; conferência de merge e issues; encerramento coordenado com DevOps.
+Tarefas por fase e dono, com modelo recomendado e justificativa conforme a seleção proporcional do fluxo; plano de provas; proposta HTML de banco e decisão preservada após excluir o temporário; revisão técnica; roteiro; PRs abertas após validação; conferência de merge e issues; encerramento coordenado com DevOps.
 
 Os modelos de [proposta de banco](../templates/database-review.html) e
 [descrição de PR](../templates/pull-request.md) ajudam a preparar os artefatos

@@ -18,6 +18,42 @@ Usar a mesma issue, quando existir, como registro da intenção, escopo, decisõ
 
 TL planeja, coordena e revisa código/evidências; nunca implementa, compõe branches de implementação ou executa testes. Escolhe somente os especialistas necessários e um dev responsável pela integração inteira. Devs executam investigação, preparação, implementação e testes próprios; DevOps cuida do isolamento; QA e AppSec verificam independentemente dos autores. Evidência identifica escopo e candidato: repositórios, base/head, componentes/builds, contratos, dados/schema, dependências e configuração pertinentes.
 
+### Seleção proporcional de modelos
+
+O agente que inicia a conversa avalia a demanda e indica, antes de delegar, o modelo
+mais apropriado para a coordenação e para cada atividade prevista, com justificativa
+curta. Identifique o modelo inicial quando a aplicação o informar; se desconhecido,
+registre essa limitação. A indicação não troca automaticamente o modelo da conversa.
+
+Em toda atribuição, inclusive novas delegações por um recebedor, tente primeiro
+selecionar o menor modelo disponível capaz de cumprir a tarefa, priorizando opções
+menores que o modelo que iniciou a conversa. Não herde o modelo inicial por
+conveniência e não use o modelo mais potente para todos os papéis. Escolha pela
+complexidade, incerteza, impacto, contexto e ferramentas necessários, não pelo título
+do agente. Leitura delimitada, ajustes simples e verificações objetivas favorecem
+modelos menores; raciocínio amplo, diagnóstico difícil ou risco elevado podem
+justificar maior capacidade já na seleção, sem exigir uma tentativa inadequada.
+
+Consulte as opções e capacidades expostas pela aplicação na sessão, sem fixar nomes
+ou presumir uma ordem de capacidade a partir deles. Passe o modelo escolhido
+explicitamente na ferramenta de delegação quando houver suporte. Se a escolha
+exigir contexto novo em vez de herança da conversa, forneça objetivo, instruções,
+fontes, decisões, versão e critérios suficientes no handoff. Não reduza isolamento,
+independência de QA/AppSec, verificações ou critérios de entrega para economizar.
+
+Registre no handoff o modelo inicial conhecido, o recomendado, a razão da escolha e
+o modelo efetivo apenas quando confirmado pela ferramenta. Uso do mesmo modelo ou
+de um maior exige motivo concreto: capacidade necessária, insuficiência observada
+ou ausência de opção menor disponível. Escale quando houver limitação demonstrada,
+preservando contexto e provas; reavalie a escolha na próxima atividade, sem manter
+a escalada como padrão. Não repita tentativas inadequadas apenas para cumprir a regra.
+
+Sem seleção de modelo na ferramenta, informe a recomendação e a limitação, seguindo
+com o modelo disponível quando suficiente e autorizado. Não alegue redução executada,
+não invente IDs, nem altere configurações globais ou a conversa por inferência.
+Esta política orienta os executores; arquivos e instalação não impõem roteamento
+nem comprovam qual modelo foi usado.
+
 ### R3 Passagem entre atividades
 
 Cada tarefa informa objetivo/fase, responsável, entrada/versão, entrega esperada e condição de conclusão. Fases dos devs: investigar, preparar interface/mock ou implementar/corrigir. Concluir uma tarefa ou complementar prova não aprova a entrega inteira. Selecionar somente os destinos necessários; saídas não disparam todos os participantes. Provas válidas são reutilizadas; só mudança com impacto exige refazer a cobertura afetada.
