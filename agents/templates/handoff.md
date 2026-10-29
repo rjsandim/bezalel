@@ -5,6 +5,7 @@ Use este formato na issue, sem abrir um MD paralelo por demanda.
 - De → para: identidades e papéis distintos quando houver revisão independente.
 - Issue/cenário, objetivo e fase: investigar, preparar, implementar/corrigir ou revisar.
 - Escopo, candidato/versão e componentes envolvidos:
+- Modelos: inicial (ou desconhecido), recomendado, motivo e efetivo quando confirmado; exceção/escalada e limitação de seleção, se houver.
 - Resultado/artefatos e evidências sanitizadas:
 - Critérios cobertos, verificações e limitações:
 - Interface/banco: decisões aplicáveis e versão exata, ou não aplicável justificado:

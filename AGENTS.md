@@ -82,6 +82,10 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   arquivos e commits; respeite alvo, confirmação e bloqueios da skill. Não adivinhe
   ambiente pela branch do terminal nem force remoção após squash/rebase.
 
+- Quem inicia a conversa indica modelos apropriados; toda atribuição prioriza
+  modelos menores que o inicial conforme a seleção proporcional em
+  `agents/dream-team.md`. Explicite a escolha quando suportada e justifique
+  exceções; não fixe modelos por papel nem alegue roteamento imposto por arquivos.
 - Em mudanças que afetem o fluxo da DreamTeam, use a [fonte canônica](agents/dream-team.md):
   confira etapas/decisões/condições entre contratos, catálogo e instruções locais.
   Não envie propostas ou sincronize o fluxo com ferramenta externa. Diferencie

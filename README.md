@@ -111,6 +111,16 @@ conferência: investigação, UI/banco, candidato, revisões, risco, aceite e PR
 O CLI só valida declarações; não autentica decisões, executa comandos ou consulta
 o GitHub. Passar no checker não prova a veracidade das evidências.
 
+Quem inicia a conversa indica o modelo mais apropriado para a demanda e para cada
+atribuição. A [política de modelos](agents/dream-team.md#seleção-proporcional-de-modelos)
+prioriza o menor modelo suficiente, preferindo opções menores que o modelo inicial.
+A delegação explicita a escolha quando suportada; manter ou aumentar a capacidade
+exige justificativa. O handoff registra recomendação e, quando confirmado, modelo
+usado. Não há modelo fixo por papel nem troca automática da conversa. Sem suporte
+na aplicação, o agente informa a limitação; instalar arquivos não comprova redução
+de uso. Projetos existentes recebem a regra ao atualizar seus vínculos gerenciados
+pelo procedimento de atualização abaixo, respeitando customizações e colisões.
+
 Os contratos e adaptadores estão preparados. Descoberta no aplicativo, ferramentas
 reais e piloto no projeto consumidor precisam ser verificados antes de alegar
 operação validada. Os testes locais usam fixtures sintéticas, sem decisões reais.
