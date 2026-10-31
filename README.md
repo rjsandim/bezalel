@@ -193,6 +193,57 @@ como `/bezalel-release`, em `.claude/commands`. Esses comandos carregam o origin
 não reescrevem o `SKILL.md`. ENV, VPS e limpar-orbstack também preservam sua política
 explícita existente, além das cinco skills manuais fora do fluxo.
 
+### Grok Build e modelos GLM
+
+A integração direta aceita `--platform grok` e o iniciador aceita `--app grok`.
+O alvo é o **Grok Build oficial da xAI** (`grok`), não CLIs comunitários com nomes
+parecidos nem o chat web. Segundo a [documentação oficial de compatibilidade](https://docs.x.ai/build/features/skills-plugins-marketplaces),
+o Grok Build descobre agentes, skills, comandos e instruções Claude Code.
+Reutilizamos os nove adaptadores do catálogo em `.claude/agents` e as skills/comandos
+em `.claude`, sem manter cópias duplicadas em `.grok`. `both` continua significando
+Codex e Claude; instalações Claude existentes também podem ser descobertas pelo Grok.
+
+Com Grok Build previamente instalado, use na base publicada:
+
+```sh
+python3 -B .bezalel/base/scripts/project.py enable --project . --platform grok --no-auto-update
+python3 -B .bezalel/base/scripts/project.py run --project . --app grok
+```
+
+O iniciador atualiza a base antes de abrir o aplicativo; `--no-auto-update` evita
+preparar hooks de sessão. Se habilitados sem essa opção, os hooks usam a camada
+compatível Claude e dependem de confiança e validação no aplicativo; a instalação
+não concede confiança. `update`, `status` e `disable` usam o mesmo registro de
+integridade e preservam customizações. Ao trocar `--platform` em uma instalação
+gerenciada, o conjunto selecionado substitui o anterior; arquivos personalizados
+bloqueiam a reconciliação. Não habilite duas modalidades de distribuição no projeto.
+
+O suporte foi preparado com testes sintéticos de instalação, atualização e remoção.
+Isso não comprova descoberta ou execução no Grok: confira `grok inspect` e `/agents`
+na versão instalada e faça um piloto antes de depender da equipe. Não há pacote
+nativo, atualização de marketplace ou `plugin.py --client grok` nesta integração.
+Nenhum CLI, credencial, modelo, endpoint ou permissão é configurado pelo Bezalel.
+
+Para **GLM da Z.ai**, o caminho documentado aqui é **Claude Code com GLM**,
+conforme a [integração oficial da Z.ai](https://docs.z.ai/devpack/tool/claude).
+GLM é o provedor/modelo dessa sessão, não um novo formato de agente ou um comando
+`glm`. Configure o provedor no aplicativo seguindo a documentação da Z.ai, fora do
+Bezalel, e confira o modelo efetivo antes de iniciar. Não coloque chaves em arquivos
+versionados, comandos compartilhados ou conversas.
+
+```sh
+python3 -B .bezalel/base/scripts/project.py enable --project . --platform claude
+python3 -B .bezalel/base/scripts/project.py run --project . --app claude
+```
+
+Os nove adaptadores continuam sem modelo fixo. A política proporcional usa os
+modelos realmente disponíveis: nomes de categorias do Claude não comprovam modelos
+GLM distintos ou menores, pois o provedor pode mapear várias categorias ao mesmo
+modelo. Confira a execução dos subagentes e registre limitações, sem simular QA ou
+AppSec independentes. Instalação em fixtures e validação do manifesto Claude não
+comprovam autenticação, seleção de modelo ou funcionamento com a API da Z.ai.
+OpenCode com GLM é outra integração e não está implementada nesta versão.
+
 ### Atualizar e iniciar uma sessão
 
 **Instalações anteriores ao catálogo local e ao novo encerramento:** o validador

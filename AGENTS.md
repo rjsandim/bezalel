@@ -117,6 +117,10 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   Operações Git da distribuição não devem iniciar manutenção automática que possa
   continuar escrevendo após o retorno; aplique a restrição por comando, sem alterar
   a configuração persistente do usuário ou do projeto.
+- Grok Build usa a integração direta e reutiliza os adaptadores Claude por
+  compatibilidade documentada. Preserve IDs e uma única cópia gerenciada; não
+  confunda modelos GLM com um formato de aplicativo. Testes sintéticos não
+  comprovam descoberta/execução nem autorizam configurar provedores/credenciais.
 - `scripts/plugin.py` gera o pacote nativo: contratos em `contracts/`, adaptadores
   Claude explicitamente listados, TOMLs Codex conectados ao projeto e checker de
   entrega capaz de ler o catálogo em `contracts/`. Não coloque

@@ -49,6 +49,8 @@ def manual_skill(path):
 
 
 def desired(project, base, platforms, automatic, contract_dir='agents'):
+    # Grok Build descobre os adaptadores Claude; mantenha uma única cópia gerenciada.
+    platforms = list(dict.fromkeys('claude' if name == 'grok' else name for name in platforms))
     contract_root = (base / contract_dir).resolve()
     catalog = read_json(base / contract_dir / 'catalog.json')
     if catalog.get('schema_version') != 3 or len(catalog.get('roles', {})) != 9:
@@ -321,11 +323,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', choices=['enable', 'update', 'status', 'disable', 'run'])
     parser.add_argument('--project', type=Path, default=Path.cwd())
-    parser.add_argument('--platform', choices=['both', 'codex', 'claude'], default='both')
+    parser.add_argument('--platform', choices=['both', 'codex', 'claude', 'grok'], default='both')
     parser.add_argument('--branch', default='master')
     parser.add_argument('--no-auto-update', action='store_true')
     parser.add_argument('--hook', action='store_true')
-    parser.add_argument('--app', choices=['codex', 'claude'])
+    parser.add_argument('--app', choices=['codex', 'claude', 'grok'])
     args = parser.parse_args()
     try:
         project = args.project.resolve()
@@ -384,7 +386,7 @@ def main():
         if args.action == 'run':
             app = args.app
             if not app or not shutil.which(app):
-                raise DistributionError('Informe --app codex ou --app claude e instale o aplicativo previamente.')
+                raise DistributionError('Informe --app codex, --app claude ou --app grok e instale o aplicativo previamente.')
             return subprocess.call([app], cwd=project)
         if args.hook:
             if changed:
