@@ -114,6 +114,14 @@ conferência: investigação, UI/banco, candidato, revisões, risco, aceite e PR
 O CLI só valida declarações; não autentica decisões, executa comandos ou consulta
 o GitHub. Passar no checker não prova a veracidade das evidências.
 
+A [economia de contexto e coordenação](agents/dream-team.md#economia-de-contexto-e-coordenação)
+orienta os agentes a comunicar mudanças relevantes, delegar entregas completas por
+fase, fornecer contexto delimitado com fontes acessíveis e reutilizar evidências
+cuja versão e cobertura continuem válidas. Preserva revisões independentes, testes
+obrigatórios e aprovações. Projetos consumidores recebem essas instruções ao
+atualizar o pacote/vínculos pelo procedimento abaixo; arquivos não impõem limites
+nem comprovam economia de tokens, que precisa ser medida no uso real.
+
 Quem inicia a conversa indica o modelo mais apropriado para a demanda e para cada
 atribuição. A [política de modelos](agents/dream-team.md#seleção-proporcional-de-modelos)
 prioriza o menor modelo suficiente, preferindo opções menores que o modelo inicial.

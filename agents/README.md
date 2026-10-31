@@ -30,7 +30,8 @@ futuras sem uso foram removidas; nenhuma coleta foi ativada.
 
 ## Carregamento e atribuição
 
-1. Leia o `AGENTS.md` do projeto, sua configuração e os documentos de contexto.
+1. Leia o `AGENTS.md` do projeto e sua configuração; consulte os documentos de
+   contexto pertinentes à atribuição, preservando instruções obrigatórias.
 2. Identifique cenário, issue real e versão; leia R1–R10 do fluxo e o contrato do
    papel. Fonte indisponível não autoriza inventar regra ou procedimento.
 3. Quem inicia a conversa indica o modelo apropriado para a demanda e atribuições.
@@ -38,7 +39,10 @@ futuras sem uso foram removidas; nenhuma coleta foi ativada.
    priorize modelos menores que o inicial e explicite a escolha quando suportada.
 4. Receba uma tarefa com objetivo/fase, dono, entrada/versão, entrega e condição de
    conclusão. Carregue o procedimento pertinente e somente as skills necessárias.
-5. Registre resultado/evidência ou bloqueio e retomada na mesma issue, usando o
+5. Aplique a [economia de contexto e coordenação](dream-team.md#economia-de-contexto-e-coordenação):
+   entrega completa por fase, fontes pertinentes, provas válidas e comunicação
+   por mudança relevante, preservando revisões independentes e testes.
+6. Registre resultado/evidência ou bloqueio e retomada na mesma issue, usando o
    [handoff curto](templates/handoff.md). Não crie um MD paralelo por demanda.
 
 O TL seleciona apenas os especialistas necessários e um dev responsável pela

@@ -88,6 +88,9 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   modelos menores que o inicial conforme a seleção proporcional em
   `agents/dream-team.md`. Explicite a escolha quando suportada e justifique
   exceções; não fixe modelos por papel nem alegue roteamento imposto por arquivos.
+- Aplique a [economia de contexto e coordenação](agents/dream-team.md#economia-de-contexto-e-coordenação):
+  contexto pertinente, entregas completas por fase, comunicação por mudança relevante
+  e provas válidas reutilizadas, preservando revisões independentes e testes.
 - Em mudanças que afetem o fluxo da DreamTeam, use a [fonte canônica](agents/dream-team.md):
   confira etapas/decisões/condições entre contratos, catálogo e instruções locais.
   Não envie propostas ou sincronize o fluxo com ferramenta externa. Diferencie

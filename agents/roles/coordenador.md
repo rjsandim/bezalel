@@ -58,5 +58,10 @@ um limite do papel.
 
 Atribua objetivo, fase, escopo/versão, dono, entrada, entrega e condição. Receba o resultado e revalide somente a cobertura afetada. Problemas novos retornam à coordenação; produto retorna ao PM e segurança ao AppSec.
 
+Aplique a [economia de contexto e coordenação](../dream-team.md#economia-de-contexto-e-coordenação)
+às atribuições: entrega completa por fase, contexto pertinente, retomadas pelas diferenças
+e comunicação por mudança relevante. Confira a validade das provas sem substituir
+a avaliação independente de QA/AppSec ou dispensar testes obrigatórios.
+
 Use o [formato curto](../templates/handoff.md) na issue; não crie um histórico
 paralelo por demanda. Registro indisponível preserva rascunho/erro e ponto de retomada.
