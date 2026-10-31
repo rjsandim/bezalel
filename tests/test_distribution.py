@@ -91,6 +91,58 @@ class DistributionTests(unittest.TestCase):
         self.assertTrue((consumer / 'AGENTS.md').read_text().startswith('Regras do projeto.'))
         self.assertIn('startup', json.dumps(state['managed']))
 
+    def test_grok_reuses_claude_adapters_without_duplicate_agents(self):
+        consumer = self.consumer()
+        state = project.reconcile(consumer, ROOT, {}, ['grok'], False, 'fixture')
+        self.assertEqual(state['platforms'], ['grok'])
+        self.assertEqual(len(list((consumer / '.claude/agents').glob('*.md'))), 9)
+        self.assertFalse((consumer / '.grok').exists())
+        self.assertFalse((consumer / '.codex').exists())
+        manual = (consumer / '.claude/commands/bezalel-release.md').read_text()
+        self.assertIn('disable-model-invocation: true', manual)
+        self.assertFalse((consumer / '.claude/skills/release').exists())
+        self.assertEqual(project.desired(consumer, ROOT, ['grok', 'claude'], False),
+                         project.desired(consumer, ROOT, ['claude'], False))
+        migrated = project.reconcile(consumer, ROOT, state, ['claude'], False, 'fixture')
+        project.reconcile(consumer, ROOT, migrated, ['grok'], False, 'fixture', disable=True)
+        self.assertFalse((consumer / '.claude/agents/dream-team-qa.md').exists())
+        self.assertEqual((consumer / 'AGENTS.md').read_text().strip(), 'Regras do projeto.')
+
+    def test_grok_custom_adapter_blocks_update_and_disable(self):
+        consumer = self.consumer()
+        state = project.reconcile(consumer, ROOT, {}, ['grok'], False, 'fixture')
+        adapter = consumer / '.claude/agents/dream-team-qa.md'
+        adapter.write_text('Customizado')
+        for disable in [False, True]:
+            with self.subTest(disable=disable), self.assertRaises(dist.DistributionError):
+                project.reconcile(consumer, ROOT, state, ['grok'], False, 'next', disable=disable)
+        self.assertEqual(adapter.read_text(), 'Customizado')
+
+    def test_grok_cli_lifecycle_and_new_skill_update(self):
+        source, consumer = self.source(), self.consumer()
+        base = consumer / '.bezalel/base'
+        dist.git(consumer, 'clone', '-q', '--', str(source), str(base))
+        def invoke(action):
+            result = subprocess.run([sys.executable, '-B', str(base / 'scripts/project.py'), action,
+                                     '--project', str(consumer), '--platform', 'grok', '--no-auto-update'],
+                                    capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+        invoke('enable')
+        invoke('status')
+        self.assertFalse((consumer / '.claude/settings.local.json').exists())
+        skill = source / 'skills/nova-skill'
+        skill.mkdir()
+        sections = ['Objetivo e escopo', 'Entradas e pré-requisitos', 'Procedimento',
+                    'Saídas', 'Validação', 'Limites operacionais']
+        (skill / 'SKILL.md').write_text('---\nname: nova-skill\ndescription: Nova skill\n---\n'
+                                      + ''.join('## ' + section + '\nTexto.\n' for section in sections))
+        commit(source, 'Nova skill')
+        invoke('update')
+        self.assertTrue((consumer / '.claude/skills/nova-skill/SKILL.md').is_file())
+        invoke('status')
+        invoke('disable')
+        self.assertFalse((consumer / '.claude/agents/dream-team-qa.md').exists())
+
     def test_existing_agent_and_broken_link_are_not_adopted_or_overwritten(self):
         for kind in ['file', 'broken-link']:
             with self.subTest(kind=kind):
