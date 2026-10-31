@@ -81,6 +81,11 @@ com `name`, `description` e instruções; a instalação direta usa `.claude/age
 O pacote nativo separa contratos de prompts descobertos e declara os nove adaptadores
 no manifesto. Não existe agente humano, modelo obrigatório ou runtime próprio.
 
+O alvo `grok` da integração direta reutiliza os adaptadores Claude, conforme a
+compatibilidade documentada do Grok Build. Não há um terceiro conjunto de papéis
+ou IDs. Consulte [adoção e limites](../README.md#grok-build-e-modelos-glm);
+validação em fixtures não comprova descoberta nem execução no aplicativo.
+
 O instalador atualiza agentes, skills e referências juntos, preservando o contexto
 e as customizações do projeto. O hook não inicia o fluxo; ele reconcilia a versão
 adotada. Distribuição e política de atualização estão no README principal.
