@@ -57,7 +57,9 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   dependências e responsável pela integração inteira. Especialistas são opcionais.
 - Gates exigem evidência de isolamento de arquivos/banco/filas/portas/storage;
   estrutura, qualquer migration ou relações complexas exigem HTML temporário com
-  estrutura/diferenças antes/depois, base real e aprovação humana anterior à
+  estrutura/diferenças antes/depois, tabelas por entidade com coluna, tipo, relação
+  e finalidade de uso, destaques visuais e legenda de cores com rótulos textuais,
+  base real e aprovação humana anterior à
   implementação. Ajuste exige reapresentação. Após decisão final, preserve resumo,
   base, versão e decisão na issue/conversa e exclua/verifique o HTML da tarefa,
   mantendo o template do pacote. Sem mudança aplicável, registre não aplicável.
