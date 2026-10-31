@@ -13,12 +13,28 @@
     h2 { font-size: 1.3rem; margin-top: 0; } h3 { font-size: 1rem; }
     .label { color: #315a87; font-weight: 700; letter-spacing: .04em; }
     .status { display: inline-block; background: #fff0c9; color: #604400; padding: 5px 12px; border-radius: 24px; }
-    .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
     .panel { background: #f8fafc; padding: 16px; border: 1px solid #d4dce7; border-radius: 8px; min-width: 0; }
     .notice { border-left: 4px solid #315a87; padding-left: 16px; }
     .scroll { overflow-x: auto; } table { border-collapse: collapse; width: 100%; text-align: left; }
     th, td { padding: 10px; border-bottom: 1px solid #d4dce7; vertical-align: top; }
     th { background: #edf3fa; } code, pre { font-size: .9rem; } pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+    header { border-top: 6px solid #2563eb; }
+    h2 { color: #17468a; }
+    .panel.current { border-top: 4px solid #64748b; }
+    .panel.proposed { border-top: 4px solid #2563eb; }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-weight: 700; border: 1px solid currentColor; }
+    .added { color: #166534; background: #dcfce7; }
+    .changed { color: #854d0e; background: #fef9c3; }
+    .removed { color: #991b1b; background: #fee2e2; }
+    .kept { color: #334155; background: #e2e8f0; }
+    code { color: #17468a; background: #eaf2ff; padding: 2px 4px; border-radius: 4px; }
+    .data-type { color: #6b21a8; font-family: ui-monospace, monospace; }
+    .relation { color: #115e59; }
+    .schema { min-width: 600px; font-size: .9rem; }
+    .schema thead th { color: #fff; background: #244b78; }
+    .scroll:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
     .pending { color: #604400; } footer { color: #4c5c70; font-size: .9rem; }
     @media (max-width: 700px) { body { padding: 16px; } .columns { grid-template-columns: 1fr; } header, section { padding: 18px; } }
     @media print { body { max-width: none; padding: 0; background: white; } section { break-inside: avoid; } }
@@ -41,13 +57,45 @@
   </section>
   <section aria-labelledby="structure">
     <h2 id="structure">Estrutura atual e proposta</h2>
-    <p>Detalhe tabelas, colunas, tipos, nulabilidade, valores padrão, chaves, índices e restrições. Mostre relações e cardinalidades; use um diagrama inline quando ajudar. Identifique explicitamente o que permanece.</p>
-    <div class="columns">
-      <div class="panel"><h3>Estado atual, na base identificada</h3><pre>PREENCHER estrutura real e relacionamentos.
-Se a fonte não estiver disponível, registrar a lacuna; não inventar estrutura.</pre></div>
-      <div class="panel"><h3>Estado proposto</h3><pre>PREENCHER a mesma estrutura com as diferenças marcadas.
-Mudança somente de dados: manter estrutura e explicar seleção/transformação.</pre></div>
+    <p>Apresente uma tabela por entidade em cada estado, com uma linha por coluna. Identifique nome, tipo completo, relação (destino e cardinalidade) e para que o campo será usado no negócio ou funcionalidade. Inclua nulabilidade, padrão, chaves, índices e restrições. Use “Sem relação” quando aplicável; lacunas devem ser explícitas, nunca inventadas.</p>
+    <p>Destaque nomes, tipos e relações visualmente. Marque cada diferença com a cor e o rótulo da legenda; não dependa apenas da cor nem substitua as tabelas por SQL ou texto sem formatação. Diagramas e SQL com destaque de sintaxe podem complementar a leitura.</p>
+    <div class="legend" aria-label="Legenda de alterações">
+      <span class="badge added">+ Adicionado</span><span class="badge changed">~ Alterado</span>
+      <span class="badge removed">− Removido</span><span class="badge kept">= Mantido</span>
     </div>
+    <div class="columns">
+      <div class="panel current">
+        <h3>Estado atual, na base identificada</h3>
+        <div class="scroll" role="region" aria-label="Tabela do estado atual, na base identificada" tabindex="0"><table class="schema">
+          <caption>Tabela: PREENCHER nome e finalidade da entidade</caption>
+          <thead><tr><th scope="col">Coluna</th><th scope="col">Tipo</th><th scope="col">Relação</th><th scope="col">Para que será usada</th><th scope="col">Regras</th><th scope="col">Alteração</th></tr></thead>
+          <tbody><tr>
+            <th scope="row"><code>PREENCHER</code></th>
+            <td class="data-type">PREENCHER tipo e tamanho/precisão</td>
+            <td class="relation">PREENCHER tabela.coluna de destino, cardinalidade e regra de exclusão</td>
+            <td>PREENCHER finalidade e funcionalidade consumidora</td>
+            <td>PREENCHER nulo, padrão, PK/FK, índices e restrições</td>
+            <td>PREENCHER rótulo e classe da legenda conforme a diferença real</td>
+          </tr></tbody>
+        </table></div>
+      </div>
+      <div class="panel proposed">
+        <h3>Estado proposto</h3>
+        <div class="scroll" role="region" aria-label="Tabela do estado proposto" tabindex="0"><table class="schema">
+          <caption>Tabela: PREENCHER nome e finalidade da entidade</caption>
+          <thead><tr><th scope="col">Coluna</th><th scope="col">Tipo</th><th scope="col">Relação</th><th scope="col">Para que será usada</th><th scope="col">Regras</th><th scope="col">Alteração</th></tr></thead>
+          <tbody><tr>
+            <th scope="row"><code>PREENCHER</code></th>
+            <td class="data-type">PREENCHER tipo e tamanho/precisão</td>
+            <td class="relation">PREENCHER tabela.coluna de destino, cardinalidade e regra de exclusão</td>
+            <td>PREENCHER finalidade e funcionalidade consumidora</td>
+            <td>PREENCHER nulo, padrão, PK/FK, índices e restrições</td>
+            <td>PREENCHER rótulo e classe da legenda conforme a diferença real</td>
+          </tr></tbody>
+        </table></div>
+      </div>
+    </div>
+    <p class="notice">Os campos acima são instruções de preenchimento, não um schema real. Em mudança somente de dados, mantenha a estrutura e mostre seleção e transformação antes/depois.</p>
     <div class="scroll"><table>
       <caption>Diferenças que precisam de decisão</caption>
       <thead><tr><th scope="col">Objeto</th><th scope="col">Ação</th><th scope="col">Antes → depois</th><th scope="col">Motivo e impacto</th></tr></thead>

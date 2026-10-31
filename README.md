@@ -84,7 +84,10 @@ salvo restrição expressa. Aprovação não prova merge. Merge e deploy continu
 
 Estrutura, qualquer migration ou relações complexas exigem uma proposta baseada
 no schema/migrations e commit reais do projeto. O [template HTML](agents/templates/database-review.html)
-mostra estrutura atual e proposta, diferenças, impactos, alternativas e recuperação.
+mostra estrutura atual e proposta em tabelas com nome da coluna, tipo, relação e
+finalidade de uso, além de regras, diferenças, impactos, alternativas e recuperação.
+Destaques visuais e legenda com cores e rótulos distinguem adições, alterações,
+remoções e itens mantidos; blocos monocromáticos de texto/SQL não substituem as tabelas.
 A cópia da tarefa fica em `.bezalel/reviews/`, ignorada no Git; confira a regra
 `/reviews/` no `.bezalel/.gitignore` antes de gerar. Ajustes são reapresentados.
 Após decisão final, registre resumo, base, versão, hash e decisão na issue/conversa
