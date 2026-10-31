@@ -1,6 +1,6 @@
 {
   "name": "bezalel",
-  "version": "2.0.0-5575f0ba26f6b0d4",
+  "version": "2.0.0-a906fe0a769cb8fc",
   "description": "Plugin Bezalel com a equipe DreamTeam, fluxo de desenvolvimento e skills.",
   "skills": "./skills/",
   "hooks": "./hooks/codex.json"
