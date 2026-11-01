@@ -4,7 +4,6 @@ import argparse
 import contextlib
 import fcntl
 import io
-import json
 import os
 from pathlib import Path
 import re
@@ -20,8 +19,12 @@ from distribution import (DistributionError, atomic_write, digest, git, inside,
 ROOT = Path(__file__).resolve().parents[1]
 STATE = '.bezalel/install.local.json'
 START, END = '<!-- bezalel:begin -->', '<!-- bezalel:end -->'
-HOOK_COMMAND = ('python3 "$(git rev-parse --show-toplevel)/.bezalel/base/scripts/project.py" '
-                'update --project "$(git rev-parse --show-toplevel)" --hook')
+# A base fica no checkout principal; em worktrees o hook a atualiza e liga a worktree atual.
+HOOK_COMMAND = ('r="$(git worktree list --porcelain | sed -n \'1s/^worktree //p\')"; '
+                's="$r/.bezalel/base/scripts/project.py"; '
+                '[ ! -f "$s" ] || python3 "$s" update --project "$r" --hook')
+LEGACY_HOOK_COMMANDS = {'python3 "$(git rev-parse --show-toplevel)/.bezalel/base/scripts/project.py" '
+                        'update --project "$(git rev-parse --show-toplevel)" --hook'}
 
 
 def location(root, name):
@@ -39,8 +42,34 @@ def current(path):
     if path.is_file():
         return {'kind': 'file', 'sha256': digest(path.read_bytes())}
     if path.exists():
-        raise DistributionError('Destino existente não é um arquivo gerenciável.')
+        raise DistributionError('Destino existente não é um arquivo gerenciável: ' + str(path))
     return None
+
+
+def main_checkout(path):
+    first = git(path, 'worktree', 'list', '--porcelain').decode().splitlines()[:1]
+    if not first or not first[0].startswith('worktree '):
+        raise DistributionError('Checkout principal do projeto não identificado.')
+    return Path(first[0][len('worktree '):]).resolve()
+
+
+def link_worktree(project, worktree):
+    """Aponta .bezalel/base da worktree para a base do checkout principal, sem cópia."""
+    if worktree == project:
+        return False
+    base = inside(project, '.bezalel/base')
+    link = inside(worktree, '.bezalel') / 'base'
+    if link.is_symlink() and Path(os.readlink(link)) == base:
+        return False
+    if link.is_symlink() or link.exists():
+        raise DistributionError('A worktree já tem .bezalel/base próprio; reconcilie manualmente: ' + str(worktree))
+    try:
+        git(worktree, 'check-ignore', '-q', '--no-index', '.bezalel/base')
+    except DistributionError as error:
+        raise DistributionError('Ignore /base em .bezalel/.gitignore da worktree antes de ligá-la.') from error
+    link.parent.mkdir(parents=True, exist_ok=True)
+    link.symlink_to(base, target_is_directory=True)
+    return True
 
 
 def manual_skill(path):
@@ -142,6 +171,14 @@ def desired(project, base, platforms, automatic, contract_dir='agents'):
     return entries
 
 
+def bezalel_hook(hook, previous=None):
+    commands = {HOOK_COMMAND, *LEGACY_HOOK_COMMANDS}
+    if previous:
+        commands.update(item.get('command') for item in previous['entry'].get('hooks', []))
+    items = hook.get('hooks', []) if isinstance(hook, dict) else []
+    return any(isinstance(item, dict) and item.get('command') in commands for item in items)
+
+
 def extract_block(content):
     if content.count(START) != 1 or content.count(END) != 1:
         raise DistributionError('Bloco Bezalel ausente ou ambíguo; preserve e reconcilie as instruções.')
@@ -159,10 +196,12 @@ def plan(project, old, entries):
         kind = (entry or previous)['kind']
         actual = current(path)
         if kind in {'file', 'link'}:
-            if actual != previous:
+            # Ausência não é customização: recria-se ou apenas sai do registro.
+            if actual != previous and not (previous and actual is None):
                 raise DistributionError('Destino personalizado ou não gerenciado: ' + name)
             if entry is None:
-                changes[name] = None
+                if actual is not None:
+                    changes[name] = None
             elif kind == 'link':
                 managed[name] = entry
                 if entry != actual:
@@ -175,6 +214,10 @@ def plan(project, old, entries):
             if path.is_symlink():
                 raise DistributionError('Instrução do projeto não pode ser um link: ' + name)
             content = path.read_text() if actual else ''
+            if previous and START not in content and END not in content:
+                previous = None
+            if not previous and not entry:
+                continue
             existing = extract_block(content) if previous else ''
             if previous and digest(existing.encode()) != previous['sha256']:
                 raise DistributionError('Bloco de instruções personalizado: ' + name)
@@ -191,15 +234,19 @@ def plan(project, old, entries):
                 raise DistributionError('Configuração não pode ser um link: ' + name)
             config = read_json(path) if actual else {}
             hooks = config.setdefault('hooks', {}).setdefault('SessionStart', [])
-            if previous:
-                if hooks.count(previous['entry']) != 1:
-                    raise DistributionError('Hook personalizado/ausente: ' + name)
+            count = hooks.count(previous['entry']) if previous else 0
+            if count > 1:
+                raise DistributionError('Hook Bezalel duplicado: ' + name)
+            if count:
                 hooks.remove(previous['entry'])
-            elif any(HOOK_COMMAND in json.dumps(hook) for hook in hooks):
-                raise DistributionError('Hook Bezalel existente sem registro: ' + name)
+            elif any(bezalel_hook(hook, previous) for hook in hooks):
+                raise DistributionError(('Hook Bezalel personalizado: ' if previous else
+                                         'Hook Bezalel existente sem registro: ') + name)
             if entry:
                 hooks.append(entry['entry'])
                 managed[name] = entry
+            if not actual and not entry:
+                continue
             result = json_bytes(config).decode()
             if not actual or path.read_text() != result:
                 changes[name] = {'kind': 'file', 'content': result}
@@ -321,7 +368,7 @@ def lock(project):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['enable', 'update', 'status', 'disable', 'run'])
+    parser.add_argument('action', choices=['enable', 'update', 'status', 'disable', 'run', 'link-worktree'])
     parser.add_argument('--project', type=Path, default=Path.cwd())
     parser.add_argument('--platform', choices=['both', 'codex', 'claude', 'grok'], default='both')
     parser.add_argument('--branch', default='master')
@@ -333,6 +380,16 @@ def main():
         project = args.project.resolve()
         if Path(git(project, 'rev-parse', '--show-toplevel').decode().strip()).resolve() != project:
             raise DistributionError('Use a raiz do projeto Git.')
+        if args.action == 'link-worktree':
+            worktree, project = project, main_checkout(project)
+            if worktree == project:
+                raise DistributionError('Informe a raiz de uma worktree, não o checkout principal.')
+            state_path = inside(project, STATE)
+            if not (state_path.is_file() and read_json(state_path).get('enabled')):
+                raise DistributionError('Bezalel não está ligado no checkout principal.')
+            linked = link_worktree(project, worktree)
+            print('Worktree ligada à base do checkout principal.' if linked else 'Worktree já estava ligada.')
+            return 0
         state_path = inside(project, STATE)
         with lock(project):
             state = read_json(state_path) if state_path.is_file() else {}
@@ -357,7 +414,8 @@ def main():
                     extra['.bezalel/project.json'] = {'kind': 'file', 'content': (base / '.bezalel/project.example.json').read_text()}
                 ignore = inside(project, '.bezalel/.gitignore')
                 rules = ignore.read_text() if ignore.exists() else ''
-                additions = [p for p in ['/base/', '/install.local.json', '/update.lock', '/vps-deploy.local.json', '/deliveries/*.local.json', '/reviews/'] if p not in rules.splitlines()]
+                # '/base' também ignora o link criado em worktrees; '/base/' só ignora diretórios.
+                additions = [p for p in ['/base', '/install.local.json', '/update.lock', '/vps-deploy.local.json', '/deliveries/*.local.json', '/reviews/'] if p not in rules.splitlines()]
                 if additions:
                     extra['.bezalel/.gitignore'] = {'kind': 'file', 'content': rules.rstrip('\n') + '\n' + '\n'.join(additions) + '\n'}
                 reconcile(project, base, state, platforms, not args.no_auto_update, revision, extra=extra)
@@ -383,6 +441,13 @@ def main():
                 changed = update(project, state)
                 message = ('Bezalel atualizado. Reabra a sessão para carregar todos os agentes e skills novos.'
                            if changed else 'Bezalel já está atualizado.')
+                if args.hook:
+                    # O hook roda na sessão; uma worktree do projeto recebe o link para a base.
+                    here = Path(git(Path.cwd(), 'rev-parse', '--show-toplevel').decode().strip()).resolve()
+                    if here != project and main_checkout(here) == project and link_worktree(project, here):
+                        message = (message if changed else '') + (' ' if changed else '') + (
+                            'Worktree ligada à base do Bezalel. Reabra a sessão para carregar agentes e skills.')
+                        changed = True
         if args.action == 'run':
             app = args.app
             if not app or not shutil.which(app):

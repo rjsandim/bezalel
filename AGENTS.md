@@ -116,7 +116,9 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
 - A integração direta (`scripts/project.py`) gerencia somente seus links,
   adaptadores, hooks e blocos de instrução por projeto. Preserve conteúdo próprio,
   contexto e estado operacional. Customizações e colisões interrompem a atualização;
-  não as adote silenciosamente. Use clone estável para ENV e não siga links externos.
+  não as adote silenciosamente. Ausência de arquivo gerenciado não é customização.
+  Worktrees usam a base do checkout principal por link ignorado no Git; não copie a
+  base. Use clone estável para ENV e não siga links externos.
   Operações Git da distribuição não devem iniciar manutenção automática que possa
   continuar escrevendo após o retorno; aplique a restrição por comando, sem alterar
   a configuração persistente do usuário ou do projeto.
