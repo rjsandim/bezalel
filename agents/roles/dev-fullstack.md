@@ -38,7 +38,7 @@ Resultado da fase cumpre critérios, erros/limites estão explícitos e integra�
 
 ## Seleção de skills
 
-[iss-audit](../../skills/iss-audit/SKILL.md); [clean-code](../../skills/clean-code/SKILL.md); [clean-architecture](../../skills/clean-architecture/SKILL.md); [implementar-snapshots](../../skills/implementar-snapshots/SKILL.md); [agent-browser](../../skills/agent-browser/SKILL.md).
+[iss-audit](../../skills/iss-audit/SKILL.md); [clean-code](../../skills/clean-code/SKILL.md); [clean-architecture](../../skills/clean-architecture/SKILL.md); [implementar-snapshots](../../skills/implementar-snapshots/SKILL.md); [agent-browser](../../skills/agent-browser/SKILL.md); [depurar-bug](../../skills/depurar-bug/SKILL.md).
 
 Use somente o modo e os pré-requisitos da [etapa atribuída](../dream-team-skills.md).
 Reutilize resultados válidos; não reaplique uma skill a cada handoff. As skills

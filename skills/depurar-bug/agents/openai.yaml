@@ -1,0 +1,7 @@
+interface:
+  display_name: "Depurar bug"
+  short_description: "Reproduz, isola a causa e corrige com teste de regressão"
+  default_prompt: "Use $depurar-bug para reproduzir este bug, provar a causa, escrever o teste que falha e aplicar a menor correção."
+
+policy:
+  allow_implicit_invocation: true

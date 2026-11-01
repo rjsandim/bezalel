@@ -1,6 +1,6 @@
 # Origem e diferenças
 
-Leitura estática da implementação do Carisma, em 2026-10-12, no código baseado
+Leitura estática de uma implementação Laravel/MySQL de um projeto privado, em 2026-10-12, no código baseado
 na revisão `90fda6f6121ab427eb3aa561e12b0dc68c78ab27`. Foram examinados os comandos
 `CreateSnapshotCommand`, `RestoreSnapshotCommand`, o concern
 `InteractsWithDatabaseSnapshots`, `config/snapshot.php`, o disco pertinente em

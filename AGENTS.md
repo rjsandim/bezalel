@@ -16,6 +16,13 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
 - Cada pasta em `skills/` contém `SKILL.md` com `name`, `description` e, nesta
   ordem: Objetivo e escopo; Entradas e pré-requisitos; Procedimento; Saídas;
   Validação; Limites operacionais. Use português nas instruções e interfaces.
+  A `description` diz quando usar, com frases que o usuário falaria, e quando
+  não usar, apontando a skill certa. "Validação" descreve como o agente confere
+  o resultado do próprio trabalho com a skill (ex.: `env status <nome>` mostra
+  os serviços prontos e as URLs respondem); testes de manutenção da skill ficam
+  em `references/manutencao.md`, curto, para não virarem etapa obrigatória no
+  projeto consumidor. Repetições destas regras viram uma linha "Siga as regras
+  do projeto e os limites do papel"; preserve as travas de segurança reais.
 - Exceções: `skills/security-audit/`, `skills/humanizer/`,
   `skills/verification-planning/`, `skills/agent-browser/`, `skills/release/`,
   `skills/reflect/`, `skills/github-resolution/`, `skills/pr-bump/` e
@@ -199,7 +206,7 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   workflow e a lista com hashes.
 - Mudanças documentais: confira links e comandos descritos; não execute comandos
   destrutivos apenas porque aparecem nos exemplos. Para limpar-orbstack, revise
-  também seus cenários em `references/validacao.md` e o contrato atual de ENV.
+  também seus cenários em `references/manutencao.md` e o contrato atual de ENV.
 - Não rode `integration_lifecycle.py` como parte da suíte padrão. Não instale
   ferramentas por conta própria para contornar pré-requisitos ausentes; reporte-os.
 - Antes do commit, revise arquivos rastreados, diferenças, credenciais e alvos

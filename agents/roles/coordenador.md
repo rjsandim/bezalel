@@ -47,7 +47,7 @@ Entrega técnica: candidato completo com revisões válidas, roteiro e PRs verif
 
 ## Seleção de skills
 
-[verification-planning](../../skills/verification-planning/SKILL.md); [clean-architecture](../../skills/clean-architecture/SKILL.md); [pr-audit](../../skills/pr-audit/SKILL.md); [clean-code](../../skills/clean-code/SKILL.md); [development-test-workbook](../../skills/development-test-workbook/SKILL.md); [humanizer](../../skills/humanizer/SKILL.md).
+[verification-planning](../../skills/verification-planning/SKILL.md); [clean-architecture](../../skills/clean-architecture/SKILL.md); [pr-audit](../../skills/pr-audit/SKILL.md); [clean-code](../../skills/clean-code/SKILL.md); [development-test-workbook](../../skills/development-test-workbook/SKILL.md); [humanizer](../../skills/humanizer/SKILL.md); [proposta-banco](../../skills/proposta-banco/SKILL.md).
 
 Use somente o modo e os pré-requisitos da [etapa atribuída](../dream-team-skills.md).
 Reutilize resultados válidos; não reaplique uma skill a cada handoff. As skills

@@ -4,7 +4,7 @@
 **DreamTeam** é sua equipe de nove agentes para corrigir bugs e desenvolver melhorias e features.
 O fluxo é mantido nos arquivos do pacote, sem depender de ferramenta externa de modelagem.
 
-O plugin reúne a DreamTeam, seu fluxo de desenvolvimento e 18 skills, incluindo nove
+O plugin reúne a DreamTeam, seu fluxo de desenvolvimento e 20 skills, incluindo nove
 importações com conteúdo preservado e duas auditorias adaptadas.
 Há contratos portáteis, adaptadores para Codex e Claude Code, instalação por
 projeto, pacote de plugin e validadores locais.
@@ -13,9 +13,11 @@ hospedado, monitoramento ou runtime próprio que aplique autorizações.
 
 ## Inventário de skills
 
-As **18 skills disponíveis** estão organizadas pelo uso: **11 indicadas no
+As **20 skills disponíveis** estão organizadas pelo uso: **13 indicadas no
 fluxo da DreamTeam**, **cinco reservadas à chamada manual** e **duas operacionais
-fora do fluxo**. A indicação no fluxo depende da etapa, do escopo e dos
+fora do fluxo**. Sete delas são de invocação explícita (`allow_implicit_invocation: false`):
+as cinco manuais do Akita, vps-deploy e limpar-orbstack; as outras 13 podem ser
+escolhidas pelo agente quando o pedido combina com a descrição. A indicação no fluxo depende da etapa, do escopo e dos
 pré-requisitos; não significa executar todas em cada demanda.
 
 ### Indicadas no fluxo da DreamTeam
@@ -33,6 +35,8 @@ pré-requisitos; não significa executar todas em cada demanda.
 | [agent-browser](skills/agent-browser/SKILL.md) | Apoiar reprodução de bugs de interface e jornadas/E2E web | Stub original; depende de CLI e guias da versão disponíveis |
 | [iss-audit](skills/iss-audit/SKILL.md) | Separar qualificação PM e investigação técnica de demandas | Variante Bezalel autorizada, com referências e origem |
 | [pr-audit](skills/pr-audit/SKILL.md) | Revisar candidato integrado/PR sem executar testes nem corrigir | Variante Bezalel autorizada para revisão técnica |
+| [depurar-bug](skills/depurar-bug/SKILL.md) | Reproduzir, provar a causa, escrever o teste que falha e aplicar a menor correção | Markdown |
+| [proposta-banco](skills/proposta-banco/SKILL.md) | Preparar a proposta HTML de mudança de banco para aprovação humana antes de implementar | Markdown; usa o template `agents/templates/database-review.html` |
 
 ### Reservadas à chamada manual
 
@@ -59,7 +63,7 @@ uma PR não inicia deploy nem comprova que um ambiente pode ser removido.
 
 O [inventário de todas as skills analisadas](agents/skills-inventario.md)
 e a [relação por processo e etapa](agents/dream-team-skills.md) registram a
-seleção de 11 skills em 24 etapas do fluxo da DreamTeam. As cópias ficam somente nesta árvore;
+seleção de 13 skills em 24 etapas do fluxo da DreamTeam. As cópias ficam somente nesta árvore;
 os agentes referenciam os métodos pertinentes sem instalar ferramentas ou alterar
 as instalações globais.
 As cinco novas skills manuais têm [condições de uso próprias](agents/skills-uso-manual.md)
@@ -100,6 +104,8 @@ A cópia da tarefa fica em `.bezalel/reviews/`, ignorada no Git; confira a regra
 `/reviews/` no `.bezalel/.gitignore` antes de gerar. Ajustes são reapresentados.
 Após decisão final, registre resumo, base, versão, hash e decisão na issue/conversa
 antes de excluir/verificar o HTML temporário. O template do pacote permanece.
+A skill [proposta-banco](skills/proposta-banco/SKILL.md) reúne esse procedimento;
+toda migration passa pela aprovação humana, sem atalho para mudanças pequenas.
 
 Novas branches, worktrees e ambientes ENV usam o mesmo nome: uma descrição curta
 em minúsculas, sem acentos, com palavras separadas por hífens, como `corrigir-login`
@@ -150,8 +156,10 @@ As skills mantidas no Bezalel declaram `name` e `description` e contêm objetivo
 entradas/pré-requisitos, procedimento, saídas, validação e limites operacionais.
 `references/`, `scripts/`, `templates/` e `tests/` aparecem quando necessários.
 `agents/openai.yaml` é um adaptador opcional de interface, não um agente em
-execução. As cinco novas skills manuais, ENV, VPS e limpar-orbstack usam invocação
-explícita nesse metadado. As demais podem ser selecionadas em tarefas compatíveis,
+execução. Sete skills usam invocação explícita nesse metadado: as cinco manuais
+do Akita, vps-deploy e limpar-orbstack. ENV é implícita para que o DevOps possa
+acioná-la; new, start, ensure e update continuam exigindo `ENV_ALLOW_SHARED_INFRA=1`
+e destroy continua exigindo `--confirm`. As demais podem ser selecionadas em tarefas compatíveis,
 conforme os metadados preservados e as ferramentas disponíveis. A interpretação
 pelo aplicativo deve ser conferida nele; este repositório não certifica loaders.
 
@@ -206,8 +214,9 @@ No Codex, as skills ficam em `.agents/skills` e os agentes em `.codex/agents`.
 No Claude Code, as skills automáticas ficam em `.claude/skills`, os agentes em
 `.claude/agents` e as skills de invocação explícita viram comandos de referência,
 como `/bezalel-release`, em `.claude/commands`. Esses comandos carregam o original;
-não reescrevem o `SKILL.md`. ENV, VPS e limpar-orbstack também preservam sua política
-explícita existente, além das cinco skills manuais fora do fluxo.
+não reescrevem o `SKILL.md`. São sete comandos: as cinco skills manuais fora do fluxo,
+`/bezalel-vps-deploy` e `/bezalel-limpar-orbstack`. ENV fica em `.claude/skills`
+como as demais skills automáticas.
 
 ### Grok Build e modelos GLM
 
@@ -405,7 +414,7 @@ claude plugin validate --strict .local-review/bezalel-plugin/.claude-plugin/plug
 claude plugin validate --strict .local-review/bezalel-plugin/.claude-plugin/marketplace.json
 ```
 
-O destino precisa ser novo. O gerador preserva as 18 pastas de skills, inclui
+O destino precisa ser novo. O gerador preserva as 20 pastas de skills, inclui
 adaptadores/manuais, não inclui estado operacional e não instala o resultado.
 
 ### Atualizar as importações do Akita
@@ -596,7 +605,9 @@ Os testes usam repositórios temporários e simulam operações Docker, brew, su
 e mkcert; o CLI real só valida Compose estaticamente, sem acessar o daemon.
 Os testes Python de VPS usam entradas sintéticas, sem rede. As skills documentais
 não precisam de uma suíte de runtime artificial. Os cenários de limpeza estão
-em [validação](skills/limpar-orbstack/references/validacao.md).
+em [manutenção](skills/limpar-orbstack/references/manutencao.md). Cada skill
+mantida guarda em `references/manutencao.md` os testes da própria skill; a seção
+"Validação" do `SKILL.md` descreve só como conferir o resultado do trabalho.
 
 A [validação no GitHub Actions](.github/workflows/validate.yml) executa as mesmas
 suítes em PRs e na `master`: checker e `tests/`, VPS, workbook (openpyxl fixado por

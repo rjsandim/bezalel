@@ -1,6 +1,6 @@
 # Skills e procedimentos por etapa do fluxo da DreamTeam
 
-As **18 skills estão presentes no Bezalel**. Destas, **11 orientam métodos em 24 das 63 etapas**, distribuídas por 16 dos 21 processos. As demais etapas mantêm pré-condições, encaminhamentos e decisões, reutilizando o resultado do método já aplicado. Os quatro processos humanos não recebem execução por skill.
+As **20 skills estão presentes no Bezalel**. Destas, **13 orientam métodos em 24 das 63 etapas**, distribuídas por 16 dos 21 processos. As demais etapas mantêm pré-condições, encaminhamentos e decisões, reutilizando o resultado do método já aplicado. Os quatro processos humanos não recebem execução por skill.
 
 O fluxo define o que entregar, quem responde, quando avançar e como retomar. A skill reúne o procedimento técnico. Uma mesma auditoria/plano pode atravessar várias etapas sem ser reiniciada. As descrições atuais estão nos [processos do fluxo](dream-team.md#processos); o [inventário](skills-inventario.md) registra todas as origens e decisões.
 
@@ -20,6 +20,8 @@ do executor. As cinco skills manuais, vps-deploy e limpar-orbstack ficam fora do
 | [env](../skills/env/SKILL.md) | Avaliar e operar ambiente conforme manifesto, contexto e referências de pools. | Isolamento durante o trabalho; após merge/issue, preservação e destroy do alvo registrado, com resultado e retorno ao TL. |
 | [clean-code](../skills/clean-code/SKILL.md) | Clareza, simplificação, contratos e correção do código tocado. | Escopo autorizado e distinção entre dev que altera e TL que revisa. |
 | [clean-architecture](../skills/clean-architecture/SKILL.md) | Analisar responsabilidades/fronteiras e orientar a menor mudança pertinente. | Regras do projeto, aprovação de banco e integração dos consumidores reais. |
+| [depurar-bug](../skills/depurar-bug/SKILL.md) | Reproduzir, provar a causa, escrever o teste que falha e aplicar a menor correção. | Dev corrige na fase autorizada; decisão de produto/banco volta ao TL; revisão independente continua com TL, QA e AppSec. |
+| [proposta-banco](../skills/proposta-banco/SKILL.md) | Montar o HTML antes/depois por entidade a partir do schema real, com riscos e reversão, apresentar e fechar após a decisão. | TL prepara; o humano decide toda migration, inclusive pequena ou só de dados; implementação dependente só depois da aprovação da versão exata. |
 | [implementar-snapshots](../skills/implementar-snapshots/SKILL.md) | Implementar a funcionalidade com seleção, sanitização, proteção e verificação. | Só usar nessa tarefa específica; não é autorização de restore ou leitura de produção. |
 | [agent-browser](../skills/agent-browser/SKILL.md) | Interagir com a interface web conforme o guia da versão disponível. | Critérios e registro de evidência; mock, integração real, acessibilidade e mobile nativo continuam distintos. |
 | [pr-audit](../skills/pr-audit/SKILL.md) | Fixar candidato, confrontar alegações/diff/provas e fechar um parecer. | TL sem executar testes/correções; candidatos incompletos não seguem a AppSec. |
@@ -27,7 +29,7 @@ do executor. As cinco skills manuais, vps-deploy e limpar-orbstack ficam fora do
 | [development-test-workbook](../skills/development-test-workbook/SKILL.md) | Derivar casos, gerar e conferir o .xlsx pelo contrato da pasta. | Mesmo candidato; Excel obrigatório em melhoria/feature; execução humana ainda pendente. |
 | [humanizer](../skills/humanizer/SKILL.md) | Revisar redação quando necessário, preservando o conteúdo. | Critérios, fatos, decisões e registros de execução não são reescritos. |
 
-Não foi transferida para uma skill genérica a decisão humana de banco, a avaliação completa de acessibilidade/mobile, a integração final, o aceite ou a abertura de PR. Essas atividades precisam de regras, ferramentas ou decisões que as skills atuais não cobrem integralmente.
+A proposta-banco prepara e apresenta a mudança de banco, mas não transfere a uma skill a decisão humana de banco, a avaliação completa de acessibilidade/mobile, a integração final, o aceite ou a abertura de PR. Essas atividades precisam de regras, ferramentas ou decisões que as skills atuais não cobrem integralmente.
 
 ## Relação dos processos
 

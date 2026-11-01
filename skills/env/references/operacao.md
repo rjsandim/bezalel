@@ -11,7 +11,7 @@ Dois momentos distintos:
 
 - **Nada de gerar arquivos com `echo` no script.** Tudo sai de **templates** em `templates/*.tpl`, renderizados com `envsubst` (so as `${VARS}` listadas em `RENDER_VARS`). Para mudar o formato de um Dockerfile/compose, edite o `.tpl`.
 - Manifesto lido/escrito com `yq`. `.env` resolvidos com `resolve_env` (python, placeholders `${env:...}`).
-- `SK="<pasta-da-skill>/scripts"`.
+- `$SKILL_DIR` é a pasta desta skill na instalação carregada; os scripts ficam em `$SKILL_DIR/scripts/`.
 - **Readiness.** `new`/`update`/`start`/`ensure` usam Compose `--wait` e propagam falhas. Só anuncie os serviços realmente prontos. URLs de serviços ainda desligados continuam disponíveis para ativação posterior.
 - **Sob demanda.** O compose sempre contém o ambiente completo. `startup.services` no manifesto define o conjunto inicial; ausente/vazio mantém o comportamento anterior (todos). `start`/`ensure <nome> <serviço...>` acrescentam serviços e dependências sem recriar os existentes. `--all` liga tudo. Build/start têm paralelismo padrão 2, ajustável por `COMPOSE_PARALLEL_LIMIT`.
 - **Preservação.** Ligar um serviço não deve chamar `update` ou `new` para recriar o ambiente. O controle usa o compose salvo e preserva `.env`, worktree, volumes e serviços já ativos. `update` também preserva `.env` existentes; mudanças nesses arquivos devem ser explícitas. Não use `destroy`, `down -v` ou limpeza de volumes para economizar memória.
@@ -26,7 +26,7 @@ Dois momentos distintos:
   .gitignore            # ignora *.env.example (podem ter segredos do app) — gerado pelo init
   <pasta>.env.example   # GITIGNORED — template de .env (pode conter segredos reais do app)
 .worktrees/<nome>/      # EFEMERO (gitignored) — a worktree (inclui .idea/ gerado: php.xml + dataSources.xml)
-<pasta-da-skill>/state/<projeto>/<nome>/   # EFEMERO — compose gerado + initdb
+$SKILL_DIR/state/<projeto>/<nome>/         # EFEMERO — compose gerado + initdb
 ```
 
 > **Segredos:** os `*.env.example` em `.envstack/` podem ser preenchidos com a config real do app (copiada do `.env`), entao o `init` gera um `.envstack/.gitignore` que os ignora. Versionam-se `stack.yaml`, `boot.sh`, os `*.Dockerfile` e o proprio `.gitignore`.
@@ -65,7 +65,7 @@ antes de habilitar. As convenções de banco abaixo descrevem o modo `isolated`.
 | `${env:url.backend}` / `${env:host.backend}` / `${env:internal.backend}` | idem, do **1o servico php** do stack (aponta frontend->API sem hardcode da pasta) |
 | `${env:alias.<nome>.url}` / `${env:alias.<nome>.host}` | URL/host de um alias deste servico (ver `aliases` no manifesto) |
 
-> `$env config` (`scripts/vars.sh`) imprime esta tabela ja resolvida com os nomes reais do projeto. Use antes de editar os `.env.example`.
+> O comando `config` (`bash "$SKILL_DIR/scripts/vars.sh"`) imprime esta tabela ja resolvida com os nomes reais do projeto. Use antes de editar os `.env.example`.
 
 ---
 
@@ -73,17 +73,15 @@ antes de habilitar. As convenções de banco abaixo descrevem o modo `isolated`.
 
 Revise o manifesto e os artefatos antes de operar. Detect/init geram arquivos locais; new exige autorização para infraestrutura compartilhada.
 
-1. **Detectar.** Rode `bash "$SK/detect.sh"`. Mostre ao usuario o `.envstack/stack.yaml` gerado (pastas/tipos/versoes/portas). Para o que nao foi detectado (versao vazia, banco), pergunte e **edite o manifesto** (via yq ou Edit).
-2. **Materializar.** Rode `bash "$SK/init.sh"`. Mostre os Dockerfiles gerados em `.envstack/` e os `.env.example`. Ajuste extensoes/comandos nos `.tpl` ou nos arquivos gerados se necessario (ex.: o projeto precisa de `gd`, `soap`, etc.).
-3. **Validar ponta-a-ponta.** Somente se autorizado a alterar infraestrutura compartilhada, use `ENV_ALLOW_SHARED_INFRA=1 bash "$SK/new.sh" sandbox`. Para geração local, use `ENV_DRY_RUN=1`. Verifique que cada URL responde. Se algo quebrar (extensao faltando, porta errada), ajuste o `.tpl`/manifesto e rode `bash "$SK/update.sh" sandbox`. Repita ate subir limpo.
-4. **Limpar o teste.** Após preservar os dados e obter autorização de remoção, use `bash "$SK/destroy.sh" sandbox --confirm <projeto>/sandbox --keep-worktree`. A exclusão posterior da worktree exige revisão dos arquivos locais.
+1. **Detectar.** Rode `bash "$SKILL_DIR/scripts/detect.sh"`. Mostre ao usuario o `.envstack/stack.yaml` gerado (pastas/tipos/versoes/portas). Para o que nao foi detectado (versao vazia, banco), pergunte e **edite o manifesto** (via yq ou Edit).
+2. **Materializar.** Rode `bash "$SKILL_DIR/scripts/init.sh"`. Mostre os Dockerfiles gerados em `.envstack/` e os `.env.example`. Ajuste extensoes/comandos nos `.tpl` ou nos arquivos gerados se necessario (ex.: o projeto precisa de `gd`, `soap`, etc.).
+3. **Validar ponta-a-ponta.** Use um ambiente de validação com nome explícito, como `validar-env`, e confira antes que esse nome não existe (`git branch --list validar-env`, `git worktree list`). Para checar só a geração, sem DNS/containers/sudo, use `ENV_DRY_RUN=1 bash "$SKILL_DIR/scripts/new.sh" validar-env`. Somente se autorizado a alterar infraestrutura compartilhada, use `ENV_ALLOW_SHARED_INFRA=1 bash "$SKILL_DIR/scripts/new.sh" validar-env` e verifique que cada URL responde. Se algo quebrar (extensão faltando, porta errada), ajuste o `.tpl`/manifesto e rode `ENV_ALLOW_SHARED_INFRA=1 bash "$SKILL_DIR/scripts/update.sh" validar-env`. Repita até subir limpo.
+4. **Remover o ambiente de validação.** Com autorização de remoção, rode `bash "$SKILL_DIR/scripts/destroy.sh" validar-env --confirm <projeto>/validar-env --keep-worktree` (sem a opção, o destroy recusa a worktree porque ela contém `.env` e `.idea/` gerados). Revise `git -C .worktrees/validar-env status --short --ignored`: sem trabalho a preservar, remova a worktree e a branch com `git worktree remove .worktrees/validar-env` e `git branch -d validar-env`, sem força. Se o Git recusar por arquivo não rastreado gerado pela skill, apague esse arquivo e repita. Confirme com `git worktree list` e `git branch --list validar-env` que nada restou. Em dry-run não há containers: pule o destroy e remova só a worktree, a branch e `$SKILL_DIR/state/<projeto>/validar-env/`.
 5. **Commitar.** Instrua o usuario a commitar `.envstack/` (`stack.yaml`, `boot.sh`, `*.Dockerfile` e `.envstack/.gitignore`) + o `.gitignore` da raiz. Os `*.env.example` ficam de fora (gitignored pelo `.envstack/.gitignore`, pois podem ter segredos do app); as worktrees tambem.
-
-> Dica: para validar a geracao sem mexer em DNS/containers/sudo, use `ENV_DRY_RUN=1 bash "$SK/new.sh" sandbox` — gera worktree, compose e `.env` e para antes de subir.
 
 ## Roteiro: `new <nome> [serviço...|--all]`
 1. Escolha a descrição curta conforme as convenções e confira o nome exato da branch, worktree e ambiente; não crie uma worktree paralela com prefixo do aplicativo.
-2. `bash "$SK/new.sh" <nome>` inicia o padrão do manifesto; argumentos selecionam outros serviços. Repetir `new` em ambiente existente delega ao start, sem regenerar arquivos.
+2. `ENV_ALLOW_SHARED_INFRA=1 bash "$SKILL_DIR/scripts/new.sh" <nome>` (variável só nesta execução autorizada) inicia o padrão do manifesto; argumentos selecionam outros serviços. Repetir `new` em ambiente existente delega ao start, sem regenerar arquivos.
 3. Relate o que está ativo e como ligar os serviços restantes. O catálogo de URLs não significa que todas estejam atendendo.
 
 ### Manifesto de ativação
@@ -101,27 +99,27 @@ services:
 `depends_on` é opcional e aceita a sintaxe de dependências do Compose. Ausente preserva DB + Redis para compatibilidade; `[]` declara independência. Mantenha todas as pastas no manifesto. Nos modos compartilhados, dependências do servidor local são retiradas e somente consumidores declarados entram na rede do pool. Não ajuste caches ou imponha limites de RAM baixos sem medir o workload.
 
 ## Roteiro: `config` (lista os placeholders `${env:...}`)
-- `bash "$SK/vars.sh"` — imprime os placeholders disponiveis ja resolvidos com os nomes reais do projeto (project, db engine, pastas, backend, aliases). Use para saber o que pode escrever nos `.env.example` antes de commitar/rodar o `new`.
+- `bash "$SKILL_DIR/scripts/vars.sh"` — imprime os placeholders disponiveis ja resolvidos com os nomes reais do projeto (project, db engine, pastas, backend, aliases). Use para saber o que pode escrever nos `.env.example` antes de commitar/rodar o `new`.
 
 ## Roteiro: `start`/`ensure`/`stop`/`restart`/`status <nome>`
-- `bash "$SK/ctl.sh" start <nome>` — retoma serviços ativos/lembrados; sem histórico, usa o padrão salvo.
-- `bash "$SK/ctl.sh" ensure <nome> <serviço...>` — garante os serviços e suas dependências; pode ser chamado novamente. `start` com nomes tem o mesmo comportamento.
-- `bash "$SK/ctl.sh" start <nome> --all` — garante todo o ambiente.
-- `bash "$SK/ctl.sh" stop <nome>` — guarda a seleção e para com prazo de 60s para encerramento; preserva containers, volumes e arquivos.
-- `bash "$SK/ctl.sh" restart <nome>` — reinicia só o que já está ativo; não acorda serviços desligados.
-- `bash "$SK/ctl.sh" status <nome>` — mostra também containers parados.
+- `ENV_ALLOW_SHARED_INFRA=1 bash "$SKILL_DIR/scripts/ctl.sh" start <nome>` — retoma serviços ativos/lembrados; sem histórico, usa o padrão salvo.
+- `ENV_ALLOW_SHARED_INFRA=1 bash "$SKILL_DIR/scripts/ctl.sh" ensure <nome> <serviço...>` — garante os serviços e suas dependências; pode ser chamado novamente. `start` com nomes tem o mesmo comportamento.
+- `ENV_ALLOW_SHARED_INFRA=1 bash "$SKILL_DIR/scripts/ctl.sh" start <nome> --all` — garante todo o ambiente.
+- `bash "$SKILL_DIR/scripts/ctl.sh" stop <nome>` — guarda a seleção e para com prazo de 60s para encerramento; preserva containers, volumes e arquivos.
+- `bash "$SKILL_DIR/scripts/ctl.sh" restart <nome>` — reinicia só o que já está ativo; não acorda serviços desligados.
+- `bash "$SKILL_DIR/scripts/ctl.sh" status <nome>` — mostra também containers parados.
 
 A seleção é aditiva. `ensure` não desligará outros serviços. A prontidão HTTP/healthcheck não substitui os testes funcionais da tarefa. Compose antigo que não contém um serviço solicitado exige `update`; o controle falha sem regenerar configurações automaticamente.
 
 ## Roteiro: `xdebug on|off|status <nome>` (servicos PHP)
-- `bash "$SK/xdebug.sh" on <nome>` — liga o Xdebug (mode=debug) e reinicia so os containers PHP.
-- `bash "$SK/xdebug.sh" off <nome>` — desliga (remove o .ini) e reinicia.
-- `bash "$SK/xdebug.sh" status <nome>` — mostra on/off por servico.
+- `bash "$SKILL_DIR/scripts/xdebug.sh" on <nome>` — liga o Xdebug (mode=debug) e reinicia so os containers PHP.
+- `bash "$SKILL_DIR/scripts/xdebug.sh" off <nome>` — desliga (remove o .ini) e reinicia.
+- `bash "$SKILL_DIR/scripts/xdebug.sh" status <nome>` — mostra on/off por servico.
 - O Xdebug vem instalado mas off (zero overhead). host.docker.internal ja esta no compose; porta 9003.
 - Ambientes criados antes desta versao precisam de `update <nome>` (rebuild) para ganhar o Xdebug na imagem.
 
 ### Config da IDE: Xdebug + Databases (automatica)
-O `new` gera, na worktree, dois arquivos `.idea/` (via `ide.sh` — regerar a qualquer momento com `bash "$SK/ide.sh" <nome>`):
+O `new` gera, na worktree, dois arquivos `.idea/` (via `ide.sh` — regerar a qualquer momento com `bash "$SKILL_DIR/scripts/ide.sh" <nome>`):
 
 - **`.idea/workspace.xml`** (Xdebug — onde o PhpStorm REALMENTE guarda isto, NAO no php.xml):
   - **PhpServers**: um **PHP Server por servico PHP** (`port=443`, path mapping `/app` -> pasta). O container exporta `PHP_IDE_CONFIG=serverName=<env>-<pasta>`, que casa com esse server pelo NOME. Sem o server aqui, o debug conecta mas falha com *"Server with name '...' doesn't exist"*. **Aliases nao precisam de config extra** — o `serverName` e fixo por container (independe do host da request), entao um unico server cobre o dominio principal e todos os aliases.
@@ -132,15 +130,15 @@ O `new` gera, na worktree, dois arquivos `.idea/` (via `ide.sh` — regerar a qu
 > ⚠️ O PhpStorm e dono do `.idea/` quando o projeto esta ABERTO — ele sobrescreve ao salvar/fechar. Gere a config com a worktree FECHADA (o `new` ja faz, antes do 1o open). Se editou com ela aberta, feche e reabra.
 - **`.idea/dataSources.xml`** (DataGrip/DB tool): uma **conexao por servico `database:true`** apontando para `localhost:<porta>/<db>` (user = `<projeto>`). A porta do banco no host e **deterministica por ambiente** (`db_host_port` em `lib.sh`, faixa 33000-34999) e exposta no compose (`compose.<engine>.tpl` -> `ports: <porta>:3306|5432`). A senha (`secret`) e pedida no 1o connect (o IntelliJ guarda no keychain — nao da pra pre-injetar via XML com seguranca).
 
-No PhpStorm: abra a **worktree** (`.worktrees/<nome>`) como projeto. A conexao de banco ja aparece no painel Database. Para Xdebug, garanta a porta 9003 (Settings > PHP > Debug, default ja e 9003), clique em **Start Listening for PHP Debug Connections** e rode `$env xdebug on <nome>`.
+No PhpStorm: abra a **worktree** (`.worktrees/<nome>`) como projeto. A conexao de banco ja aparece no painel Database. Para Xdebug, garanta a porta 9003 (Settings > PHP > Debug, default ja e 9003), clique em **Start Listening for PHP Debug Connections** e rode `bash "$SKILL_DIR/scripts/xdebug.sh" on <nome>`.
 
 > Ambientes criados antes desta versao nao tem a porta do banco exposta nem o `dataSources.xml` — rode `update <nome>` (recria o compose + regenera `.idea/`).
 
 ## Roteiro: `update <nome>`
-- `bash "$SK/update.sh" <nome> [serviço...|--all]` — regenera o compose e reconstrói a seleção ativa/lembrada, ou a seleção explícita. Preserva `.env` existentes, worktree e volumes; só resolve `.env` ausentes. Use após mudar manifesto/Dockerfile/boot.sh; alterações de configuração local são feitas explicitamente no `.env`.
+- `ENV_ALLOW_SHARED_INFRA=1 bash "$SKILL_DIR/scripts/update.sh" <nome> [serviço...|--all]` — regenera o compose e reconstrói a seleção ativa/lembrada, ou a seleção explícita. Preserva `.env` existentes, worktree e volumes; só resolve `.env` ausentes. Use após mudar manifesto/Dockerfile/boot.sh; alterações de configuração local são feitas explicitamente no `.env`.
 
 ## Roteiro: `destroy <nome>`
-- A autorização deve identificar projeto e ambiente. Use `bash "$SK/destroy.sh" <nome> --confirm <projeto>/<nome>`; `--keep-worktree` preserva worktree e branch, mas não os volumes. Sem a opção, arquivos locais (inclusive ignorados), commits não integrados ou divergências bloqueiam a remoção antes de tocar nos volumes. Não há --force, remoção por prefixo ou exclusão automática de imagens. Falhas preservam o registro de estado e retornam erro.
+- A autorização deve identificar projeto e ambiente. Use `bash "$SKILL_DIR/scripts/destroy.sh" <nome> --confirm <projeto>/<nome>`; `--keep-worktree` preserva worktree e branch, mas não os volumes. Sem a opção, arquivos locais (inclusive ignorados), commits não integrados ou divergências bloqueiam a remoção antes de tocar nos volumes. Não há --force, remoção por prefixo ou exclusão automática de imagens. Falhas preservam o registro de estado e retornam erro.
 
 ## Pre-requisitos da maquina
 Python 3.9+, Bash, Homebrew, yq de Mike Farah v4, Docker com Compose que suporte `up --wait --wait-timeout`, Git com `--path-format` e `--end-of-options`, `jq`, `envsubst` (gettext). macOS-first (usa `brew services` + resolver do macOS para o DNS wildcard; `mkcert`/`dnsmasq`/Traefik sao configurados pelo `new`/`update`).
@@ -161,5 +159,4 @@ Cert wildcard `*.<projeto>.<tld>` por projeto (mkcert, confiavel pela CA do `mkc
 - Mudar formato do stack: edite os `templates/compose.*.tpl`.
 
 ## Verificação da skill
-- `python3 -m unittest discover -s "<pasta-da-skill>/tests" -v` valida geração, ativação aditiva, retomada, preservação e falhas usando Docker simulado e validação real de Compose.
-- Mudanças no ciclo de vida também exigem ensaio com containers e banco descartáveis: iniciar mínimo, acrescentar documentação, parar/retomar e conferir dados/arquivos. Nunca use dados reais para o ensaio.
+- Os testes de manutenção da skill estão em [manutenção](manutencao.md).

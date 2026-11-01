@@ -63,7 +63,8 @@
           "file": "processes/bank.md",
           "skills": [
             "clean-architecture",
-            "verification-planning"
+            "verification-planning",
+            "proposta-banco"
           ]
         },
         {
@@ -106,7 +107,8 @@
         "pr-audit",
         "clean-code",
         "development-test-workbook",
-        "humanizer"
+        "humanizer",
+        "proposta-banco"
       ],
       "codex": "codex/dream-team-coordenador.toml",
       "claude": "claude/dream-team-coordenador.md",
@@ -147,7 +149,8 @@
             "clean-code",
             "clean-architecture",
             "implementar-snapshots",
-            "agent-browser"
+            "agent-browser",
+            "depurar-bug"
           ]
         }
       ],
@@ -156,7 +159,8 @@
         "clean-code",
         "clean-architecture",
         "implementar-snapshots",
-        "agent-browser"
+        "agent-browser",
+        "depurar-bug"
       ],
       "codex": "codex/dream-team-dev-fullstack.toml",
       "claude": "claude/dream-team-dev-fullstack.md",
@@ -175,7 +179,8 @@
             "iss-audit",
             "clean-code",
             "clean-architecture",
-            "implementar-snapshots"
+            "implementar-snapshots",
+            "depurar-bug"
           ]
         }
       ],
@@ -183,7 +188,8 @@
         "iss-audit",
         "clean-code",
         "clean-architecture",
-        "implementar-snapshots"
+        "implementar-snapshots",
+        "depurar-bug"
       ],
       "codex": "codex/dream-team-backend.toml",
       "claude": "claude/dream-team-backend.md",
@@ -202,7 +208,8 @@
             "iss-audit",
             "clean-code",
             "clean-architecture",
-            "agent-browser"
+            "agent-browser",
+            "depurar-bug"
           ]
         }
       ],
@@ -210,7 +217,8 @@
         "iss-audit",
         "clean-code",
         "clean-architecture",
-        "agent-browser"
+        "agent-browser",
+        "depurar-bug"
       ],
       "codex": "codex/dream-team-frontend-web.toml",
       "claude": "claude/dream-team-frontend-web.md",
@@ -228,14 +236,16 @@
           "skills": [
             "iss-audit",
             "clean-code",
-            "clean-architecture"
+            "clean-architecture",
+            "depurar-bug"
           ]
         }
       ],
       "skills": [
         "iss-audit",
         "clean-code",
-        "clean-architecture"
+        "clean-architecture",
+        "depurar-bug"
       ],
       "codex": "codex/dream-team-mobile.toml",
       "claude": "claude/dream-team-mobile.md",

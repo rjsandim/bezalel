@@ -1,0 +1,7 @@
+interface:
+  display_name: "Proposta de banco"
+  short_description: "Prepara a mudança de banco em HTML para aprovação humana"
+  default_prompt: "Use $proposta-banco para montar a proposta de mudança de banco desta tarefa e apresentá-la para minha aprovação antes de implementar."
+
+policy:
+  allow_implicit_invocation: true
