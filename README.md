@@ -584,10 +584,12 @@ não precisam de uma suíte de runtime artificial. Os cenários de limpeza estã
 em [validação](skills/limpar-orbstack/references/validacao.md).
 
 A [validação no GitHub Actions](.github/workflows/validate.yml) executa as mesmas
-suítes em PRs e na `master`: checker e `tests/`, VPS e workbook (openpyxl fixado por
-hash em ambiente virtual, [lista](.github/requirements-workbook.txt)). A suíte da
-ENV ainda não roda no CI: no Ubuntu, com Compose v2.38, o `compose config` dos
-testes falha; rode-a localmente ao mudar a skill.
+suítes em PRs e na `master`: checker e `tests/`, VPS, workbook (openpyxl fixado por
+hash em ambiente virtual, [lista](.github/requirements-workbook.txt)) e ENV. O job
+da ENV confere `git`, `jq`, `yq`, `envsubst` e `docker` já presentes no runner, sem
+instalá-los, roda `bash -n` nos scripts e a suíte. Como o contexto Docker dos
+fixtures só existe no simulador, o `compose config` real roda sem esse contexto,
+apontado para um socket inexistente: o Compose v2 do Linux recusa contexto ausente.
 
 `skills/env/tests/integration_lifecycle.py` é separado: usa containers reais,
 imagens e um módulo Playwright fornecidos pelo operador. Não execute como teste
