@@ -90,6 +90,17 @@ quando existirem e encaminha o encerramento do ambiente ao DevOps. Abertura de P
 faz parte do desenvolvimento solicitado: PR normal, pronta para revisão, sem draft. Não exige nova pergunta após validação,
 salvo restrição expressa. Aprovação não prova merge. Merge e deploy continuam manuais.
 
+No planejamento, o TL classifica a demanda como **pequena, normal ou grande**
+([classes](agents/dream-team.md#classes-de-demanda)). A pequena (bug ou melhoria
+localizada, sem migration, contrato, superfície de segurança, dependência ou
+configuração) segue um caminho rápido: relato registrado pelo TL, uma atribuição de
+dev com teste que falha e correção, `pr-audit` sobre o diff, triagem curta do AppSec,
+QA independente da regressão e roteiro em checklist na PR. Qualquer gatilho de escalada
+a torna normal. O roteiro é checklist em Markdown por padrão; Excel fica para a feature
+ou para roteiros com 8 ou mais casos ou conferência de dados. Toda migration continua
+exigindo a proposta HTML e a decisão humana. Divergências entre papéis seguem a regra
+R11 (dono do tema decide; após dois retornos pelo mesmo problema, decide o solicitante).
+
 Estrutura, qualquer migration ou relações complexas exigem uma proposta baseada
 no schema/migrations e commit reais do projeto. O [template HTML](agents/templates/database-review.html)
 mostra estrutura atual e proposta em tabelas com nome da coluna, tipo, relação e
@@ -122,7 +133,7 @@ conferência: investigação, UI/banco, candidato, revisões, risco, aceite e PR
 O CLI só valida declarações; não autentica decisões, executa comandos ou consulta
 o GitHub. Passar no checker não prova a veracidade das evidências.
 
-A [economia de contexto e coordenação](agents/dream-team.md#economia-de-contexto-e-coordenação)
+A [economia de contexto e coordenação](agents/coordenacao.md#economia-de-contexto-e-coordenação)
 orienta os agentes a comunicar mudanças relevantes, delegar entregas completas por
 fase, fornecer contexto delimitado com fontes acessíveis e reutilizar evidências
 cuja versão e cobertura continuem válidas. Preserva revisões independentes, testes
@@ -131,7 +142,7 @@ atualizar o pacote/vínculos pelo procedimento abaixo; arquivos não impõem lim
 nem comprovam economia de tokens, que precisa ser medida no uso real.
 
 Quem inicia a conversa indica o modelo mais apropriado para a demanda e para cada
-atribuição. A [política de modelos](agents/dream-team.md#seleção-proporcional-de-modelos)
+atribuição. A [política de modelos](agents/coordenacao.md#seleção-proporcional-de-modelos)
 prioriza o menor modelo suficiente, preferindo opções menores que o modelo inicial.
 A delegação explicita a escolha quando suportada; manter ou aumentar a capacidade
 exige justificativa. O handoff registra recomendação e, quando confirmado, modelo
@@ -563,8 +574,8 @@ Codex, não consulta banco nem executa os casos. Fórmulas exigem recálculo em 
 aplicativo de planilhas. O gerador recusa sobrescrever arquivos existentes.
 
 O campo `manual_test.path` da entrega aponta para o roteiro local, conforme o
-[contrato](agents/record-contract.md). Excel é obrigatório em melhoria/feature;
-no bug, o formato depende da necessidade. A skill produz o artefato; QA, revisão
+[contrato](agents/record-contract.md). Excel é usado na feature e, nas demais
+classes, só com 8 ou mais casos, conferência de dados ou pedido. A skill produz o artefato; QA, revisão
 e decisão humana continuam no fluxo.
 
 ## Verificação local segura

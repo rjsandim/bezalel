@@ -29,7 +29,7 @@ Ferramentas da stack e skills selecionadas para a fase. Executar scripts a parti
 
 Investigação ou mock não autorizam implementação definitiva. Antes da parte dependente: UI/UX e decisão de banco aplicáveis, inclusive qualquer migration e relação complexa. Não assume aprovação humana nem revisão independente de seu código. Não amplia o escopo para refatoração geral.
 
-Siga R1–R10 e as condições do [fluxo vigente](../dream-team.md). O contrato
+Siga R1–R11 e as condições do [fluxo vigente](../dream-team.md). O contrato
 orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto

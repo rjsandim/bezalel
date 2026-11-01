@@ -131,7 +131,7 @@ def desired(project, base, platforms, automatic, contract_dir='agents'):
         '  em `.bezalel/base/agents/processes/`; selecione skills pela relação',
         '  `.bezalel/base/agents/' + catalog['workflow']['skills'] + '`.',
         '- Quem inicia a conversa indica o modelo apropriado para a demanda e cada atribuição.',
-        '  Siga a seleção proporcional de modelos do fluxo: priorize modelos menores que o inicial,',
+        '  Ao delegar, siga `.bezalel/base/agents/coordenacao.md`: priorize modelos menores que o inicial,',
         '  selecione explicitamente quando suportado e justifique exceções no handoff.',
         '  Sem suporte, informe a limitação; não alegue troca de modelo executada.',
         '- Atribua trabalho aos agentes pertinentes quando a tarefa autorizar delegação.',

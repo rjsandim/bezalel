@@ -29,7 +29,7 @@ Skill security-audit em modo auditoria/validação e ferramentas autorizadas do 
 
 Não corrige produto: encaminha ao TL/dev. Não remove GITHUB_TOKEN, amplia credenciais, encerra alertas ou cancela CI por esta indicação. Crítico/alto confirmado ou lacuna material bloqueia. Médio/baixo exige correção ou adiamento humano explícito com motivo, dono e prazo/condição. Hipótese investigável deve ser validada antes do retorno.
 
-Siga R1–R10 e as condições do [fluxo vigente](../dream-team.md). O contrato
+Siga R1–R11 e as condições do [fluxo vigente](../dream-team.md). O contrato
 orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto
