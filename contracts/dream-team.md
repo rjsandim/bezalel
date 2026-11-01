@@ -20,7 +20,7 @@ processos. Cada papel lê estas regras e somente os [processos](#processos) que 
 - **Mudança material:** alteração que invalida prova já feita; ver [R3](#r3-passagem-entre-atividades).
 - **Tipos de saída:** *Encaminhamento* passa a outro processo; *Conclusão da atividade* encerra o processo e segue ao destino; *Estado próprio* aguarda sem encaminhar; *Impedimento/reprovação* devolve com motivo e retomada.
 - **Entrada de retorno:** retomada de um processo já iniciado, com contexto, fase, versão e origem.
-- **R1–R11:** regras comuns abaixo; valem para todos os papéis.
+- **R1–R11:** regras comuns abaixo; valem para todos os papéis. Como aplicar skills nas etapas: [relação por etapa](dream-team-skills.md#como-aplicar).
 
 ## Regras comuns
 
@@ -33,6 +33,8 @@ Usar a mesma issue, quando existir, como registro da intenção, escopo, decisõ
 ### R2 Responsabilidade e evidência
 
 TL planeja, coordena e revisa código/evidências; nunca implementa, compõe branches de implementação ou executa testes. Escolhe somente os especialistas necessários e um dev responsável pela integração inteira. Devs executam investigação, preparação, implementação e testes próprios; DevOps cuida do isolamento; QA e AppSec verificam independentemente dos autores. Evidência identifica escopo e candidato: repositórios, base/head, componentes/builds, contratos, dados/schema, dependências e configuração pertinentes. Revisor diferente no texto não comprova executor independente: TL, QA e AppSec não podem revisar sua própria implementação. Executores distintos exigem ferramentas de delegação/coordenação da aplicação ou um operador que conduza as atribuições; não simular subagentes mudando o nome do papel numa única execução.
+
+Tarefas transversais têm dono fixo: **CI que falha depois de abrir a PR** → o dev integrador corrige na mesma branch e o TL revalida só o afetado (R3); **plano de reversão** (código, dados e configuração) → o dev integrador prepara, o TL confere e publica na PR; **dados de teste** → o QA define o que precisa no plano e o DevOps provisiona dados sintéticos ou sanitizados no ambiente isolado.
 
 ### R3 Passagem entre atividades
 
@@ -99,15 +101,6 @@ repete a mesma objeção sem fato novo.
 O ciclo correção → revisão → AppSec → QA tem limite de **dois retornos pelo mesmo
 problema**. No terceiro, o TL interrompe (R4), resume as tentativas, as provas e as
 alternativas, e leva a decisão ao solicitante.
-
-## Seleção de skills nas etapas
-
-As etapas indicam objetivo, responsável, condição e entrega; o método fica na skill indicada, em skills/<nome>/SKILL.md do Bezalel, com suas referências. Aplicar somente o modo/fase pertinente. Uma aplicação pode atender várias etapas do mesmo trabalho: não reiniciar auditoria, plano ou redação a cada passagem; reutilizar artefatos/provas ainda válidos. Apoios condicionais só entram quando úteis. Skill não cria agente, gate, autorização ou transferência de responsabilidade. Se indisponível, registrar o limite e usar procedimento equivalente disponível; prova/ferramenta obrigatória ausente segue R4.
-iss-audit: qualificação PM ou investigação dev, conforme fase. pr-audit: revisão TL sem editar/testar. clean-code inclui simplificação; clean-architecture aplica-se a fronteiras afetadas. implementar-snapshots só para construir/corrigir a funcionalidade. verification-planning orienta provas proporcionais; TL planeja/confere e executores produzem evidência. Pesquisa dependente de @librarian indisponível fica registrada, sem inventar agente ou conclusão; infraestrutura de verificação depende da autorização própria.
-agent-browser exige CLI/guia da versão e alvo isolado autorizado; não instalar por inferência. MCP continua preferido para operações do serviço. Browser apoia a prova da interface, sem substituir regressão automatizada, acessibilidade completa, serviços/persistência ou mobile nativo. humanizer é opcional na redação antes da submissão/publicação; não muda fatos, critérios, respostas, resultados ou decisões versionadas.
-security-audit fica em auditoria/validação: correção de produto volta a TL/dev; não ampliar credenciais, remover GITHUB_TOKEN, alterar/encerrar alertas ou cancelar CI por esta indicação. Cópias originais permanecem intactas; pr-audit e iss-audit usam variantes autorizadas. Skills reservadas ao uso manual e candidatas pendentes no inventário ficam fora das etapas; nenhuma é disparada ao concluir PR/auditoria.
-
-O [inventário completo](skills-inventario.md) registra origem, cópias e adaptações pendentes. A [relação por processo e etapa](dream-team-skills.md) facilita consultar a seleção. As adaptações autorizadas de pr-audit e iss-audit estão identificadas; as demais cópias preservam o conteúdo original. Os agentes referenciam essas skills sem duplicar seus procedimentos.
 
 ## Classes de demanda
 

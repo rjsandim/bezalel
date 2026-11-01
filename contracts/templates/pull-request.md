@@ -40,3 +40,6 @@ Aceite humano: pendente.
 ## Depois do merge
 
 Merge e deploy são manuais. Passos de deploy, dados ou recuperação: <passos ou "nenhum">.
+
+Depois de fazer o merge, avise na conversa ou nesta issue: o TL confere o merge, fecha as
+issues do escopo e pede ao DevOps o encerramento do ambiente `<nome>`.

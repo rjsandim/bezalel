@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "bezalel",
-  "version": "2.0.0-5602e338fabf8bb4",
+  "version": "2.0.0-1981467b280e1d4e",
   "description": "Plugin Bezalel com a equipe DreamTeam, fluxo de desenvolvimento e skills.",
   "extensions": {
     "com.openai": {
