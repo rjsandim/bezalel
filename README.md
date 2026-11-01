@@ -425,6 +425,8 @@ Sem `--apply`, só informa o resultado. `--upstream /caminho/do/clone --revision
 permite verificar uma cópia local sem fetch. `--apply` grava arquivos/registro locais,
 sem commit, push ou PR. O workflow precisa de Actions habilitado, escrita de conteúdo
 e permissão para criar PRs; proteções da organização/branch continuam valendo.
+PRs criadas com `GITHUB_TOKEN` não disparam `pull_request`; por isso o workflow
+aciona a [validação](.github/workflows/validate.yml) na branch da proposta.
 Uma falha de autenticação, permissão ou publicação é falha, não atualização concluída.
 As operações Git dos scripts de distribuição desativam a manutenção automática
 somente durante cada comando, evitando gravações posteriores em diretórios
@@ -581,6 +583,12 @@ Os testes Python de VPS usam entradas sintéticas, sem rede. As skills documenta
 não precisam de uma suíte de runtime artificial. Os cenários de limpeza estão
 em [validação](skills/limpar-orbstack/references/validacao.md).
 
+A [validação no GitHub Actions](.github/workflows/validate.yml) executa as mesmas
+suítes em PRs e na `master`: checker e `tests/`, VPS e workbook (openpyxl fixado por
+hash em ambiente virtual, [lista](.github/requirements-workbook.txt)). A suíte da
+ENV ainda não roda no CI: no Ubuntu, com Compose v2.38, o `compose config` dos
+testes falha; rode-a localmente ao mudar a skill.
+
 `skills/env/tests/integration_lifecycle.py` é separado: usa containers reais,
 imagens e um módulo Playwright fornecidos pelo operador. Não execute como teste
 padrão. Exige autorização e infraestrutura descartável próprias.
@@ -601,4 +609,5 @@ A antiga variante Claude de ENV é recuperável no commit
 Arquivos locais, estado de execução, backups e rascunhos não integram o Git.
 Referências bibliográficas foram mantidas; nenhuma nova licença foi atribuída.
 
-Para contribuir, siga [AGENTS.md](AGENTS.md). Não há publicação automática.
+Para contribuir, siga [AGENTS.md](AGENTS.md). A única publicação automática é a
+da branch `bezalel-plugins` após integração na `master`; merge e deploy são manuais.
