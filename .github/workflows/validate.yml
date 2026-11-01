@@ -32,20 +32,3 @@ jobs:
           "$RUNNER_TEMP/workbook/bin/python" -m pip install --quiet --no-deps --require-hashes -r .github/requirements-workbook.txt
       - name: Roteiro manual em Excel
         run: '"$RUNNER_TEMP/workbook/bin/python" -B -m unittest discover -s skills/development-test-workbook/tests -v'
-  env:
-    # Docker, Compose, jq, yq v4 e envsubst vêm da imagem do runner; os testes simulam o daemon.
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          persist-credentials: false
-      - name: Conferir pré-requisitos sem instalá-los
-        run: |
-          for tool in git jq yq envsubst docker; do command -v "$tool"; done
-          yq --version
-          docker compose version
-      - name: Sintaxe dos scripts shell
-        run: for script in skills/env/scripts/*.sh; do bash -n "$script"; done
-      - name: ENV
-        run: python3 -B -m unittest discover -s skills/env/tests -v

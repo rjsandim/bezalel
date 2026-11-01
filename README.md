@@ -567,8 +567,9 @@ em [validação](skills/limpar-orbstack/references/validacao.md).
 
 A [validação no GitHub Actions](.github/workflows/validate.yml) executa as mesmas
 suítes em PRs e na `master`: checker e `tests/`, VPS e workbook (openpyxl fixado por
-hash em ambiente virtual, [lista](.github/requirements-workbook.txt)), sintaxe dos
-scripts ENV e a suíte da ENV com as ferramentas da imagem do runner, sem daemon.
+hash em ambiente virtual, [lista](.github/requirements-workbook.txt)). A suíte da
+ENV ainda não roda no CI: no Ubuntu, com Compose v2.38, o `compose config` dos
+testes falha; rode-a localmente ao mudar a skill.
 
 `skills/env/tests/integration_lifecycle.py` é separado: usa containers reais,
 imagens e um módulo Playwright fornecidos pelo operador. Não execute como teste
