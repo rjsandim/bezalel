@@ -1,5 +1,8 @@
 """Distribuição em repositórios sintéticos; não instala plugins ou chama serviços."""
+import ast
+import contextlib
 import copy
+import io
 import json
 import os
 from pathlib import Path
@@ -29,6 +32,33 @@ def commit(root, message='Fixture'):
 def init(root):
     root.mkdir(parents=True, exist_ok=True)
     dist.git(root, 'init', '-q', '-b', 'master')
+
+
+# Processo filho que morre (SIGKILL) ou recebe SIGTERM num ponto exato do update.
+INTERRUPTED_UPDATE = '''
+import os, signal, sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+import distribution, project
+consumer, target, mode = Path(sys.argv[2]), sys.argv[3], sys.argv[4]
+real_write, real_git = project.atomic_write, project.git
+def stop():
+    os.kill(os.getpid(), signal.SIGKILL if mode == "kill" else signal.SIGTERM)
+def write(path, data, permissions=0o644):
+    if Path(path).as_posix().endswith(target) and b'"pending"' not in data:
+        stop()
+    return real_write(path, data, permissions)
+def git(root, *args, **kwargs):
+    if target == "checkout" and args[:1] == ("checkout",):
+        stop()
+    return real_git(root, *args, **kwargs)
+project.atomic_write, project.git = write, git
+try:
+    project.update(consumer, distribution.read_json(consumer / project.STATE))
+except distribution.DistributionError as error:
+    print(error, file=sys.stderr)
+    sys.exit(3)
+'''
 
 
 def rename_agent(source, role, name):
@@ -488,16 +518,164 @@ class DistributionTests(unittest.TestCase):
         failed = False
         def failing(path, data, mode=0o644):
             nonlocal failed
-            if Path(path).name == 'install.local.json' and not failed:
+            # Falha a gravação final do registro, depois do checkout (o marcador pendente passa).
+            if Path(path).name == 'install.local.json' and b'"pending"' not in data and not failed:
                 failed = True
                 raise OSError('Falha sintética na gravação do registro')
             return original(path, data, mode)
         with patch.object(project, 'atomic_write', side_effect=failing):
             with self.assertRaises(OSError):
                 project.update(consumer, state)
+        self.assertTrue(failed)
         self.assertEqual(dist.git(base, 'rev-parse', 'HEAD').decode().strip(), state['revision'])
         self.assertEqual(dist.read_json(consumer / project.STATE), state)
         self.assertNotIn('Nesta versão', (consumer / '.codex/agents/dream-team-qa.toml').read_text())
+
+    def interrupted_update(self, target, mode):
+        """Publica uma revisão e interrompe o update num processo filho."""
+        source, consumer, base, state = self.connected()
+        adapter = source / 'agents/codex/dream-team-qa.toml'
+        adapter.write_text(adapter.read_text().replace('Você exerce', 'Nesta versão, você exerce'))
+        claude = source / 'agents/claude/dream-team-qa.md'
+        claude.write_text(claude.read_text() + '\nNesta versão.\n')
+        skill = source / 'skills/nova-skill'
+        skill.mkdir()
+        sections = ['Objetivo e escopo', 'Entradas e pré-requisitos', 'Procedimento',
+                    'Saídas', 'Validação', 'Limites operacionais']
+        (skill / 'SKILL.md').write_text('---\nname: nova-skill\ndescription: Nova skill\n---\n'
+                                        + ''.join('## ' + section + '\nTexto.\n' for section in sections))
+        revision = commit(source, 'Nova versão')
+        result = subprocess.run([sys.executable, '-B', '-c', INTERRUPTED_UPDATE, str(ROOT / 'scripts'),
+                                 str(consumer), target, mode], capture_output=True, text=True, timeout=120)
+        return consumer, base, state, revision, result
+
+    def assert_updated(self, consumer, base, revision):
+        head = dist.git(base, 'rev-parse', 'HEAD').decode().strip()
+        recorded = dist.read_json(consumer / project.STATE)
+        self.assertEqual((head, recorded['revision']), (revision, revision))
+        self.assertNotIn('pending', recorded)
+        entries = project.desired(consumer, base, recorded['platforms'], recorded['automatic'])
+        self.assertEqual(project.plan(consumer, recorded['managed'], entries)[0], {})
+        self.assertTrue((consumer / '.agents/skills/nova-skill/SKILL.md').is_file())
+        self.assertIn('Nesta versão', (consumer / '.codex/agents/dream-team-qa.toml').read_text())
+        self.assertIn('Nesta versão', (consumer / '.claude/agents/dream-team-qa.md').read_text())
+
+    def test_update_killed_before_final_record_is_completed_by_next_run(self):
+        consumer, base, state, revision, result = self.interrupted_update('install.local.json', 'kill')
+        self.assertEqual(result.returncode, -9, result.stderr)
+        self.assertEqual(dist.git(base, 'rev-parse', 'HEAD').decode().strip(), revision)
+        self.assertTrue(project.update(consumer, dist.read_json(consumer / project.STATE)))
+        self.assert_updated(consumer, base, revision)
+
+    def test_update_killed_midway_through_project_files_is_completed(self):
+        consumer, base, state, revision, result = self.interrupted_update('.codex/agents/dream-team-qa.toml', 'kill')
+        self.assertEqual(result.returncode, -9, result.stderr)
+        # Gravação parcial: o adaptador Claude já mudou e o do Codex ainda não.
+        self.assertIn('Nesta versão', (consumer / '.claude/agents/dream-team-qa.md').read_text())
+        self.assertNotIn('Nesta versão', (consumer / '.codex/agents/dream-team-qa.toml').read_text())
+        self.assertTrue(project.update(consumer, dist.read_json(consumer / project.STATE)))
+        self.assert_updated(consumer, base, revision)
+
+    def test_update_killed_before_checkout_retries_from_origin(self):
+        consumer, base, state, revision, result = self.interrupted_update('checkout', 'kill')
+        self.assertEqual(result.returncode, -9, result.stderr)
+        self.assertEqual(dist.git(base, 'rev-parse', 'HEAD').decode().strip(), state['revision'])
+        self.assertTrue(project.update(consumer, dist.read_json(consumer / project.STATE)))
+        self.assert_updated(consumer, base, revision)
+
+    def test_sigterm_during_update_rolls_back_files_base_and_record(self):
+        for target in ['.codex/agents/dream-team-qa.toml', 'checkout']:
+            with self.subTest(target=target):
+                self.root = Path(self.temp.name) / Path(target).stem
+                self.root.mkdir()
+                consumer, base, state, revision, result = self.interrupted_update(target, 'term')
+                self.assertEqual(result.returncode, 3, result.stderr)
+                self.assertIn('interrompida por sinal', result.stderr)
+                self.assertEqual(dist.git(base, 'rev-parse', 'HEAD').decode().strip(), state['revision'])
+                self.assertEqual(dist.read_json(consumer / project.STATE), state)
+                self.assertNotIn('Nesta versão', (consumer / '.claude/agents/dream-team-qa.md').read_text())
+                self.assertFalse((consumer / '.agents/skills/nova-skill').is_symlink())
+                self.assertTrue(project.update(consumer, state))
+                self.assert_updated(consumer, base, revision)
+
+    def test_reformatted_hook_config_is_neither_divergent_nor_rewritten(self):
+        consumer = self.consumer()
+        state = project.reconcile(consumer, ROOT, {}, ['codex', 'claude'], True, 'fixture')
+        names = ['.claude/settings.local.json', '.codex/hooks.json']
+        for name in names:
+            path = consumer / name
+            path.write_text(json.dumps(dist.read_json(path), indent=4, sort_keys=True), encoding='utf-8')
+        before = {name: (consumer / name).read_bytes() for name in names}
+        entries = project.desired(consumer, ROOT, ['codex', 'claude'], True)
+        self.assertEqual(project.plan(consumer, state['managed'], entries)[0], {})
+        project.reconcile(consumer, ROOT, state, ['codex', 'claude'], True, 'fixture2')
+        self.assertEqual({name: (consumer / name).read_bytes() for name in names}, before)
+
+    def test_disable_removes_only_hook_containers_created_by_installer(self):
+        unrelated = {'hooks': [{'type': 'command', 'command': 'fixture-command'}]}
+        cases = {
+            'ausente': None,
+            'proprio': {'permissions': {'allow': ['Read']}},
+            'lista-do-usuario': {'hooks': {'SessionStart': []}},
+            'outros-hooks': {'hooks': {'SessionStart': [unrelated], 'Stop': []}},
+        }
+        for label, original in cases.items():
+            with self.subTest(case=label):
+                consumer = self.root / label
+                init(consumer)
+                path = consumer / '.claude/settings.local.json'
+                if original is not None:
+                    path.parent.mkdir()
+                    path.write_text(json.dumps(original), encoding='utf-8')
+                state = project.reconcile(consumer, ROOT, {}, ['claude'], True, 'fixture')
+                state = project.reconcile(consumer, ROOT, state, ['claude'], True, 'fixture2')
+                project.reconcile(consumer, ROOT, state, ['claude'], False, 'fixture2', disable=True)
+                if original is None:
+                    self.assertFalse(path.exists())
+                else:
+                    self.assertEqual(dist.read_json(path), original)
+
+    def test_enable_then_disable_restores_instruction_files_byte_for_byte(self):
+        originals = {
+            'AGENTS.md': 'Regras do projeto — ação.\r\nSegunda linha.\r\n'.encode('utf-8'),
+            'README.md': 'Conteúdo próprio sem quebra final'.encode('utf-8'),
+            'CLAUDE.md': b'\xef\xbb\xbf' + 'Instruções próprias.\n'.encode('utf-8'),
+        }
+        for label, files in [('existentes', originals), ('ausentes', {})]:
+            with self.subTest(case=label):
+                consumer = self.root / label
+                init(consumer)
+                for name, data in files.items():
+                    (consumer / name).write_bytes(data)
+                state = project.reconcile(consumer, ROOT, {}, ['codex', 'claude'], True, 'fixture')
+                agents = (consumer / 'AGENTS.md').read_bytes()
+                self.assertIn(project.START.encode(), agents)
+                if files:
+                    self.assertTrue(agents.startswith(originals['AGENTS.md']))
+                    self.assertEqual(agents.count(b'\n'), agents.count(b'\r\n'), 'CRLF não preservado')
+                    self.assertTrue((consumer / 'CLAUDE.md').read_bytes().startswith(originals['CLAUDE.md']))
+                state = project.reconcile(consumer, ROOT, state, ['codex', 'claude'], True, 'fixture2')
+                self.assertEqual((consumer / 'AGENTS.md').read_bytes(), agents)
+                project.reconcile(consumer, ROOT, state, ['codex', 'claude'], False, 'fixture2', disable=True)
+                for name in ['AGENTS.md', 'README.md', 'CLAUDE.md']:
+                    if name in files:
+                        self.assertEqual((consumer / name).read_bytes(), files[name], name)
+                    else:
+                        self.assertFalse((consumer / name).exists(), name)
+
+    def test_installer_scripts_read_and_write_text_as_utf8(self):
+        for name in ['distribution.py', 'project.py', 'plugin.py']:
+            tree = ast.parse((ROOT / 'scripts' / name).read_text(encoding='utf-8'))
+            for node in ast.walk(tree):
+                if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)):
+                    continue
+                keywords = {keyword.arg for keyword in node.keywords}
+                if node.func.attr in {'read_text', 'write_text'}:
+                    self.assertIn('encoding', keywords, f'{name}:{node.lineno}')
+                archive = isinstance(node.func.value, ast.Name) and node.func.value.id == 'tarfile'
+                if node.func.attr in {'open', 'fdopen'} and not archive:
+                    modes = [arg.value for arg in node.args if isinstance(arg, ast.Constant) and isinstance(arg.value, str)]
+                    self.assertTrue('encoding' in keywords or any('b' in mode for mode in modes), f'{name}:{node.lineno}')
 
     def test_rewritten_remote_history_is_not_forced_onto_project(self):
         source, consumer, base, state = self.connected()
@@ -560,6 +738,70 @@ class DistributionTests(unittest.TestCase):
         manifest = dist.read_json(updated / '.claude-plugin/plugin.json')
         self.assertIn('./contracts/claude/quality-check.md', manifest['agents'])
         self.assertNotIn('./contracts/' + previous['claude'], manifest['agents'])
+
+    def packages(self):
+        """Dois pacotes nativos da mesma fonte: o anterior e o novo."""
+        source = self.source()
+        old, new = self.root / 'plugin-old', self.root / 'plugin-new'
+        plugin.build(source, old)
+        with (source / 'agents/dream-team.md').open('a', encoding='utf-8') as stream:
+            stream.write('\nNova versão\n')
+        plugin.build(source, new)
+        return old.resolve(), new.resolve()
+
+    def refresh(self, consumer, package, client, failing=False):
+        """Executa o hook nativo do aplicativo `client`, com `package` como cache carregado."""
+        real = subprocess.run
+        def run(command, *args, **kwargs):
+            if command[0] in {'codex', 'claude'}:
+                if failing:
+                    raise subprocess.CalledProcessError(1, command)
+                return subprocess.CompletedProcess(command, 0, b'', b'')
+            return real(command, *args, **kwargs)
+        output = io.StringIO()
+        argv = ['plugin.py', 'refresh', '--project', str(consumer), '--client', client]
+        with patch.object(sys, 'argv', argv), patch.object(plugin, 'ROOT', package), \
+                patch.object(subprocess, 'run', side_effect=run), \
+                contextlib.redirect_stdout(output), contextlib.redirect_stderr(io.StringIO()):
+            code = plugin.main()
+        return code, output.getvalue()
+
+    def test_native_refresh_rebinds_only_from_owner_and_never_regresses(self):
+        old, new = self.packages()
+        consumer = self.consumer()
+        plugin.bind(consumer, old, {}, ['codex', 'claude'], True)
+        base = consumer / '.bezalel/base'
+        # Claude já na versão nova e Codex ainda na anterior, alternando sessões.
+        steps = [('claude', new), ('codex', old), ('claude', new), ('codex', new), ('claude', old), ('codex', new)]
+        targets, outputs = [], []
+        for client, package in steps:
+            code, output = self.refresh(consumer, package, client)
+            self.assertEqual(code, 0)
+            targets.append(base.resolve())
+            outputs.append(output)
+        self.assertEqual(targets, [old, old, old, new, new, new])
+        self.assertIn('seguem a versão', outputs[0])
+        self.assertIn('contratos e agentes atualizados', outputs[3])
+        self.assertEqual([outputs[i] for i in (1, 2, 5)], ['', '', ''])
+        recorded = dist.read_json(consumer / plugin.STATE)
+        self.assertEqual(recorded['version'], dist.read_json(new / 'plugin.json')['version'])
+        self.assertEqual(recorded['versions'], {'codex': recorded['version'],
+                                                'claude': dist.read_json(old / 'plugin.json')['version']})
+
+    def test_native_refresh_records_state_only_after_update_commands(self):
+        old, new = self.packages()
+        consumer = self.consumer()
+        plugin.bind(consumer, old, {}, ['codex'], True)
+        before = dist.read_json(consumer / plugin.STATE)
+        code, output = self.refresh(consumer, new, 'codex', failing=True)
+        self.assertEqual((code, output), (1, ''))
+        self.assertEqual((consumer / '.bezalel/base').resolve(), old)
+        self.assertEqual(dist.read_json(consumer / plugin.STATE), before)
+        code, output = self.refresh(consumer, new, 'codex')
+        self.assertEqual(code, 0)
+        self.assertIn('contratos e agentes atualizados', output)
+        self.assertEqual((consumer / '.bezalel/base').resolve(), new)
+        self.assertEqual(self.refresh(consumer, new, 'codex'), (0, ''))
 
     def test_refresh_is_scoped_to_bezalel_and_never_runs_skill_commands(self):
         for client in ['codex', 'claude']:

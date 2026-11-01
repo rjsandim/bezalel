@@ -332,6 +332,12 @@ validá-los. Base modificada, conflito de arquivo ou falha de rede deixam um err
 visível e preservam a revisão anterior. Uma skill removida sai da descoberta;
 nenhum recurso Docker, volume ou ambiente é removido.
 
+Se o processo for interrompido no meio (timeout do hook, SIGTERM ou SIGKILL), o
+registro guarda um marcador com a revisão de origem e de destino. O próximo `update`
+conclui a reconciliação a partir dele, sem força nem reset; até lá, `enable`, `status`
+e `disable` recusam rodar e pedem `update`. Arquivos de instruções preservam o final
+de linha (LF ou CRLF), e `enable` seguido de `disable` devolve o conteúdo original.
+
 O hook `SessionStart` em `.codex/hooks.json` / `.claude/settings.local.json`
 também consulta atualizações em sessões novas. Como o aplicativo pode já ter
 carregado agentes quando o hook roda, uma atualização pede reabertura da sessão;
@@ -411,6 +417,14 @@ projeto. O cache nativo não é uma pasta de customização: altere a fonte no B
 Use `--no-auto-update` no `enable` para desativar a consulta. O mecanismo nativo do
 Claude também possui uma opção de auto-update; deixe-a desligada ao usar este hook,
 para evitar dois atualizadores concorrentes.
+
+Com `--client both`, só o hook do Codex reaponta `.bezalel/base` e os TOMLs, pois
+apenas o Codex lê esses arquivos; o Claude carrega agentes e skills do próprio cache.
+O registro guarda a versão vista por aplicativo, e a base muda somente quando o cache
+do Codex muda de versão: aplicativos em versões diferentes não alternam nem fazem o
+vínculo regredir, e o hook do Claude avisa quando está em outra versão. O registro só é
+gravado depois dos comandos de atualização; se um falhar, nada muda e o aviso volta na
+sessão seguinte.
 
 Se uma skill gravou `state/` ou `backups/` no cache, o hook recusa a atualização até
 preservação/migração desse estado. Para ENV, use a integração direta, com caminho
