@@ -14,12 +14,23 @@ class DistributionError(ValueError):
 IGNORED = {'.git', '.DS_Store', '__pycache__', 'state', 'backups', '.pytest_cache'}
 
 
+def read_text(path):
+    """UTF-8 explícito, sem traduzir CRLF: reescritas preservam o arquivo do usuário."""
+    return Path(path).read_bytes().decode('utf-8')
+
+
+def newline(text):
+    """Final de linha predominante do texto; LF quando ausente ou empatado."""
+    crlf = text.count('\r\n')
+    return '\r\n' if crlf > text.count('\n') - crlf else '\n'
+
+
 def read_json(path):
-    return json.loads(Path(path).read_text())
+    return json.loads(read_text(path))
 
 
 def json_bytes(value):
-    return (json.dumps(value, ensure_ascii=False, indent=2) + '\n').encode()
+    return (json.dumps(value, ensure_ascii=False, indent=2) + '\n').encode('utf-8')
 
 
 def digest(data):

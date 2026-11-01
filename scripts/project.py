@@ -2,19 +2,22 @@
 """Liga, atualiza ou desliga o Bezalel por projeto, preservando customizações."""
 import argparse
 import contextlib
+import copy
 import fcntl
 import io
 import os
 from pathlib import Path
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import tarfile
 import tempfile
+import threading
 
 from distribution import (DistributionError, atomic_write, digest, git, inside,
-                          json_bytes, read_json)
+                          json_bytes, newline, read_json, read_text)
 
 ROOT = Path(__file__).resolve().parents[1]
 STATE = '.bezalel/install.local.json'
@@ -25,6 +28,46 @@ HOOK_COMMAND = ('r="$(git worktree list --porcelain | sed -n \'1s/^worktree //p\
                 '[ ! -f "$s" ] || python3 "$s" update --project "$r" --hook')
 LEGACY_HOOK_COMMANDS = {'python3 "$(git rev-parse --show-toplevel)/.bezalel/base/scripts/project.py" '
                         'update --project "$(git rev-parse --show-toplevel)" --hook'}
+
+
+class Interrupted(DistributionError):
+    pass
+
+
+@contextlib.contextmanager
+def shielded():
+    """Adia SIGTERM durante checkout e reversões; o sinal pendente é entregue ao final."""
+    previous = signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGTERM})
+    try:
+        yield
+    finally:
+        signal.pthread_sigmask(signal.SIG_SETMASK, previous)
+
+
+@contextlib.contextmanager
+def terminable():
+    """SIGTERM (por exemplo, o prazo do hook) vira exceção uma vez e aciona a reversão normal."""
+    if threading.current_thread() is not threading.main_thread():
+        yield
+        return
+    armed = True
+
+    def handler(signum, frame):
+        nonlocal armed
+        if armed:
+            armed = False
+            raise Interrupted('Atualização interrompida por sinal; a revisão anterior foi preservada.')
+    previous = signal.signal(signal.SIGTERM, handler)
+    try:
+        yield
+    finally:
+        signal.signal(signal.SIGTERM, previous)
+
+
+def append_lines(text, lines):
+    """Acrescenta linhas no final de linha predominante do arquivo."""
+    nl = newline(text)
+    return text.rstrip('\r\n') + nl + nl.join(lines) + nl
 
 
 def location(root, name):
@@ -74,7 +117,7 @@ def link_worktree(project, worktree):
 
 def manual_skill(path):
     metadata = path / 'agents/openai.yaml'
-    return metadata.is_file() and bool(re.search(r'allow_implicit_invocation:\s*false\b', metadata.read_text()))
+    return metadata.is_file() and bool(re.search(r'allow_implicit_invocation:\s*false\b', read_text(metadata)))
 
 
 def desired(project, base, platforms, automatic, contract_dir='agents'):
@@ -121,7 +164,7 @@ def desired(project, base, platforms, automatic, contract_dir='agents'):
             if target in entries:
                 raise DistributionError('Adaptador duplicado no catálogo.')
             entries[target] = {
-                'kind': 'file', 'content': adapter.read_text()}
+                'kind': 'file', 'content': read_text(adapter)}
     instructions = '\n'.join([
         '## Uso do Bezalel neste projeto', '',
         '- Bezalel é o plugin; DreamTeam é a equipe de agentes de desenvolvimento.',
@@ -180,81 +223,133 @@ def bezalel_hook(hook, previous=None):
     return any(isinstance(item, dict) and item.get('command') in commands for item in items)
 
 
-def extract_block(content):
+def block_span(content):
     if content.count(START) != 1 or content.count(END) != 1:
         raise DistributionError('Bloco Bezalel ausente ou ambíguo; preserve e reconcilie as instruções.')
     start, end = content.index(START), content.index(END) + len(END)
     if start >= content.index(END):
         raise DistributionError('Marcadores Bezalel invertidos.')
-    return content[start:end]
+    return start, end
 
 
-def plan(project, old, entries):
+def plan_entry(project, name, previous, entry):
+    """Mudança de um destino: (mudança ou None, registro gerenciado ou None)."""
+    path = location(project, name)
+    kind = (entry or previous)['kind']
+    actual = current(path)
+    change = record = None
+    if kind in {'file', 'link'}:
+        # Ausência não é customização: recria-se ou apenas sai do registro.
+        if actual != previous and not (previous and actual is None):
+            raise DistributionError('Destino personalizado ou não gerenciado: ' + name)
+        if entry is None:
+            if actual is not None:
+                change = {'kind': 'remove'}
+        elif kind == 'link':
+            record = entry
+            if entry != actual:
+                change = entry
+        else:
+            record = {'kind': 'file', 'sha256': digest(entry['content'].encode('utf-8'))}
+            if record != actual:
+                change = entry
+    elif kind == 'block':
+        if path.is_symlink():
+            raise DistributionError('Instrução do projeto não pode ser um link: ' + name)
+        content = read_text(path) if actual else ''
+        nl = newline(content)
+        if previous and START not in content and END not in content:
+            previous = None
+        if not previous and not entry:
+            return None, None
+        if previous:
+            start, end = block_span(content)
+            # O registro guarda o bloco em LF; o arquivo mantém seu final de linha.
+            if digest(content[start:end].replace('\r\n', '\n').encode('utf-8')) != previous['sha256']:
+                raise DistributionError('Bloco de instruções personalizado: ' + name)
+        elif START in content or END in content:
+            raise DistributionError('Bloco existente sem registro: ' + name)
+        block = START + '\n' + entry['content'] + '\n' + END if entry else ''
+        if previous and entry:
+            result = content[:start] + block.replace('\n', nl) + content[end:]
+            layout = {key: previous[key] for key in ('before', 'after', 'created') if key in previous}
+        elif previous:
+            # Remove também o separador acrescentado na inclusão; registros antigos usavam '\n\n' e '\n'.
+            before = previous.get('before', '\n\n' if start else '').replace('\n', nl)
+            after = previous.get('after', '\n').replace('\n', nl)
+            if start >= len(before) and content[start - len(before):start] == before:
+                start -= len(before)
+            if content[end:end + len(after)] == after:
+                end += len(after)
+            result = content[:start] + content[end:]
+        else:
+            before = (nl if content and not content.endswith(nl) else '') + (nl if content else '')
+            result = content + before + block.replace('\n', nl) + nl
+            layout = {'before': before.replace('\r\n', '\n'), 'after': '\n', 'created': actual is None}
+        if entry:
+            record = {'kind': 'block', 'sha256': digest(block.encode('utf-8')), **layout}
+        if result != content:
+            # Arquivo criado pelo enable e esvaziado pelo disable volta a não existir.
+            change = ({'kind': 'remove'} if not entry and not result and previous.get('created')
+                      else {'kind': 'file', 'content': result})
+    elif kind == 'hook':
+        if path.is_symlink():
+            raise DistributionError('Configuração não pode ser um link: ' + name)
+        config = read_json(path) if actual else {}
+        section = config.get('hooks', {}) if isinstance(config, dict) else None
+        if not isinstance(section, dict) or not isinstance(section.get('SessionStart', []), list):
+            raise DistributionError('Configuração de hooks inválida: ' + name)
+        original = copy.deepcopy(config)
+        hooks = section.get('SessionStart', [])
+        # Contêineres criados pelo instalador saem no disable quando vazios; os do usuário ficam.
+        created = previous.get('created', []) if previous and actual else [
+            part for part, missing in [('file', not actual), ('hooks', 'hooks' not in config),
+                                       ('SessionStart', 'SessionStart' not in section)] if missing]
+        count = hooks.count(previous['entry']) if previous else 0
+        if count > 1:
+            raise DistributionError('Hook Bezalel duplicado: ' + name)
+        if not count and any(bezalel_hook(hook, previous) for hook in hooks):
+            raise DistributionError(('Hook Bezalel personalizado: ' if previous else
+                                     'Hook Bezalel existente sem registro: ') + name)
+        if entry:
+            hooks = config.setdefault('hooks', {}).setdefault('SessionStart', [])
+            if count:
+                hooks[hooks.index(previous['entry'])] = entry['entry']
+            else:
+                hooks.append(entry['entry'])
+            record = {**entry, 'created': created}
+        elif count:
+            hooks.remove(previous['entry'])
+            if 'SessionStart' in created and not hooks:
+                del section['SessionStart']
+            if 'hooks' in created and not section:
+                del config['hooks']
+        # Compara o conteúdo, não a formatação: reformatar o arquivo não é divergência.
+        if config != original:
+            change = ({'kind': 'remove'} if not entry and 'file' in created and not config
+                      else {'kind': 'file', 'content': json_bytes(config).decode('utf-8')})
+    else:
+        raise DistributionError('Tipo de instalação não suportado.')
+    return ({**change, 'expected': actual} if change else None), record
+
+
+def plan(project, old, entries, alternatives=None):
+    """`alternatives` traz o registro gravado antes de uma atualização interrompida."""
     changes, managed = {}, {}
     for name in sorted(old.keys() | entries.keys()):
-        path = location(project, name)
         previous, entry = old.get(name), entries.get(name)
-        kind = (entry or previous)['kind']
-        actual = current(path)
-        if kind in {'file', 'link'}:
-            # Ausência não é customização: recria-se ou apenas sai do registro.
-            if actual != previous and not (previous and actual is None):
-                raise DistributionError('Destino personalizado ou não gerenciado: ' + name)
-            if entry is None:
-                if actual is not None:
-                    changes[name] = None
-            elif kind == 'link':
-                managed[name] = entry
-                if entry != actual:
-                    changes[name] = entry
-            else:
-                managed[name] = {'kind': 'file', 'sha256': digest(entry['content'].encode())}
-                if managed[name] != actual:
-                    changes[name] = entry
-        elif kind == 'block':
-            if path.is_symlink():
-                raise DistributionError('Instrução do projeto não pode ser um link: ' + name)
-            content = path.read_text() if actual else ''
-            if previous and START not in content and END not in content:
-                previous = None
-            if not previous and not entry:
-                continue
-            existing = extract_block(content) if previous else ''
-            if previous and digest(existing.encode()) != previous['sha256']:
-                raise DistributionError('Bloco de instruções personalizado: ' + name)
-            if not previous and (START in content or END in content):
-                raise DistributionError('Bloco existente sem registro: ' + name)
-            block = START + '\n' + entry['content'] + '\n' + END if entry else ''
-            result = content.replace(existing, block, 1) if previous else content + ('\n\n' if content else '') + block + '\n'
-            if result != content:
-                changes[name] = {'kind': 'file', 'content': result}
-            if entry:
-                managed[name] = {'kind': 'block', 'sha256': digest(block.encode())}
-        elif kind == 'hook':
-            if path.is_symlink():
-                raise DistributionError('Configuração não pode ser um link: ' + name)
-            config = read_json(path) if actual else {}
-            hooks = config.setdefault('hooks', {}).setdefault('SessionStart', [])
-            count = hooks.count(previous['entry']) if previous else 0
-            if count > 1:
-                raise DistributionError('Hook Bezalel duplicado: ' + name)
-            if count:
-                hooks.remove(previous['entry'])
-            elif any(bezalel_hook(hook, previous) for hook in hooks):
-                raise DistributionError(('Hook Bezalel personalizado: ' if previous else
-                                         'Hook Bezalel existente sem registro: ') + name)
-            if entry:
-                hooks.append(entry['entry'])
-                managed[name] = entry
-            if not actual and not entry:
-                continue
-            result = json_bytes(config).decode()
-            if not actual or path.read_text() != result:
-                changes[name] = {'kind': 'file', 'content': result}
-        else:
-            raise DistributionError('Tipo de instalação não suportado.')
-        if name in changes:
-            changes[name] = {**(changes[name] or {'kind': 'remove'}), 'expected': actual}
+        try:
+            change, record = plan_entry(project, name, previous, entry)
+        except DistributionError:
+            other = (alternatives or {}).get(name)
+            if other is None or other == previous:
+                raise
+            # Gravação parcial: o destino já corresponde ao registro da atualização pendente.
+            change, record = plan_entry(project, name, other, entry)
+        if change:
+            changes[name] = change
+        if record:
+            managed[name] = record
     return changes, managed
 
 
@@ -270,7 +365,7 @@ def apply(project, changes):
             backups[name] = ('link', os.readlink(path)) if kind and kind['kind'] == 'link' else (
                 ('file', path.read_bytes(), path.stat().st_mode & 0o777) if kind else None)
             if entry and entry['kind'] == 'file':
-                atomic_write(path, entry['content'].encode(), backups[name][2] if backups[name] and backups[name][0] == 'file' else 0o644)
+                atomic_write(path, entry['content'].encode('utf-8'), backups[name][2] if backups[name] and backups[name][0] == 'file' else 0o644)
             else:
                 if kind:
                     path.unlink()
@@ -278,25 +373,26 @@ def apply(project, changes):
                     path.parent.mkdir(parents=True, exist_ok=True)
                     path.symlink_to(entry['target'])
     except BaseException:
-        for name, backup in reversed(list(backups.items())):
-            path = location(project, name)
-            if path.is_file() or path.is_symlink():
-                path.unlink()
-            if backup and backup[0] == 'link':
-                path.symlink_to(backup[1])
-            elif backup:
-                atomic_write(path, backup[1], backup[2])
+        with shielded():
+            for name, backup in reversed(list(backups.items())):
+                path = location(project, name)
+                if path.is_file() or path.is_symlink():
+                    path.unlink()
+                if backup and backup[0] == 'link':
+                    path.symlink_to(backup[1])
+                elif backup:
+                    atomic_write(path, backup[1], backup[2])
         raise
 
 
-def reconcile(project, base, state, platforms, automatic, revision, disable=False, extra=None):
+def reconcile(project, base, state, platforms, automatic, revision, disable=False, extra=None, alternatives=None):
     entries = {} if disable else desired(project, base, platforms, automatic)
-    changes, managed = plan(project, state.get('managed', {}), entries)
+    changes, managed = plan(project, state.get('managed', {}), entries, alternatives)
     changes.update(extra or {})
     new = {'schema_version': 1, 'enabled': not disable, 'platforms': platforms,
            'automatic': automatic, 'branch': state.get('branch', 'master'),
            'revision': revision, 'managed': managed}
-    changes[STATE] = {'kind': 'file', 'content': json_bytes(new).decode()}
+    changes[STATE] = {'kind': 'file', 'content': json_bytes(new).decode('utf-8')}
     apply(project, changes)
     return new
 
@@ -313,53 +409,98 @@ def snapshot(repo, revision, target):
             atomic_write(path, stream.extractfile(member).read(), member.mode & 0o777)
 
 
+def resume(project, base, state):
+    """Conclui uma atualização interrompida (ex.: SIGKILL) sem força nem reset.
+
+    O marcador é gravado após validar o destino e antes do checkout. Com HEAD na
+    origem ou no destino, reconcilia os arquivos com a base atual aceitando, por
+    destino, o registro anterior ou o planejado; outra revisão exige ação manual.
+    """
+    pending = state['pending']
+    clean = {key: value for key, value in state.items() if key != 'pending'}
+    if (not isinstance(pending, dict) or not {'from', 'to', 'managed'} <= pending.keys()
+            or pending['from'] != clean.get('revision')):
+        raise DistributionError('Marcador de atualização pendente inválido; reconcilie a instalação explicitamente.')
+    if git(base, 'status', '--porcelain').strip():
+        raise DistributionError('Atualização interrompida deixou mudanças na base; preserve-as e reconcilie manualmente.')
+    head = git(base, 'rev-parse', 'HEAD').decode().strip()
+    if head not in (pending['from'], pending['to']):
+        raise DistributionError('Base fora das revisões da atualização interrompida; reconcilie a revisão explicitamente.')
+    if head != pending['from']:
+        git(base, 'merge-base', '--is-ancestor', pending['from'], head)
+    new = reconcile(project, base, clean, clean['platforms'], clean['automatic'], head,
+                    alternatives=pending['managed'])
+    return new, head != pending['from']
+
+
 def update(project, state):
     if not state.get('enabled'):
         return False
     base = inside(project, '.bezalel/base')
-    if git(base, 'status', '--porcelain').strip():
-        raise DistributionError('Base Bezalel tem mudanças locais; atualização preservada e bloqueada.')
-    previous = git(base, 'rev-parse', 'HEAD').decode().strip()
-    if previous != state['revision']:
-        raise DistributionError('Base foi trocada fora do atualizador; reconcilie a revisão explicitamente.')
-    branch = state['branch']
-    git(base, 'check-ref-format', '--branch', branch)
-    git(base, 'fetch', '--quiet', '--no-tags', 'origin', 'refs/heads/' + branch, timeout=25)
-    revision = git(base, 'rev-parse', 'FETCH_HEAD^{commit}').decode().strip()
-    git(base, 'merge-base', '--is-ancestor', previous, revision)
-    with tempfile.TemporaryDirectory(prefix='bezalel-candidate-') as temporary:
-        candidate = Path(temporary).resolve()
-        snapshot(base, revision, candidate)
-        # Valida a nova árvore com o checker já adotado; não executa scripts novos.
-        import check_repository
-        original_root = check_repository.ROOT
-        try:
-            check_repository.ROOT = candidate
-            errors = (check_repository.validate_structure(check_repository.package_files())
-                      + check_repository.validate_agents() + check_repository.validate_upstream()
-                      + check_repository.validate_workbook_template())
-        finally:
-            check_repository.ROOT = original_root
-        if errors:
-            raise DistributionError('Nova revisão não passou na validação estrutural: ' + '; '.join(errors[:3]))
-        entries = desired(project, candidate, state['platforms'], state['automatic'])
-        plan(project, state['managed'], entries)
-        try:
-            if revision != previous:
-                git(base, 'checkout', '--quiet', '--detach', revision)
-            reconcile(project, candidate, state, state['platforms'], state['automatic'], revision)
-        except BaseException:
-            if revision != previous:
-                git(base, 'checkout', '--quiet', '--detach', previous)
-            raise
-    return revision != previous
+    state_path = inside(project, STATE)
+    with terminable():
+        resumed = False
+        if state.get('pending'):
+            state, resumed = resume(project, base, state)
+        if git(base, 'status', '--porcelain').strip():
+            raise DistributionError('Base Bezalel tem mudanças locais; atualização preservada e bloqueada.')
+        previous = git(base, 'rev-parse', 'HEAD').decode().strip()
+        if previous != state['revision']:
+            raise DistributionError('Base foi trocada fora do atualizador; reconcilie a revisão explicitamente.')
+        branch = state['branch']
+        git(base, 'check-ref-format', '--branch', branch)
+        git(base, 'fetch', '--quiet', '--no-tags', 'origin', 'refs/heads/' + branch, timeout=25)
+        revision = git(base, 'rev-parse', 'FETCH_HEAD^{commit}').decode().strip()
+        git(base, 'merge-base', '--is-ancestor', previous, revision)
+        with tempfile.TemporaryDirectory(prefix='bezalel-candidate-') as temporary:
+            candidate = Path(temporary).resolve()
+            snapshot(base, revision, candidate)
+            # Valida a nova árvore com o checker já adotado; não executa scripts novos.
+            import check_repository
+            original_root = check_repository.ROOT
+            try:
+                check_repository.ROOT = candidate
+                errors = (check_repository.validate_structure(check_repository.package_files())
+                          + check_repository.validate_agents() + check_repository.validate_upstream()
+                          + check_repository.validate_workbook_template())
+            finally:
+                check_repository.ROOT = original_root
+            if errors:
+                raise DistributionError('Nova revisão não passou na validação estrutural: ' + '; '.join(errors[:3]))
+            entries = desired(project, candidate, state['platforms'], state['automatic'])
+            _, managed = plan(project, state['managed'], entries)
+            # Marcador antes do checkout: um processo morto entre checkout e registro é retomado.
+            marked = {**state, 'pending': {'from': previous, 'to': revision, 'managed': managed}}
+            written = False
+            try:
+                atomic_write(state_path, json_bytes(marked))
+                written = True
+                if revision != previous:
+                    with shielded():
+                        git(base, 'checkout', '--quiet', '--detach', revision)
+                reconcile(project, candidate, state, state['platforms'], state['automatic'], revision)
+            except BaseException as error:
+                with shielded():
+                    # Sem marcador confirmado nada foi trocado (um marcador gravado é retomado depois).
+                    # Registro final sem marcador: o sinal chegou após a conclusão; não reverta.
+                    if not written:
+                        raise
+                    if 'pending' not in read_json(state_path):
+                        if not isinstance(error, Interrupted):
+                            raise
+                    else:
+                        if revision != previous:
+                            git(base, 'checkout', '--quiet', '--detach', previous)
+                        atomic_write(state_path, json_bytes(state))
+                        raise
+    return resumed or revision != previous
 
 
 @contextlib.contextmanager
 def lock(project):
     path = inside(project, '.bezalel/update.lock')
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open('a') as stream:
+    with path.open('ab') as stream:
         try:
             fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as error:
@@ -396,6 +537,8 @@ def main():
             state = read_json(state_path) if state_path.is_file() else {}
             if state and state.get('schema_version') != 1:
                 raise DistributionError('Registro de instalação incompatível.')
+            if state.get('pending') and args.action in {'enable', 'status', 'disable'}:
+                raise DistributionError('Há uma atualização interrompida; execute update para concluí-la primeiro.')
             if args.action == 'enable':
                 base = inside(project, '.bezalel/base')
                 if not (base / 'agents/catalog.json').is_file():
@@ -412,13 +555,13 @@ def main():
                 state['branch'] = args.branch
                 extra = {}
                 if not context.exists():
-                    extra['.bezalel/project.json'] = {'kind': 'file', 'content': (base / '.bezalel/project.example.json').read_text()}
+                    extra['.bezalel/project.json'] = {'kind': 'file', 'content': read_text(base / '.bezalel/project.example.json')}
                 ignore = inside(project, '.bezalel/.gitignore')
-                rules = ignore.read_text() if ignore.exists() else ''
+                rules = read_text(ignore) if ignore.exists() else ''
                 # '/base' também ignora o link criado em worktrees; '/base/' só ignora diretórios.
                 additions = [p for p in ['/base', '/install.local.json', '/update.lock', '/vps-deploy.local.json', '/deliveries/*.local.json', '/reviews/'] if p not in rules.splitlines()]
                 if additions:
-                    extra['.bezalel/.gitignore'] = {'kind': 'file', 'content': rules.rstrip('\n') + '\n' + '\n'.join(additions) + '\n'}
+                    extra['.bezalel/.gitignore'] = {'kind': 'file', 'content': append_lines(rules, additions)}
                 reconcile(project, base, state, platforms, not args.no_auto_update, revision, extra=extra)
                 message = 'Bezalel ligado. Preencha .bezalel/project.json e confira a descoberta em uma nova sessão.'
             elif args.action == 'status':
@@ -429,7 +572,7 @@ def main():
                         raise DistributionError('Instalação requer reconciliação; há arquivos divergentes.')
                     state['local_changes'] = bool(git(project / '.bezalel/base', 'status', '--porcelain').strip())
                     state['actual_revision'] = git(project / '.bezalel/base', 'rev-parse', 'HEAD').decode().strip()
-                message = json_bytes({k: v for k, v in state.items() if k != 'managed'}).decode().strip() or 'Não instalado.'
+                message = json_bytes({k: v for k, v in state.items() if k != 'managed'}).decode('utf-8').strip() or 'Não instalado.'
             elif args.action == 'disable':
                 if state:
                     reconcile(project, project / '.bezalel/base', state, state['platforms'], False, state['revision'], disable=True)

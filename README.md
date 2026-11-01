@@ -408,6 +408,14 @@ Use `--no-auto-update` no `enable` para desativar a consulta. O mecanismo nativo
 Claude também possui uma opção de auto-update; deixe-a desligada ao usar este hook,
 para evitar dois atualizadores concorrentes.
 
+Com `--client both`, só o hook do Codex reaponta `.bezalel/base` e os TOMLs, pois
+apenas o Codex lê esses arquivos; o Claude carrega agentes e skills do próprio cache.
+O registro guarda a versão vista por aplicativo, e a base muda somente quando o cache
+do Codex muda de versão: aplicativos em versões diferentes não alternam nem fazem o
+vínculo regredir, e o hook do Claude avisa quando está em outra versão. O registro só é
+gravado depois dos comandos de atualização; se um falhar, nada muda e o aviso volta na
+sessão seguinte.
+
 Se uma skill gravou `state/` ou `backups/` no cache, o hook recusa a atualização até
 preservação/migração desse estado. Para ENV, use a integração direta, com caminho
 estável: caches de plugins podem ser removidos pelo aplicativo. Essa limitação não
