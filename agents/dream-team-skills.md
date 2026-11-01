@@ -24,7 +24,7 @@ do executor. As cinco skills manuais, vps-deploy e limpar-orbstack ficam fora do
 | [agent-browser](../skills/agent-browser/SKILL.md) | Interagir com a interface web conforme o guia da versão disponível. | Critérios e registro de evidência; mock, integração real, acessibilidade e mobile nativo continuam distintos. |
 | [pr-audit](../skills/pr-audit/SKILL.md) | Fixar candidato, confrontar alegações/diff/provas e fechar um parecer. | TL sem executar testes/correções; candidatos incompletos não seguem a AppSec. |
 | [security-audit](../skills/security-audit/SKILL.md) | Modelo de ameaças, checklist, inspeção, validação adversarial e parecer. | Limites de acesso, correção pelo dev, tratamento de riscos e decisão humana conforme R8. |
-| [development-test-workbook](../skills/development-test-workbook/SKILL.md) | Derivar casos, gerar e conferir o .xlsx pelo contrato da pasta. | Mesmo candidato; Excel obrigatório em melhoria/feature; execução humana ainda pendente. |
+| [development-test-workbook](../skills/development-test-workbook/SKILL.md) | Derivar casos, gerar e conferir o .xlsx pelo contrato da pasta. | Mesmo candidato; Excel na feature ou quando a classe pedir; execução humana ainda pendente. |
 | [humanizer](../skills/humanizer/SKILL.md) | Revisar redação quando necessário, preservando o conteúdo. | Critérios, fatos, decisões e registros de execução não são reescritos. |
 
 Não foi transferida para uma skill genérica a decisão humana de banco, a avaliação completa de acessibilidade/mobile, a integração final, o aceite ou a abertura de PR. Essas atividades precisam de regras, ferramentas ou decisões que as skills atuais não cobrem integralmente.

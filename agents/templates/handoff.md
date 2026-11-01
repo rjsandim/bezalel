@@ -17,9 +17,9 @@ Use este formato na issue, sem abrir um MD paralelo por demanda.
 
 O recebedor confere versão, contexto e prova. Handoff não aprova produto, banco,
 risco, aceite ou efeitos externos. Reutilize resultados válidos; mudanças exigem
-revalidação somente do que foi afetado, conforme [R1–R10](../dream-team.md).
+revalidação somente do que foi afetado, conforme [R1–R11](../dream-team.md).
 
-Aplique a [economia de contexto e coordenação](../dream-team.md#economia-de-contexto-e-coordenação).
+Aplique a [economia de contexto e coordenação](../coordenacao.md#economia-de-contexto-e-coordenação).
 Referencie fontes acessíveis em vez de copiar o histórico integral; amplie a leitura
 quando necessário. Evite reenviar estado inalterado. Prova reaproveitada exige
 validade conferida e não substitui a avaliação independente do recebedor.

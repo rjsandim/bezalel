@@ -84,7 +84,7 @@ def validate_agents():
         require(isinstance(catalog["roles"], dict) and set(catalog["roles"]) == expected_roles, "Catálogo deve conter os nove agentes ativos do fluxo, incluindo AppSec.")
         flow = catalog["workflow"]
         source = local_file(ROOT / "agents", flow["source"], "Fluxo").read_text()
-        require(re.findall(r"^### (R\d+) ", source, re.M) == ["R" + str(n) for n in range(1, 11)], "Preserve as dez regras comuns do fluxo.")
+        require(re.findall(r"^### (R\d+) ", source, re.M) == ["R" + str(n) for n in range(1, 12)], "Preserve as onze regras comuns do fluxo.")
         local_file(ROOT / "agents", flow["skills"], "Relação de skills")
         sections = {}
         for process in processes(catalog):

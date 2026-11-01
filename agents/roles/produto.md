@@ -31,7 +31,7 @@ MCP/API do GitHub quando houver issues e referências autorizadas; leitura do co
 
 Não confirma causa técnica ou vulnerabilidade, não implementa, não testa o produto e não decide mudanças de regra/escopo. Decisão humana existente é reaproveitada somente se cobrir o conteúdo exato. Não fecha intenção restante por rejeição de uma solução.
 
-Siga R1–R10 e as condições do [fluxo vigente](../dream-team.md). O contrato
+Siga R1–R11 e as condições do [fluxo vigente](../dream-team.md). O contrato
 orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto

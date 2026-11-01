@@ -65,6 +65,9 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   mantendo o template do pacote. Sem mudança aplicável, registre não aplicável.
 - Não fabrique aprovações ou resultados para satisfazer validadores. JSON não prova
   identidade nem autorização; um runtime deve conferir a interação humana real.
+- A classe da demanda (pequena, normal, grande) define artefatos, não dispensa revisões
+  independentes nem a proposta de banco. Regras de delegação ficam em
+  `agents/coordenacao.md`; não as repita nos papéis.
 - QA independente amplia cenários e confronta comportamento, não só a suíte do dev.
   Mantenha responsabilidade pela integração de API/web/mobile e serviços envolvidos.
 - Product Manager aponta desvios e alternativas; o usuário decide mudanças. Contratos,
@@ -88,7 +91,7 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   modelos menores que o inicial conforme a seleção proporcional em
   `agents/dream-team.md`. Explicite a escolha quando suportada e justifique
   exceções; não fixe modelos por papel nem alegue roteamento imposto por arquivos.
-- Aplique a [economia de contexto e coordenação](agents/dream-team.md#economia-de-contexto-e-coordenação):
+- Aplique a [economia de contexto e coordenação](agents/coordenacao.md#economia-de-contexto-e-coordenação):
   contexto pertinente, entregas completas por fase, comunicação por mudança relevante
   e provas válidas reutilizadas, preservando revisões independentes e testes.
 - Em mudanças que afetem o fluxo da DreamTeam, use a [fonte canônica](agents/dream-team.md):

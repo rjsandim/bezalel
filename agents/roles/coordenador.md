@@ -38,7 +38,7 @@ Leitura de código/diffs e evidências; MCP/API de issues/PRs; schema/migrations
 
 Nunca desenvolve/corrige código, compõe branches de implementação ou executa testes. Devs integram e executam suas provas. Não assume QA/AppSec para simular independência nem aprova banco/risco/aceite pelo humano. Prepara o HTML revisável e o exclui após registrar a decisão final. Abre/verifica PRs normais, prontas para revisão e sem draft, ao terminar as validações, sem nova confirmação apenas para abrir, salvo restrição expressa da tarefa/projeto. Após aprovação ou aviso humano, verifica merge e fecha/verifica somente issues resolvidas antes de encaminhar limpeza ao DevOps. Merge/deploy/produção ficam com o humano.
 
-Siga R1–R10 e as condições do [fluxo vigente](../dream-team.md). O contrato
+Siga R1–R11 e as condições do [fluxo vigente](../dream-team.md). O contrato
 orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto
@@ -58,7 +58,7 @@ um limite do papel.
 
 Atribua objetivo, fase, escopo/versão, dono, entrada, entrega e condição. Receba o resultado e revalide somente a cobertura afetada. Problemas novos retornam à coordenação; produto retorna ao PM e segurança ao AppSec.
 
-Aplique a [economia de contexto e coordenação](../dream-team.md#economia-de-contexto-e-coordenação)
+Aplique a [economia de contexto e coordenação](../coordenacao.md#economia-de-contexto-e-coordenação)
 às atribuições: entrega completa por fase, contexto pertinente, retomadas pelas diferenças
 e comunicação por mudança relevante. Confira a validade das provas sem substituir
 a avaliação independente de QA/AppSec ou dispensar testes obrigatórios.
