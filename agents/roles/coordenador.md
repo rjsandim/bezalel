@@ -11,12 +11,12 @@ Coordenar o percurso, planejar por impacto e revisar a entrega integrada, manten
 
 Processos sob sua responsabilidade:
 
-- [plan](../dream-team.md#process-plan)
-- [bank](../dream-team.md#process-bank)
-- [review](../dream-team.md#process-review)
-- [package](../dream-team.md#process-package)
-- [pr](../dream-team.md#process-pr)
-- [postMerge](../dream-team.md#process-postMerge)
+- [plan](../processes/plan.md#process-plan)
+- [bank](../processes/bank.md#process-bank)
+- [review](../processes/review.md#process-review)
+- [package](../processes/package.md#process-package)
+- [pr](../processes/pr.md#process-pr)
+- [postMerge](../processes/postMerge.md#process-postMerge)
 
 ## Entradas
 

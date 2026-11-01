@@ -7,7 +7,7 @@ import sys
 import tomllib
 import zipfile
 from xml.etree import ElementTree
-from dream_team import render as render_adapters
+from dream_team import REFERENCE, expected_files, processes
 from check_delivery import ContractError, local_file, read_json, require, text, validate_config
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -87,13 +87,17 @@ def validate_agents():
         require(re.findall(r"^### (R\d+) ", source, re.M) == ["R" + str(n) for n in range(1, 11)], "Preserve as dez regras comuns do fluxo.")
         local_file(ROOT / "agents", flow["skills"], "Relação de skills")
         sections = {}
-        for block in re.split(r"^### ", source, flags=re.M):
-            match = re.search(r"\*\*Referência:\*\* `([^`]+)`\. \*\*Responsável:\*\* ([^\n]+)\.", block)
-            if match:
-                require(match[1] not in sections, "Processo duplicado no fluxo.")
-                procedure = block.split("**Pronto:**", 1)[0]
-                require(re.findall(r"^([123])\. \*\*", procedure, re.M) == ["1", "2", "3"], "Cada processo deve preservar suas três etapas.")
-                sections[match[1]] = (match[2], procedure)
+        for process in processes(catalog):
+            key, path = process["key"], local_file(ROOT / "agents", process["file"], "Processo")
+            require(path.parent == ROOT / "agents/processes" and path.stem == key, "Processo fora da pasta prevista ou com nome divergente.")
+            content = path.read_text()
+            match = REFERENCE.search(content)
+            require(match and match[1] == key and key not in sections, "Referência do processo divergente ou duplicada.")
+            require(content.startswith('<a id="process-' + key + '"></a>\n') and '<a id="process-' + key + '"></a>' in source, "Âncora do processo ausente.")
+            procedure = content.split("**Pronto:**", 1)[0]
+            require(re.findall(r"^([123])\. \*\*", procedure, re.M) == ["1", "2", "3"], "Cada processo deve preservar suas três etapas.")
+            sections[key] = (match[2], procedure)
+        require(set(ROOT / "agents" / process["file"] for process in processes(catalog)) == set((ROOT / "agents/processes").glob("*.md")), "Arquivo de processo órfão.")
         require(len(sections) == 21, "O fluxo deve cobrir os 21 processos previstos.")
         scenarios = flow["scenarios"]
         require(isinstance(scenarios, list) and len(scenarios) == 3 and len({x["id"] for x in scenarios}) == 3, "Declare três cenários distintos.")
@@ -101,7 +105,6 @@ def validate_agents():
         actors = catalog["external_actors"]
         require(isinstance(actors, dict) and set(actors) == {"aprovador-humano"}, "Mantenha o humano externo ao catálogo de agentes.")
         skills_available = {p.parent.name for p in (ROOT / "skills").glob("*/SKILL.md")}
-        generated = render_adapters(ROOT)
         declared, adapters, claude_adapters, process_keys, process_ids, role_ids = set(), set(), set(), [], [], []
         for role, entry in {**catalog["roles"], **actors}.items():
             human = role in actors
@@ -116,7 +119,7 @@ def validate_agents():
             for process in entry["processes"]:
                 key = process["key"]
                 require(key in sections and sections[key][0] == entry["display_name"], "Processo atribuído ao responsável incorreto.")
-                require('#process-' + key in content, "Contrato não referencia seu processo.")
+                require('../' + process["file"] in content, "Contrato não referencia seu processo.")
                 found_skills = {skill for skill in skills_available if re.search(r"(?<![a-z-])" + re.escape(skill) + r"(?![a-z-])", sections[key][1])}
                 require(isinstance(process["skills"], list) and len(process["skills"]) == len(set(process["skills"])) and set(process["skills"]) == found_skills, "Skills do catálogo divergem do procedimento.")
                 required_skills.update(found_skills)
@@ -146,8 +149,6 @@ def validate_agents():
             front, body = claude[4:].split('\n---\n', 1)
             require(len(front.splitlines()) == 2 and text(front.splitlines()[1].removeprefix('description: ').strip('"')), "Adaptador Claude amplia configurações não previstas.")
             require('agents/' + entry['file'] in body and 'agents/' + flow['source'] in body, "Adaptador Claude deve carregar contrato e fluxo.")
-            require(adapter_path.read_text() == generated[entry["codex"]] and claude == generated[entry["claude"]],
-                    "Adaptador diverge do gerado pelo catálogo e template; rode python3 -B scripts/dream_team.py generate.")
         require(len(role_ids) == len(set(role_ids)) == 10, "Identidades dos cargos duplicadas.")
         require(len(process_keys) == len(set(process_keys)) == 21 and set(process_keys) == set(sections), "Processo órfão ou duplicado no catálogo.")
         require(len(process_ids) == len(set(process_ids)) == 21, "IDs de processos duplicados.")
@@ -160,6 +161,20 @@ def validate_agents():
     except (OSError, UnicodeError, TypeError, ValueError, KeyError, AttributeError):
         return ["Não foi possível validar catálogo, contratos ou adaptadores; conteúdo omitido."]
     return []
+
+
+def validate_generated():
+    """Confere adaptadores e índice gerados nesta árvore.
+
+    Fica fora de validate_agents: ao atualizar um projeto, o checker já instalado valida
+    a nova árvore, e seu gerador pode ser anterior ao template ou ao formato publicado.
+    """
+    try:
+        divergent = [name for name, content in expected_files(ROOT).items()
+                     if not (ROOT / "agents" / name).is_file() or (ROOT / "agents" / name).read_text() != content]
+    except (OSError, UnicodeError, TypeError, ValueError, KeyError, AttributeError):
+        return ["Não foi possível gerar adaptadores e índice de processos; conteúdo omitido."]
+    return ["Arquivo gerado diverge (agents/" + name + "); rode python3 -B scripts/dream_team.py generate." for name in divergent]
 
 
 def validate_upstream():
@@ -211,7 +226,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.parse_args()
     files = package_files()
-    errors = validate_structure(files) + validate_agents() + validate_upstream() + validate_workbook_template()
+    errors = validate_structure(files) + validate_agents() + validate_generated() + validate_upstream() + validate_workbook_template()
     if errors:
         for error in errors:
             print(error, file=sys.stderr)

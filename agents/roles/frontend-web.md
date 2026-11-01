@@ -11,7 +11,7 @@ Executar a fase atribuída para jornadas e estados de interface web. Investigar 
 
 Processos sob sua responsabilidade:
 
-- [web](../dream-team.md#process-web)
+- [web](../processes/web.md#process-web)
 
 ## Entradas
 

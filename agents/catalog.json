@@ -10,6 +10,7 @@
         {
           "key": "bug",
           "id": "12d2b156-9007-4570-ac8b-35b984264897",
+          "file": "processes/bug.md",
           "skills": [
             "iss-audit",
             "humanizer"
@@ -18,6 +19,7 @@
         {
           "key": "improvement",
           "id": "8d689fb9-1695-4ffa-9a16-a3f9bfb64827",
+          "file": "processes/improvement.md",
           "skills": [
             "iss-audit",
             "humanizer"
@@ -26,6 +28,7 @@
         {
           "key": "feature",
           "id": "6fe73b21-d387-4a7e-ae5c-be6597a476eb",
+          "file": "processes/feature.md",
           "skills": [
             "iss-audit",
             "humanizer"
@@ -48,6 +51,7 @@
         {
           "key": "plan",
           "id": "2a24e1bb-2308-405c-977d-f740597a0c21",
+          "file": "processes/plan.md",
           "skills": [
             "verification-planning",
             "clean-architecture"
@@ -56,6 +60,7 @@
         {
           "key": "bank",
           "id": "03d0fd7a-3836-4292-a414-8b9073ade48f",
+          "file": "processes/bank.md",
           "skills": [
             "clean-architecture",
             "verification-planning"
@@ -64,6 +69,7 @@
         {
           "key": "review",
           "id": "210fb59b-17d2-4b26-b768-8338508e1d39",
+          "file": "processes/review.md",
           "skills": [
             "pr-audit",
             "clean-code",
@@ -73,6 +79,7 @@
         {
           "key": "package",
           "id": "1b4f9822-4713-4257-852b-2bb696e2a622",
+          "file": "processes/package.md",
           "skills": [
             "development-test-workbook",
             "humanizer"
@@ -81,6 +88,7 @@
         {
           "key": "pr",
           "id": "dc9efb62-16aa-4af6-ad09-e05e0c666d6c",
+          "file": "processes/pr.md",
           "skills": [
             "humanizer"
           ]
@@ -88,6 +96,7 @@
         {
           "key": "postMerge",
           "id": "7c70981f-8903-47e9-847d-8ffbde0f41f1",
+          "file": "processes/postMerge.md",
           "skills": []
         }
       ],
@@ -111,6 +120,7 @@
         {
           "key": "env",
           "id": "0921e388-3c9d-4bd3-9741-d75d6754a002",
+          "file": "processes/env.md",
           "skills": [
             "env"
           ]
@@ -131,6 +141,7 @@
         {
           "key": "fullstack",
           "id": "6340e3bd-69e1-4847-973f-6dad3009785e",
+          "file": "processes/fullstack.md",
           "skills": [
             "iss-audit",
             "clean-code",
@@ -159,6 +170,7 @@
         {
           "key": "backend",
           "id": "4cd17fa3-eee7-426b-83c1-6e31ba684f88",
+          "file": "processes/backend.md",
           "skills": [
             "iss-audit",
             "clean-code",
@@ -185,6 +197,7 @@
         {
           "key": "web",
           "id": "8cb979f7-5e35-41cf-8dbe-dc75954df1d7",
+          "file": "processes/web.md",
           "skills": [
             "iss-audit",
             "clean-code",
@@ -211,6 +224,7 @@
         {
           "key": "mobile",
           "id": "8d1553c2-5d96-48ab-8d00-a1a12c344fd0",
+          "file": "processes/mobile.md",
           "skills": [
             "iss-audit",
             "clean-code",
@@ -235,6 +249,7 @@
         {
           "key": "ui",
           "id": "a8eab940-0f98-4e69-9643-b7aefcd50a31",
+          "file": "processes/ui.md",
           "skills": [
             "agent-browser"
           ]
@@ -242,6 +257,7 @@
         {
           "key": "qa",
           "id": "892c40db-3eb3-4729-be8f-d0314c20560d",
+          "file": "processes/qa.md",
           "skills": [
             "verification-planning",
             "agent-browser"
@@ -264,6 +280,7 @@
         {
           "key": "security",
           "id": "c7ecac2b-9885-4705-bd80-e994995d3724",
+          "file": "processes/security.md",
           "skills": [
             "security-audit"
           ]
@@ -286,21 +303,25 @@
         {
           "key": "product",
           "id": "48c49b4c-0e80-43ea-8116-c262d0d5bd66",
+          "file": "processes/product.md",
           "skills": []
         },
         {
           "key": "bankDecision",
           "id": "96c0769a-2921-4792-86b6-ce310cd1bacd",
+          "file": "processes/bankDecision.md",
           "skills": []
         },
         {
           "key": "risk",
           "id": "79710a23-932e-49e5-bcdb-abab8697c6e0",
+          "file": "processes/risk.md",
           "skills": []
         },
         {
           "key": "accept",
           "id": "fd173525-c768-49a1-8fec-b62537e0e0a6",
+          "file": "processes/accept.md",
           "skills": []
         }
       ],

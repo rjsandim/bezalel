@@ -11,7 +11,7 @@ Analisar e revalidar a segurança do candidato integrado com evidências e trata
 
 Processos sob sua responsabilidade:
 
-- [security](../dream-team.md#process-security)
+- [security](../processes/security.md#process-security)
 
 ## Entradas
 

@@ -11,8 +11,8 @@ Confrontar interface e entrega integrada com requisitos, ampliando os cenários 
 
 Processos sob sua responsabilidade:
 
-- [ui](../dream-team.md#process-ui)
-- [qa](../dream-team.md#process-qa)
+- [ui](../processes/ui.md#process-ui)
+- [qa](../processes/qa.md#process-qa)
 
 ## Entradas
 
