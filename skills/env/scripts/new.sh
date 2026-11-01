@@ -129,7 +129,7 @@ for i in $(seq 0 $((COUNT - 1))); do
         render_template compose.service.tpl /dev/stdout >> "$COMPOSE"
 
     # Override explicito; ausencia preserva DB + Redis dos manifestos antigos.
-    if yq -e ".services[$i] | has(\"depends_on\")" "$MANIFEST" >/dev/null; then
+    if [ "$(yq -r ".services[$i] | has(\"depends_on\")" "$MANIFEST")" = 'true' ]; then
         export SERVICE_DEPS="$(yq -o=json -I=0 ".services[$i].depends_on" "$MANIFEST")"
         yq -i '.services[strenv(FOLDER)].depends_on = (strenv(SERVICE_DEPS) | from_json)' "$COMPOSE"
     fi
