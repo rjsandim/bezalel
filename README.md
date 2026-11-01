@@ -329,6 +329,12 @@ validá-los. Base modificada, conflito de arquivo ou falha de rede deixam um err
 visível e preservam a revisão anterior. Uma skill removida sai da descoberta;
 nenhum recurso Docker, volume ou ambiente é removido.
 
+Se o processo for interrompido no meio (timeout do hook, SIGTERM ou SIGKILL), o
+registro guarda um marcador com a revisão de origem e de destino. O próximo `update`
+conclui a reconciliação a partir dele, sem força nem reset; até lá, `enable`, `status`
+e `disable` recusam rodar e pedem `update`. Arquivos de instruções preservam o final
+de linha (LF ou CRLF), e `enable` seguido de `disable` devolve o conteúdo original.
+
 O hook `SessionStart` em `.codex/hooks.json` / `.claude/settings.local.json`
 também consulta atualizações em sessões novas. Como o aplicativo pode já ter
 carregado agentes quando o hook roda, uma atualização pede reabertura da sessão;
