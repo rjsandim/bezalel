@@ -1,9 +1,9 @@
 name: Validar o pacote
 on:
   pull_request:
-  push:
-    branches: [master]
   workflow_dispatch:
+  # Na master, roda chamado pelo workflow de publicação, antes do push do canal.
+  workflow_call:
 permissions:
   contents: read
 jobs:

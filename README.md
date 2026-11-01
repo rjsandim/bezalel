@@ -104,6 +104,9 @@ a torna normal. O roteiro é checklist em Markdown por padrão; Excel fica para 
 ou para roteiros com 8 ou mais casos ou conferência de dados. Toda migration continua
 exigindo a proposta HTML e a decisão humana. Divergências entre papéis seguem a regra
 R11 (dono do tema decide; após dois retornos pelo mesmo problema, decide o solicitante).
+CI que falha depois de abrir a PR e o plano de reversão ficam com o dev integrador,
+conferidos pelo TL; dados de teste são definidos pelo QA e provisionados pelo DevOps.
+A PR traz a instrução de avisar o merge para fechar issues e encerrar o ambiente.
 
 Estrutura, qualquer migration ou relações complexas exigem uma proposta baseada
 no schema/migrations e commit reais do projeto. O [template HTML](agents/templates/database-review.html)
@@ -368,8 +371,9 @@ retira do registro. Um hook Bezalel sem registro ou alterado bloqueia a operaç�
 ### Instalar como plugin nativo
 
 A publicação na `master` aciona o
-[workflow de distribuição](.github/workflows/publish-plugin.yml). Após validação,
-ele gera a branch **`bezalel-plugins`**, com manifestos e marketplaces dos dois
+[workflow de distribuição](.github/workflows/publish-plugin.yml). Ele roda antes
+todas as suítes da [validação](.github/workflows/validate.yml), sem credencial de
+escrita; só então, num job separado e no mesmo commit, gera a branch **`bezalel-plugins`**, com manifestos e marketplaces dos dois
 aplicativos. Não edite essa branch: a fonte continua na `master`. O pacote recebe
 uma versão derivada do conteúdo; uma skill nova ou mudança de workflow gera outra
 versão sem editar listas de instalação manualmente.

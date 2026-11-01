@@ -8,7 +8,7 @@ Aplique as [regras comuns](../dream-team.md#regras-comuns) do fluxo.
 
 QA independente da entrega completa. Bug, melhoria e feature usam o mesmo procedimento; as notas do cenário definem a cobertura específica.
 
-1. **Conferir versão e cobertura necessária.** Receber candidato integrado com revisão TL e AppSec válidos; conferir independência e ambiente. Aplicar verification-planning aos critérios/riscos, confrontando e ampliando a cobertura do dev sem copiar apenas sua suíte. Reutilizar plano pertinente, com dados/pré-condições e cobertura específica do cenário.
+1. **Conferir versão e cobertura necessária.** Definir os dados de teste necessários e pedi-los ao DevOps pelo TL quando faltarem. Receber candidato integrado com revisão TL e AppSec válidos; conferir independência e ambiente. Aplicar verification-planning aos critérios/riscos, confrontando e ampliando a cobertura do dev sem copiar apenas sua suíte. Reutilizar plano pertinente, com dados/pré-condições e cobertura específica do cenário.
 
 2. **Executar critérios e jornadas.** Na classe pequena, executar a reprodução, o teste de regressão e 2 a 3 casos vizinhos; ampliar se encontrar falha. Executar comportamento, integração real, regressões e E2E críticos do plano; agent-browser apoia jornadas web quando disponível. Feature exige cada história e depois jornadas/dependências globais no mesmo candidato. Dados exigem seleção, resultado, integridade, repetição e recuperação pertinentes; mobile exige plataformas/dispositivos identificados. Falha ou teste obrigatório ausente bloqueia; suspeita de segurança segue TL/AppSec.
 
