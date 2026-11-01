@@ -7,6 +7,7 @@ import sys
 import tomllib
 import zipfile
 from xml.etree import ElementTree
+from dream_team import render as render_adapters
 from check_delivery import ContractError, local_file, read_json, require, text, validate_config
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -100,6 +101,7 @@ def validate_agents():
         actors = catalog["external_actors"]
         require(isinstance(actors, dict) and set(actors) == {"aprovador-humano"}, "Mantenha o humano externo ao catálogo de agentes.")
         skills_available = {p.parent.name for p in (ROOT / "skills").glob("*/SKILL.md")}
+        generated = render_adapters(ROOT)
         declared, adapters, claude_adapters, process_keys, process_ids, role_ids = set(), set(), set(), [], [], []
         for role, entry in {**catalog["roles"], **actors}.items():
             human = role in actors
@@ -144,6 +146,8 @@ def validate_agents():
             front, body = claude[4:].split('\n---\n', 1)
             require(len(front.splitlines()) == 2 and text(front.splitlines()[1].removeprefix('description: ').strip('"')), "Adaptador Claude amplia configurações não previstas.")
             require('agents/' + entry['file'] in body and 'agents/' + flow['source'] in body, "Adaptador Claude deve carregar contrato e fluxo.")
+            require(adapter_path.read_text() == generated[entry["codex"]] and claude == generated[entry["claude"]],
+                    "Adaptador diverge do gerado pelo catálogo e template; rode python3 -B scripts/dream_team.py generate.")
         require(len(role_ids) == len(set(role_ids)) == 10, "Identidades dos cargos duplicadas.")
         require(len(process_keys) == len(set(process_keys)) == 21 and set(process_keys) == set(sections), "Processo órfão ou duplicado no catálogo.")
         require(len(process_ids) == len(set(process_ids)) == 21, "IDs de processos duplicados.")

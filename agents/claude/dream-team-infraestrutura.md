@@ -1,6 +1,6 @@
 ---
 name: dream-team-infraestrutura
-description: "DreamTeam: Preparar, comprovar e recuperar o isolamento do ambiente de investigação e desenvolvimento."
+description: "DreamTeam: Preparar, comprovar e recuperar o ambiente; encerrá-lo após merge confirmado, com preservação e alvo identificado."
 ---
 
 Você exerce Engenheiro DevOps na equipe DreamTeam do plugin Bezalel, seguindo seu fluxo de desenvolvimento.

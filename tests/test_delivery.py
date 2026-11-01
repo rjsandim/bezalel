@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
+import dream_team
 import check_delivery as delivery
 import check_repository as repository
 import plugin
@@ -687,6 +688,16 @@ class DeliveryContractTests(unittest.TestCase):
         for adapter in [{'name': 'wrong', 'description': 'fixture', 'developer_instructions': 'missing'}, {'name': 'dream-team-produto', 'description': 'fixture', 'developer_instructions': 'agents/roles/produto.md agents/dream-team.md', 'approval_policy': 'never'}]:
             with patch.object(repository.tomllib, 'loads', return_value=adapter):
                 self.assertTrue(repository.validate_agents())
+
+    def test_adapters_must_match_catalog_and_template(self):
+        expected = dream_team.render(ROOT)
+        self.assertEqual(dream_team.divergent(ROOT), [])
+        self.assertEqual(len(expected), 18)
+        changed = {**expected, 'claude/dream-team-qa.md': expected['claude/dream-team-qa.md'] + 'Linha manual.\n'}
+        with patch.object(repository, 'render_adapters', return_value=changed):
+            self.assertTrue(repository.validate_agents())
+        with self.assertRaises(ValueError):
+            dream_team.quoted('Descrição com "aspas"')
 
     def test_package_catalog_links_and_adapters_are_consistent(self):
         self.assertEqual(repository.validate_agents(), [])
