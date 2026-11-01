@@ -18,6 +18,11 @@ state_path = Path(os.environ['ENV_TEST_STATE'])
 state = json.loads(state_path.read_text())
 state['calls'].append(args)
 state_path.write_text(json.dumps(state))
+# O contexto do fixture só existe neste simulador. O CLI real valida o compose
+# sem daemon, apontado para um socket inexistente em vez do contexto fictício.
+real_docker = os.environ['ENV_TEST_DOCKER']
+real_env = {key: value for key, value in os.environ.items() if key != 'DOCKER_CONTEXT'}
+real_env['DOCKER_HOST'] = 'unix://' + str(state_path.parent / 'no-daemon.sock')
 if args[0] == 'context':
     if os.environ.get('ENV_TEST_FAIL_CONTEXT') == '1':
         sys.exit(6)
@@ -45,7 +50,7 @@ rest = args[4:]
 if os.environ.get('ENV_TEST_PRIVATE_DIAGNOSTIC') == '1':
     print('private-diagnostic-value', file=sys.stderr)
 if command == 'config':
-    os.execv(os.environ['ENV_TEST_DOCKER'], [os.environ['ENV_TEST_DOCKER'], *args])
+    os.execve(real_docker, [real_docker, *args], real_env)
 if command == 'ps':
     if '--services' in rest:
         print('\n'.join(state['running']))
@@ -53,7 +58,7 @@ if command == 'ps':
 if command == 'up':
     if os.environ.get('ENV_TEST_FAIL_UP') == '1':
         sys.exit(7)
-    config = json.loads(subprocess.check_output([os.environ['ENV_TEST_DOCKER'], 'compose', '-f', file, 'config', '--format', 'json']))
+    config = json.loads(subprocess.check_output([real_docker, 'compose', '-f', file, 'config', '--format', 'json'], env=real_env))
     wanted = [arg for arg in rest if arg in config['services']]
     if not wanted:
         sys.exit('Refusing untargeted startup')
@@ -131,7 +136,11 @@ services:
 
     def command(self, script, *args, extra=None, expected=0):
         result = subprocess.run(['bash', str(self.skill / 'scripts' / script), *args], cwd=self.repo, env={**self.env, **(extra or {})}, text=True, capture_output=True)
-        self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+        if result.returncode != expected:
+            # Diagnósticos de fixtures sintéticos não têm valores reais; exiba-os na falha.
+            diagnostics = sorted((self.skill / 'state').glob('**/compose-diagnostic.*'))
+            details = ''.join(f'\n--- {path.name}\n{path.read_text()}' for path in diagnostics)
+            self.fail(f'{script}: código {result.returncode}, esperado {expected}\n{result.stdout}{result.stderr}{details}')
         return result
 
     def observed(self):
