@@ -1,26 +1,42 @@
-# Problema e comportamento resultante
+<!--
+Instruções ao agente (remova este bloco ao publicar): use este corpo ao abrir a PR
+pelo processo de PR (../processes/pr.md). Preencha com fatos do candidato validado;
+sem segredos ou dados privados. Abra pronta para revisão, sem draft e sem auto-merge.
+-->
 
-## Mudança
+## Resumo
 
-Issue, necessidade atendida, resultado e exemplo antes/depois quando útil.
+<!-- Problema e comportamento resultante em 2 a 4 linhas; exemplo antes/depois quando ajudar. -->
 
-## Validação
+Closes #<issue>
+Classe: pequena | normal | grande
 
-Candidato completo, componentes/repos/base/head, checks prévios, revisão TL,
-AppSec, QA independente e integração pelo dev responsável. Informe limitações
-reais e tratamento dos achados. Informe que o aceite humano está pendente, ou referencie a decisão real já existente da mesma versão.
+## O que revisar primeiro
 
-## Roteiro e aceite
+<!-- Arquivos ou decisões em que a atenção do revisor rende mais. -->
 
-Roteiro pronto para o humano executar e decidir na PR: Excel em melhoria/feature;
-no bug, formato pertinente. Gerar a planilha não executa testes. Artefatos e links
-não podem conter segredos/dados privados nem ser publicados sem autorização.
+## Riscos e reversão
 
-## Banco, contratos e próximos passos
+- Risco:
+- Como reverter:
+- Banco: proposta e decisão humana registradas em <link>, ou não aplicável porque <motivo>.
 
-Proposta/decisão exatas quando houve estrutura, migration ou relações complexas;
-caso contrário, não aplicável com razão. Registre compatibilidade, recuperação,
-dependências e riscos. Abra/verifique PRs normais, prontas para revisão e sem draft; informe CI no estado
-observado e orientações manuais ao humano. Não habilite merge/deploy automático. Após aprovação ou aviso humano, consultar merge no serviço; somente com todas as PRs mergeadas, fechar/verificar issues aplicáveis e encaminhar ao DevOps o encerramento do ambiente da branch registrada.
-Este rascunho não comprova abertura ou execução: siga o
-[processo de PR](../processes/pr.md#process-pr).
+## Validação técnica (candidato `<sha>`)
+
+- [ ] Integração completa pelo dev responsável
+- [ ] Revisão TL: <link ou resumo>
+- [ ] AppSec: <parecer ou triagem da classe pequena>
+- [ ] QA independente: <resultado e limites>
+- [ ] Checks prévios: <estado observado>
+
+## Roteiro de aceite
+
+<!-- Checklist em Markdown nas classes pequena e normal; link do Excel na grande. -->
+
+- [ ] <passo> → esperado: <resultado>
+
+Aceite humano: pendente.
+
+## Depois do merge
+
+Merge e deploy são manuais. Passos de deploy, dados ou recuperação: <passos ou "nenhum">.

@@ -29,7 +29,7 @@ Skill env a partir de sua pasta carregada; Git/worktree e Docker no contexto aut
 
 Não usa produção como teste, não amplia infraestrutura compartilhada por inferência e não remove recursos preexistentes. Abertura ou aprovação da PR não basta para limpeza. Após merge consultado e issues tratadas, aplica env destroy ao ambiente comprovadamente associado à branch da tarefa. Preserva dados/arquivos/commits e respeita confirmações e bloqueios da skill; squash/rebase não autoriza forçar remoção. vps-deploy e limpar-orbstack permanecem disponíveis para tarefas próprias fora deste papel no fluxo.
 
-Siga R1–R10 e as condições do [fluxo vigente](../dream-team.md). O contrato
+Siga R1–R11 e as condições do [fluxo vigente](../dream-team.md). O contrato
 orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto

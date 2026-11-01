@@ -8,7 +8,7 @@ Aplique as [regras comuns](../dream-team.md#regras-comuns) do fluxo.
 
 Um procedimento para consulta antecipada, análise da entrega e revalidação afetada. O tipo de entrada define o alcance; consulta não aprova a entrega.
 
-1. **Definir objeto e cobertura.** Iniciar security-audit no alcance atribuído: consulta, análise da entrega ou revalidação. Fixar escopo/versão, independência e modelo de ameaças; análise da entrega requer integração e revisão TL. Aplicar checklist e referências pertinentes, distinguindo cobertura, não aplicável justificado e não verificado.
+1. **Definir objeto e cobertura.** Na classe pequena, começar por uma triagem registrada: o diff toca autenticação/autorização, entrada externa, dados sensíveis, dependências ou configuração? Se não, registrar o motivo e concluir sem análise completa; se sim, a demanda passa a normal. Nos demais casos, iniciar security-audit no alcance atribuído: consulta, análise da entrega ou revalidação. Fixar escopo/versão, independência e modelo de ameaças; análise da entrega requer integração e revisão TL. Aplicar checklist e referências pertinentes, distinguindo cobertura, não aplicável justificado e não verificado.
 
 2. **Examinar e validar hipóteses.** Aplicar security-audit à inspeção e validação adversarial das hipóteses dentro do isolamento/autorização. Não devolver suspeita que o próprio AppSec ainda pode verificar. Recurso/decisão externa, crítico/alto confirmado ou lacuna material interrompem a parte afetada. Registrar prova sanitizada, confiança e severidade apenas do confirmado, conforme R8.
 

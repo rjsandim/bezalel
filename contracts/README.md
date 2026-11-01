@@ -37,11 +37,11 @@ futuras sem uso foram removidas; nenhuma coleta foi ativada.
    comuns do fluxo (até o índice) e somente os arquivos dos processos atribuídos.
    Fonte indisponível não autoriza inventar regra ou procedimento.
 3. Quem inicia a conversa indica o modelo apropriado para a demanda e atribuições.
-   Aplique a [seleção proporcional de modelos](dream-team.md#seleção-proporcional-de-modelos):
+   Aplique a [seleção proporcional de modelos](coordenacao.md#seleção-proporcional-de-modelos):
    priorize modelos menores que o inicial e explicite a escolha quando suportada.
 4. Receba uma tarefa com objetivo/fase, dono, entrada/versão, entrega e condição de
    conclusão. Carregue o procedimento pertinente e somente as skills necessárias.
-5. Aplique a [economia de contexto e coordenação](dream-team.md#economia-de-contexto-e-coordenação):
+5. Aplique a [economia de contexto e coordenação](coordenacao.md#economia-de-contexto-e-coordenação):
    entrega completa por fase, fontes pertinentes, provas válidas e comunicação
    por mudança relevante, preservando revisões independentes e testes.
 6. Registre resultado/evidência ou bloqueio e retomada na mesma issue, usando o
@@ -101,6 +101,17 @@ PR pronta para revisão, aceite na PR, conferência de merge, fechamento de issu
 encerramento do ambiente seguem R10 e os processos [pr](processes/pr.md) e
 [postMerge](processes/postMerge.md); o HTML temporário de banco segue R6 e o
 processo [bank](processes/bank.md).
+
+## Fonte e manutenção
+
+O [fluxo](dream-team.md), os processos em `processes/`, o catálogo e os contratos dos papéis
+são as fontes do fluxo.
+Mantenha cenários, etapas, decisões, condições e referências coerentes entre os
+arquivos. IDs existentes permanecem estáveis; não é necessário enviar propostas
+ou sincronizar o fluxo com um serviço externo. O índice abaixo e os adaptadores
+dos agentes são gerados por `scripts/dream_team.py`; altere o processo, o contrato,
+o catálogo ou o template e regenere. O checker confere estrutura, vínculos e
+arquivos gerados, sem provar equivalência semântica, decisão humana ou execução real.
 
 ## Registros e validação
 

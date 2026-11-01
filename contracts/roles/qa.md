@@ -30,7 +30,7 @@ Ferramentas de teste do projeto e interface autorizada; agent-browser quando dis
 
 Não implementa correções de produto e não revisa sua própria implementação. Trocar nome do papel no mesmo executor não cria independência. Mock não comprova integração real. Não executa o aceite em nome do humano nem marca a planilha humana como executada.
 
-Siga R1–R10 e as condições do [fluxo vigente](../dream-team.md). O contrato
+Siga R1–R11 e as condições do [fluxo vigente](../dream-team.md). O contrato
 orienta o executor; não concede permissões nem impõe uma barreira técnica.
 
 ## Critérios de pronto

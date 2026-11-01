@@ -10,103 +10,48 @@ Este arquivo reúne as regras comuns, os percursos dos cenários e o índice dos
 processos. Cada papel lê estas regras e somente os [processos](#processos) que o
 [catálogo](catalog.json) lhe atribui.
 
+## Glossário
+
+- **Solicitante:** pessoa que pediu a demanda e decide o aceite; é o aprovador humano externo.
+- **Candidato:** versão integrada (repositórios, base/head e composição) em revisão, validação e entrega.
+- **vN:** versão numerada do escopo aprovado da feature; mudança de escopo gera nova versão.
+- **Destino:** resultado registrado de uma intenção (corrigir, adiar, descartar, transferir) ou processo indicado numa saída.
+- **Classe:** pequena, normal ou grande; ver [Classes de demanda](#classes-de-demanda).
+- **Mudança material:** alteração que invalida prova já feita; ver [R3](#r3-passagem-entre-atividades).
+- **Tipos de saída:** *Encaminhamento* passa a outro processo; *Conclusão da atividade* encerra o processo e segue ao destino; *Estado próprio* aguarda sem encaminhar; *Impedimento/reprovação* devolve com motivo e retomada.
+- **Entrada de retorno:** retomada de um processo já iniciado, com contexto, fase, versão e origem.
+- **R1–R11:** regras comuns abaixo; valem para todos os papéis.
+
 ## Regras comuns
 
 Estas regras são a fonte local comum aos três cenários. O fluxo é mantido neste repositório e não exige envio, sincronização ou aprovação em serviço de modelagem. Cada atividade usa as pré-condições do destino, inclusive nas retomadas. Condições locais complementam, sem substituir, o procedimento e estas regras.
 
 ### R1 Registro e autorização
 
-Usar a mesma issue, quando existir, como registro da intenção, escopo, decisões e evidências; sem issue, usar a conversa da tarefa e depois a PR. Referências à issue nas etapas seguem essa regra; não criar issue fictícia ou obrigatória apenas para encerrar. Anexos ficam vinculados. Registrar o mínimo antes de qualquer destino. Efeitos externos dependem da autorização concreta da tarefa, aproveitando a já concedida. Ausência de acesso/autorização mantém pendência e rascunho verificável. O mapa documenta responsabilidades; não executa ferramentas, autentica pessoas ou concede permissão.
+Usar a mesma issue, quando existir, como registro da intenção, escopo, decisões e evidências; sem issue, usar a conversa da tarefa e depois a PR. Referências à issue nas etapas seguem essa regra; não criar issue fictícia ou obrigatória apenas para encerrar. Anexos ficam vinculados. Registrar o mínimo antes de qualquer destino. Efeitos externos dependem da autorização concreta da tarefa, aproveitando a já concedida. Ausência de acesso/autorização mantém pendência e rascunho verificável. Estes documentos descrevem responsabilidades; não executam ferramentas, autenticam pessoas nem concedem permissão.
 
 ### R2 Responsabilidade e evidência
 
 TL planeja, coordena e revisa código/evidências; nunca implementa, compõe branches de implementação ou executa testes. Escolhe somente os especialistas necessários e um dev responsável pela integração inteira. Devs executam investigação, preparação, implementação e testes próprios; DevOps cuida do isolamento; QA e AppSec verificam independentemente dos autores. Evidência identifica escopo e candidato: repositórios, base/head, componentes/builds, contratos, dados/schema, dependências e configuração pertinentes. Revisor diferente no texto não comprova executor independente: TL, QA e AppSec não podem revisar sua própria implementação. Executores distintos exigem ferramentas de delegação/coordenação da aplicação ou um operador que conduza as atribuições; não simular subagentes mudando o nome do papel numa única execução.
 
-### Seleção proporcional de modelos
-
-O agente que inicia a conversa avalia a demanda e indica, antes de delegar, o modelo
-mais apropriado para a coordenação e para cada atividade prevista, com justificativa
-curta. Identifique o modelo inicial quando a aplicação o informar; se desconhecido,
-registre essa limitação. A indicação não troca automaticamente o modelo da conversa.
-
-Em toda atribuição, inclusive novas delegações por um recebedor, tente primeiro
-selecionar o menor modelo disponível capaz de cumprir a tarefa, priorizando opções
-menores que o modelo que iniciou a conversa. Não herde o modelo inicial por
-conveniência e não use o modelo mais potente para todos os papéis. Escolha pela
-complexidade, incerteza, impacto, contexto e ferramentas necessários, não pelo título
-do agente. Leitura delimitada, ajustes simples e verificações objetivas favorecem
-modelos menores; raciocínio amplo, diagnóstico difícil ou risco elevado podem
-justificar maior capacidade já na seleção, sem exigir uma tentativa inadequada.
-
-Consulte as opções e capacidades expostas pela aplicação na sessão, sem fixar nomes
-ou presumir uma ordem de capacidade a partir deles. Passe o modelo escolhido
-explicitamente na ferramenta de delegação quando houver suporte. Se a escolha
-exigir contexto novo em vez de herança da conversa, forneça objetivo, instruções,
-fontes, decisões, versão e critérios suficientes no handoff. Não reduza isolamento,
-independência de QA/AppSec, verificações ou critérios de entrega para economizar.
-
-Registre no handoff o modelo inicial conhecido, o recomendado, a razão da escolha e
-o modelo efetivo apenas quando confirmado pela ferramenta. Uso do mesmo modelo ou
-de um maior exige motivo concreto: capacidade necessária, insuficiência observada
-ou ausência de opção menor disponível. Escale quando houver limitação demonstrada,
-preservando contexto e provas; reavalie a escolha na próxima atividade, sem manter
-a escalada como padrão. Não repita tentativas inadequadas apenas para cumprir a regra.
-
-Sem seleção de modelo na ferramenta, informe a recomendação e a limitação, seguindo
-com o modelo disponível quando suficiente e autorizado. Não alegue redução executada,
-não invente IDs, nem altere configurações globais ou a conversa por inferência.
-Esta política orienta os executores; arquivos e instalação não impõem roteamento
-nem comprovam qual modelo foi usado.
-
 ### R3 Passagem entre atividades
 
 Cada tarefa informa objetivo/fase, responsável, entrada/versão, entrega esperada e condição de conclusão. Fases dos devs: investigar, preparar interface/mock ou implementar/corrigir. Concluir uma tarefa ou complementar prova não aprova a entrega inteira. Selecionar somente os destinos necessários; saídas não disparam todos os participantes. Provas válidas são reutilizadas; só mudança com impacto exige refazer a cobertura afetada.
 
-### Economia de contexto e coordenação
+**Mudança material** é a que invalida prova já feita. A lista é fechada:
 
-Aplicar estas regras à passagem R3 em todos os papéis e cenários, mantendo R2 e
-R5–R9, a ordem das revisões e as condições de cada etapa:
+| Alteração no candidato | Refazer |
+|---|---|
+| Código de produção, migrations, schema/dados ou dependências | Revisão TL e QA das partes afetadas |
+| Autenticação/autorização, entrada externa, dados sensíveis, configuração ou dependências | Também AppSec |
+| Contrato de API/integração ou interface | Também UI/UX e QA das jornadas afetadas |
+| Apenas comentários, formatação, documentação ou testes sem mudança de comportamento | Nada; registrar a diferença |
 
-- **Comunicar por mudança relevante.** Enviar resultado, bloqueio, dúvida necessária
-  ou alteração de escopo/versão/dependência que afete outro responsável. Evitar
-  confirmações repetidas, pedidos de andamento sem motivo e mensagens que apenas
-  repitam estado já registrado. Bloqueios e riscos são comunicados assim que
-  identificados; economia não justifica silêncio sobre impedimentos. Preservar as
-  atualizações ao usuário exigidas pela aplicação. Preferir notificações de conclusão
-  das ferramentas; sem esse suporte, usar espera apropriada à duração prevista e
-  consultas pontuais quando necessárias, sem ciclos curtos de consulta/mensagem
-  apenas para constatar que nada mudou. Isso não autoriza monitoramento contínuo.
-- **Delimitar o contexto de cada atribuição.** Fornecer objetivo/fase, escopo,
-  responsável, candidato/base/versão, decisões e restrições aplicáveis, critérios,
-  dependências, fontes e evidências relevantes. Preferir referências e trechos
-  pertinentes a copiar o histórico integral ou carregar todos os documentos/skills.
-  Manter as fontes completas acessíveis; o recebedor consulta o necessário e amplia
-  a leitura quando houver ambiguidade, risco ou dependência. Não omitir instruções
-  obrigatórias, decisões humanas, achados pendentes ou contratos de integração.
-  Se a ferramenta permitir contexto novo, preferi-lo com esse handoff suficiente;
-  não alegar isolamento de contexto quando a ferramenta herdar a conversa.
-- **Reutilizar provas com validade conferida.** Identificar origem, executor,
-  candidato/versão, cobertura e limitações antes de aproveitar evidência existente.
-  Conferir diferenças de código, composição, schema, dependências, configuração e
-  ambiente pertinentes. Sem impacto, referenciar o resultado válido em vez de
-  repetir leitura, teste ou parecer. Mudança material invalida a cobertura afetada;
-  dúvida de impacto exige investigação/revalidação, nunca aprovação presumida.
-  O revisor independente avalia as fontes e lacunas por conta própria: testes do
-  autor não substituem QA/AppSec nem suas verificações obrigatórias. Reutilização
-  não dispensa testes exigidos para o candidato nem converte prova parcial em aceite.
-- **Delegar uma entrega completa por fase.** Agrupar investigação, preparação,
-  implementação/correção ou revisão em uma atribuição com resultado verificável,
-  limites, dependências e condição de conclusão. Dentro do escopo autorizado, o
-  executor realiza os passos necessários e correções ordinárias sem nova atribuição
-  para cada comando, arquivo ou teste. Retorna resultado/evidências ou impedimento;
-  esclarecimentos necessários continuam permitidos. Retomadas trazem a diferença,
-  o ponto pendente e as provas válidas, sem reiniciar a fase inteira. Não agrupar
-  fases para atravessar aprovação pendente, mudar responsabilidades ou eliminar
-  revisão independente; mudança de escopo segue PM/humano.
-
-Estas orientações não alteram quantidade de papéis, seleção de modelos, testes,
-critérios de entrega ou autorizações. São contratos documentais, sem medição ou
-limitação automática de tokens; a economia efetiva precisa ser observada no uso.
+Na dúvida sobre impacto, tratar como material e revalidar. Ao passar trabalho adiante:
+comunicar só mudança relevante, dar contexto delimitado com fontes acessíveis, delegar
+uma entrega completa por fase e reutilizar provas cuja validade foi conferida. Quem
+delega segue também a [coordenação de atribuições](coordenacao.md), com a seleção
+proporcional de modelos.
 
 ### R4 Interrupção e retomada
 
@@ -138,6 +83,23 @@ Concluídos desenvolvimento e validações técnicas, publicar a branch da taref
 
 Quando o usuário aprovar a entrega ou informar que fez merge, TL consulta o serviço novamente e confirma todas as PRs e respectivos base/head/merge commit. Aprovação, branch removida ou PR fechada não provam merge. Sem merge confirmado, manter issue e ambiente e informar a pendência; não fazer polling ou agendar acompanhamento por inferência. Merge confirmado permite fechar/verificar somente issues do escopo realmente concluído e encaminhar ao DevOps o encerramento do ambiente da branch da tarefa. Limpeza segue o contrato da skill, incluindo preservação, identificação do alvo e bloqueios; parcialidade permanece registrada. Merge e deploy continuam humanos.
 
+### R11 Desempate e limite de ciclos
+
+Quando papéis discordam, decide o dono do tema; quem discorda registra a evidência e não
+repete a mesma objeção sem fato novo.
+
+| Tema | Decide | Escala ao humano quando |
+|---|---|---|
+| Severidade, falso positivo e tratamento de segurança | AppSec; TL contesta só com prova | Adiamento de médio/baixo ou conflito persistente |
+| Defeito funcional versus comportamento esperado | QA reporta; TL decide se é defeito | Esperado depende de regra de produto |
+| Regra de negócio, escopo e critério de aceite | PM com o humano | Sempre que não houver decisão registrada |
+| Desenho técnico, ordem e divisão do trabalho | TL | Afeta escopo, prazo ou risco aceito |
+| Ambiente e isolamento | DevOps | Exige recurso compartilhado ou autorização |
+
+O ciclo correção → revisão → AppSec → QA tem limite de **dois retornos pelo mesmo
+problema**. No terceiro, o TL interrompe (R4), resume as tentativas, as provas e as
+alternativas, e leva a decisão ao solicitante.
+
 ## Seleção de skills nas etapas
 
 As etapas indicam objetivo, responsável, condição e entrega; o método fica na skill indicada, em skills/<nome>/SKILL.md do Bezalel, com suas referências. Aplicar somente o modo/fase pertinente. Uma aplicação pode atender várias etapas do mesmo trabalho: não reiniciar auditoria, plano ou redação a cada passagem; reutilizar artefatos/provas ainda válidos. Apoios condicionais só entram quando úteis. Skill não cria agente, gate, autorização ou transferência de responsabilidade. Se indisponível, registrar o limite e usar procedimento equivalente disponível; prova/ferramenta obrigatória ausente segue R4.
@@ -146,6 +108,27 @@ agent-browser exige CLI/guia da versão e alvo isolado autorizado; não instalar
 security-audit fica em auditoria/validação: correção de produto volta a TL/dev; não ampliar credenciais, remover GITHUB_TOKEN, alterar/encerrar alertas ou cancelar CI por esta indicação. Cópias originais permanecem intactas; pr-audit e iss-audit usam variantes autorizadas. Skills reservadas ao uso manual e candidatas pendentes no inventário ficam fora das etapas; nenhuma é disparada ao concluir PR/auditoria.
 
 O [inventário completo](skills-inventario.md) registra origem, cópias e adaptações pendentes. A [relação por processo e etapa](dream-team-skills.md) facilita consultar a seleção. As adaptações autorizadas de pr-audit e iss-audit estão identificadas; as demais cópias preservam o conteúdo original. Os agentes referenciam essas skills sem duplicar seus procedimentos.
+
+## Classes de demanda
+
+No planejamento, o TL classifica a demanda e registra a classe na issue. A classe define
+os artefatos; as revisões independentes continuam em todas.
+
+| | Pequena | Normal | Grande |
+|---|---|---|---|
+| Quando | Bug ou melhoria localizada: poucos arquivos, sem migration/schema, sem contrato de API/integração, sem tocar autenticação, entrada externa, dados sensíveis, dependências ou configuração | Demais bugs e melhorias | Feature (cenário 3) |
+| Qualificação | TL registra esperado, observado e reprodução; PM só se o esperado for duvidoso | PM | PM e escopo vN aprovado |
+| Isolamento | Worktree própria; demais dimensões não aplicáveis com motivo em uma linha | Prova completa (R5) | Prova completa (R5) |
+| Dev | Uma atribuição: teste que falha, correção e teste de regressão | Investigação, plano e implementação | Investigação de viabilidade e plano do conjunto |
+| Revisão TL | pr-audit sobre o diff | Completa | Completa |
+| AppSec | Triagem curta: toca superfície de segurança? Se sim, análise completa | Completa | Completa |
+| QA independente | Reprodução, regressão e 2 a 3 casos vizinhos | Completo | Histórias e jornadas |
+| Roteiro | Checklist em Markdown na PR | Checklist em Markdown; Excel com 8 ou mais casos, conferência de dados ou pedido | Excel .xlsx |
+| Banco | Não se aplica: migration torna a demanda normal | Proposta HTML e decisão humana (R6) | Proposta HTML e decisão humana (R6) |
+
+A demanda pequena passa a normal assim que surgir migration, mudança de contrato, achado
+de segurança, segundo retorno do QA ou sinal de feature; registre o motivo e siga o
+percurso completo a partir do ponto atual, reaproveitando provas válidas.
 
 ## Percursos dos cenários
 
@@ -159,15 +142,15 @@ nas diferenças por cenário do respectivo processo.
 
 Foco: separar hipótese, comportamento esperado e defeito; investigar antes de definir a menor correção segura. Diagnóstico suficiente é a investigação obrigatória. Residual de produto fica vinculado; suspeita/achado de segurança precisa de tratamento. Humano decide regra, comportamento esperado e reclassificação. Transferências permitidas: 2 ou 3, iniciadas/verificadas pelo PM na mesma issue.
 
-**Início:** PM qualifica a intenção e resolve decisões de produto necessárias.
+**Início:** PM qualifica a intenção e resolve decisões de produto necessárias; na classe pequena, o TL registra o relato.
 
 ### 2 Melhoria delimitar e validar a mudança
 
 **Entrada:** Melhoria de comportamento existente ou transferência humana do bug; benefício e limite a confirmar.
 
-Foco: resultado observável e escopo pequeno, confirmado pelo TL após investigação de comportamento, contratos e dependências. Mudança de regra/escopo precisa de decisão humana; aproveitar o pedido já claro. Se a investigação revelar trabalho de feature, humano decide transferência a 3 e PM inicia/verifica o destino na mesma issue. Roteiro de aceite em Excel .xlsx real.
+Foco: resultado observável e escopo pequeno, confirmado pelo TL após investigação de comportamento, contratos e dependências. Mudança de regra/escopo precisa de decisão humana; aproveitar o pedido já claro. Se a investigação revelar trabalho de feature, humano decide transferência a 3 e PM inicia/verifica o destino na mesma issue. Roteiro de aceite conforme a [classe](#classes-de-demanda).
 
-**Início:** PM qualifica a intenção e resolve decisões de produto necessárias.
+**Início:** PM qualifica a intenção e resolve decisões de produto necessárias; na classe pequena, o TL registra o relato.
 
 ### 3 Feature aprovar e entregar o conjunto
 
@@ -181,7 +164,7 @@ Foco: principal e histórias curtas vinculadas, critérios individuais/globais, 
 
 **Percurso:** início do cenário → TL delimita investigação → DevOps comprova ambiente → devs investigam → TL confirma plano → interface/mock e UI/UX quando pertinentes, banco na ordem definida → devs implementam e integram → TL revisa o conjunto → AppSec analisa → QA valida → TL prepara roteiro → TL abre/verifica PRs e apresenta roteiro → humano avalia → ao aprovar ou avisar merge, TL confere merge/fecha issues aplicáveis → DevOps encerra o ambiente identificado.
 
-**Resultado:** Com implementação: todas as PRs necessárias abertas/verificadas para a branch de produção real, na versão tecnicamente validada, com roteiro e orientação entregues a Rafael. Encerramento posterior exige merge consultado no serviço, issues aplicáveis verificadas e ambiente tratado conforme o processo pós-merge. Sem implementação: destinos documentados pelo PM e estados verificados. Espera/revisão/bloqueio não são conclusão. Merge, deploy e produção permanecem manuais.
+**Resultado:** Com implementação: todas as PRs necessárias abertas/verificadas para a branch de produção real, na versão tecnicamente validada, com roteiro e orientação entregues ao solicitante. Encerramento posterior exige merge consultado no serviço, issues aplicáveis verificadas e ambiente tratado conforme o processo pós-merge. Sem implementação: destinos documentados pelo PM e estados verificados. Espera/revisão/bloqueio não são conclusão. Merge, deploy e produção permanecem manuais.
 
 ## Processos
 
@@ -190,17 +173,6 @@ Os identificadores curtos organizam a correspondência documental; não são um 
 Cada processo fica em [`processes/<referência>.md`](processes/), com etapas, saídas, condições locais
 e diferenças por cenário. O [índice de processos](#índice-de-processos) relaciona
 responsáveis, etapas e skills para consulta.
-
-## Fonte e manutenção
-
-Este documento, os processos em `processes/`, o catálogo e os contratos dos papéis
-são as fontes do fluxo.
-Mantenha cenários, etapas, decisões, condições e referências coerentes entre os
-arquivos. IDs existentes permanecem estáveis; não é necessário enviar propostas
-ou sincronizar o fluxo com um serviço externo. O índice abaixo e os adaptadores
-dos agentes são gerados por `scripts/dream_team.py`; altere o processo, o contrato,
-o catálogo ou o template e regenere. O checker confere estrutura, vínculos e
-arquivos gerados, sem provar equivalência semântica, decisão humana ou execução real.
 
 ## Índice de processos
 
@@ -303,7 +275,7 @@ Procedimento: [processes/pr.md](processes/pr.md).
 
 1. **Conferir autorização, candidato e evidências.**
 2. **Abrir e verificar as PRs reais.** Skills: humanizer.
-3. **Conferir até o handoff e orientar Rafael.** Skills: humanizer.
+3. **Conferir até o handoff e orientar o solicitante.** Skills: humanizer.
 
 <a id="process-postMerge"></a>
 
