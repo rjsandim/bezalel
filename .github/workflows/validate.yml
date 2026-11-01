@@ -32,3 +32,14 @@ jobs:
           "$RUNNER_TEMP/workbook/bin/python" -m pip install --quiet --no-deps --require-hashes -r .github/requirements-workbook.txt
       - name: Roteiro manual em Excel
         run: '"$RUNNER_TEMP/workbook/bin/python" -B -m unittest discover -s skills/development-test-workbook/tests -v'
+  diagnostico-env:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Compose config com contexto sintetico ausente
+        run: |
+          docker compose version; yq --version
+          d="$RUNNER_TEMP/diag"; mkdir -p "$d"
+          printf 'services:\n  a:\n    image: busybox\n' > "$d/c.yml"
+          docker compose -f "$d/c.yml" config --quiet && echo "sem contexto: ok"
+          DOCKER_CONTEXT=fixture docker compose -f "$d/c.yml" config --quiet && echo "fixture: ok" || echo "fixture: rc=$?"
