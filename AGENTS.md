@@ -184,6 +184,8 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   `bash -n` nos scripts shell alterados. Os testes usam Docker simulado; o CLI
   real só pode ser usado por eles para `compose config`, sem daemon.
 - Mudanças em VPS: `python3 -B -m unittest discover -s skills/vps-deploy/tests -v`.
+- O CI (`validate.yml`) roda essas suítes e a do workbook; ao mudar comandos de
+  validação ou dependências fixadas, atualize o workflow e a lista com hashes.
 - Mudanças documentais: confira links e comandos descritos; não execute comandos
   destrutivos apenas porque aparecem nos exemplos. Para limpar-orbstack, revise
   também seus cenários em `references/validacao.md` e o contrato atual de ENV.
