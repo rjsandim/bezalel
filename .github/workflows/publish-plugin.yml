@@ -4,22 +4,28 @@ on:
     branches: [master]
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 concurrency:
   group: bezalel-plugins
   cancel-in-progress: false
 jobs:
+  # Todas as suítes rodam sem credencial de escrita; só o job seguinte publica.
+  verify:
+    uses: ./.github/workflows/validate.yml
+    permissions:
+      contents: read
   publish:
+    needs: verify
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
+      # Mesmo commit verificado (github.sha); o job não executa testes nem conteúdo importado.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          ref: master
           fetch-depth: 0
-      - run: python3 -B scripts/check_repository.py
-      - run: python3 -B -m unittest discover -s tests -v
-      - run: git diff --check
       - name: Gerar pacote e catálogos dos dois aplicativos
         run: python3 -B scripts/plugin.py build --output "$RUNNER_TEMP/bezalel-package"
       - name: Publicar somente a branch de distribuição
