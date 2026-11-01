@@ -3,6 +3,7 @@ import copy
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -88,6 +89,11 @@ class DistributionTests(unittest.TestCase):
         self.assertEqual((ROOT / 'skills/release/SKILL.md').read_bytes(), before)
         self.assertEqual(len(list((consumer / '.codex/agents').glob('*.toml'))), 9)
         self.assertEqual(len(list((consumer / '.claude/agents').glob('*.md'))), 9)
+        for adapter in [*(consumer / '.codex/agents').glob('*.toml'), *(consumer / '.claude/agents').glob('*.md')]:
+            assigned = re.findall(r'agents/(processes/[A-Za-z]+\.md)', adapter.read_text())
+            self.assertTrue(assigned and all((ROOT / 'agents' / name).is_file() for name in assigned))
+        self.assertNotIn('agents/processes/plan.md', (consumer / '.codex/agents/dream-team-qa.toml').read_text())
+        self.assertIn('.bezalel/base/agents/processes/', (consumer / 'AGENTS.md').read_text())
         self.assertTrue((consumer / 'AGENTS.md').read_text().startswith('Regras do projeto.'))
         self.assertIn('startup', json.dumps(state['managed']))
 
@@ -508,6 +514,8 @@ class DistributionTests(unittest.TestCase):
         self.assertIn('./commands/bezalel-release.md', claude['commands'])
         self.assertNotIn('hooks/hooks.json', dist.files(package))
         self.assertIn('${CLAUDE_PLUGIN_ROOT}', (package / 'contracts/claude/dream-team-qa.md').read_text())
+        self.assertIn('contracts/processes/qa.md', (package / 'contracts/codex/dream-team-qa.toml').read_text())
+        self.assertTrue((package / 'contracts/processes/qa.md').is_file())
         self.assertFalse((package / 'agents').exists())
         with (source / 'agents/dream-team.md').open('a') as stream:
             stream.write('\nNova versão\n')

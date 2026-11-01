@@ -2,7 +2,7 @@
 
 As **18 skills estão presentes no Bezalel**. Destas, **11 orientam métodos em 24 das 63 etapas**, distribuídas por 16 dos 21 processos. As demais etapas mantêm pré-condições, encaminhamentos e decisões, reutilizando o resultado do método já aplicado. Os quatro processos humanos não recebem execução por skill.
 
-O fluxo define o que entregar, quem responde, quando avançar e como retomar. A skill reúne o procedimento técnico. Uma mesma auditoria/plano pode atravessar várias etapas sem ser reiniciada. As descrições atuais estão na [fonte canônica](dream-team.md); o [inventário](skills-inventario.md) registra todas as origens e decisões.
+O fluxo define o que entregar, quem responde, quando avançar e como retomar. A skill reúne o procedimento técnico. Uma mesma auditoria/plano pode atravessar várias etapas sem ser reiniciada. As descrições atuais estão nos [processos do fluxo](dream-team.md#processos); o [inventário](skills-inventario.md) registra todas as origens e decisões.
 
 ## Como aplicar
 
@@ -31,31 +31,12 @@ Não foi transferida para uma skill genérica a decisão humana de banco, a aval
 
 ## Relação dos processos
 
-| Processo | Skills pertinentes | Etapas com método indicado |
-|---|---|---|
-| Qualificar e conduzir o bug | [iss-audit](../skills/iss-audit/SKILL.md), [humanizer](../skills/humanizer/SKILL.md) | 2 — Definir a necessidade |
-| Qualificar e conduzir a melhoria | [iss-audit](../skills/iss-audit/SKILL.md), [humanizer](../skills/humanizer/SKILL.md) | 2 — Definir resultado e limites |
-| Definir e conduzir o escopo da feature | [iss-audit](../skills/iss-audit/SKILL.md), [humanizer](../skills/humanizer/SKILL.md) | 1 — Registrar visão e histórias |
-| Decidir regra ou escopo | Nenhuma | Decisão/execução humana. |
-| Coordenar a entrega | [verification-planning](../skills/verification-planning/SKILL.md), [clean-architecture](../skills/clean-architecture/SKILL.md) | 2 — Definir o próximo resultado e suas condições |
-| Preparar, recuperar ou encerrar o ambiente | [env](../skills/env/SKILL.md) | 1 — Conferir alvos e autorização; 2 — Executar a operação pertinente |
-| Executar contribuição fullstack | [iss-audit](../skills/iss-audit/SKILL.md), [clean-code](../skills/clean-code/SKILL.md), [clean-architecture](../skills/clean-architecture/SKILL.md), [implementar-snapshots](../skills/implementar-snapshots/SKILL.md), [agent-browser](../skills/agent-browser/SKILL.md) | 2 — Executar a fase atribuída |
-| Executar contribuição backend | [iss-audit](../skills/iss-audit/SKILL.md), [clean-code](../skills/clean-code/SKILL.md), [clean-architecture](../skills/clean-architecture/SKILL.md), [implementar-snapshots](../skills/implementar-snapshots/SKILL.md) | 2 — Executar a fase atribuída |
-| Executar contribuição web | [iss-audit](../skills/iss-audit/SKILL.md), [clean-code](../skills/clean-code/SKILL.md), [clean-architecture](../skills/clean-architecture/SKILL.md), [agent-browser](../skills/agent-browser/SKILL.md) | 2 — Executar a fase atribuída |
-| Executar contribuição mobile | [iss-audit](../skills/iss-audit/SKILL.md), [clean-code](../skills/clean-code/SKILL.md), [clean-architecture](../skills/clean-architecture/SKILL.md) | 2 — Executar a fase atribuída |
-| Preparar a proposta de banco | [clean-architecture](../skills/clean-architecture/SKILL.md), [verification-planning](../skills/verification-planning/SKILL.md) | 2 — Preparar a alternativa revisável |
-| Decidir a proposta de banco | Nenhuma | Decisão/execução humana. |
-| Revisar interface e contrato | [agent-browser](../skills/agent-browser/SKILL.md) | 2 — Exercitar as jornadas previstas |
-| Revisar a entrega integrada | [pr-audit](../skills/pr-audit/SKILL.md), [clean-code](../skills/clean-code/SKILL.md), [clean-architecture](../skills/clean-architecture/SKILL.md) | 1 — Conferir o candidato completo; 2 — Revisar código e contratos; 3 — Entregar conclusão identificada |
-| Analisar ou revalidar segurança | [security-audit](../skills/security-audit/SKILL.md) | 1 — Definir objeto e cobertura; 2 — Examinar e validar hipóteses; 3 — Concluir parecer ou tratamento |
-| Decidir adiamento de risco | Nenhuma | Decisão/execução humana. |
-| Validar critérios e jornadas | [verification-planning](../skills/verification-planning/SKILL.md), [agent-browser](../skills/agent-browser/SKILL.md) | 1 — Conferir versão e cobertura necessária; 2 — Executar critérios e jornadas |
-| Preparar o aceite humano | [development-test-workbook](../skills/development-test-workbook/SKILL.md), [humanizer](../skills/humanizer/SKILL.md) | 2 — Preparar roteiro e acesso; 3 — Apresentar o pacote |
-| Executar roteiro e decidir aceite | Nenhuma | Decisão/execução humana. |
-| Abrir PRs e entregar próximos passos | [humanizer](../skills/humanizer/SKILL.md) | 2 — Abrir e verificar as PRs reais; 3 — Conferir até o handoff e orientar Rafael |
+A relação de skills por processo e etapa fica no [índice de processos](dream-team.md#índice-de-processos),
+gerado a partir dos arquivos de processo; cada arquivo traz o procedimento completo.
 
 Os passos sem skill específica fazem controle do fluxo, decisão humana ou reaproveitam
-resultados válidos. Ao mudar uma indicação, alinhe fluxo, esta relação e catálogo;
-o checker confere a cobertura por processo, não a qualidade semântica da seleção.
+resultados válidos. Ao mudar uma indicação, alinhe o processo, esta tabela e o
+catálogo e regenere o índice; o checker confere a cobertura por processo, não a
+qualidade semântica da seleção.
 
 O processo **Conferir merge e encerrar a tarefa** não executa uma skill própria: TL consulta PRs e issues e passa ao DevOps a limpeza pelo processo de ambiente. O HTML de banco é temporário; a decisão e o resumo sobrevivem à exclusão.

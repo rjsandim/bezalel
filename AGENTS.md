@@ -103,8 +103,11 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   na mesma tarefa, conforme o impacto. Não é necessário reescrever instruções
   que continuam válidas; não deixe mudança de comportamento sem documentação.
 - Use `AGENTS.md` como instrução curta de contribuição, README como guia de adoção,
-  [fluxo da DreamTeam](agents/dream-team.md) como processo vigente e a
+  [fluxo da DreamTeam](agents/dream-team.md) (regras comuns e índice) e
+  `agents/processes/` (um arquivo por processo) como processo vigente e a
   [relação por etapa](agents/dream-team-skills.md) para selecionar skills.
+  Cada papel lê só as regras comuns e os próprios processos; não reconcentre
+  procedimentos em um arquivo único nem copie regras comuns para os processos.
   Referencie essas fontes; não copie seus procedimentos completos aqui.
 - Contratos, catálogo, templates, adaptadores e validadores seguem o fluxo vigente. Atualize
   o conjunto quando uma responsabilidade mudar; não reintroduza percursos antigos,
@@ -112,6 +115,9 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   são verificações próprias; testes locais não certificam execução de agentes.
 - `agents/codex/` e `agents/claude/` contêm nove adaptadores por plataforma, com
   referências aos contratos, sem modelo fixo, credenciais ou override de permissões.
+  Adaptadores e índice de processos são gerados por `scripts/dream_team.py` a partir
+  do catálogo, contratos, processos e `scripts/dream-team-adapter.txt`; altere as
+  fontes e rode `generate`, nunca edite o gerado à mão.
   Não crie um adaptador humano. Catálogo e checker devem conferir os dois formatos.
 - A integração direta (`scripts/project.py`) gerencia somente seus links,
   adaptadores, hooks e blocos de instrução por projeto. Preserve conteúdo próprio,
@@ -174,7 +180,9 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
 - Para toda mudança, execute `python3 -B scripts/check_repository.py` e confira
   `git diff --check`. O checker é somente leitura e valida estrutura, metadados
   essenciais e links locais; não exige regenerar inventários ou hashes.
-- Mudanças em agentes/contratos/checkers: `python3 -B -m unittest discover -s tests -v`.
+- Mudanças em agentes/contratos/processos/checkers: `python3 -B scripts/dream_team.py generate`
+  e `python3 -B -m unittest discover -s tests -v`. Mantenha o índice compatível com
+  o checker já instalado nos projetos, que valida a nova árvore ao atualizar.
   Use fixtures sintéticas; não execute comandos declarados na configuração para
   testar sua leitura.
 - Mudanças em instalação/atualização/plugins usam a mesma suíte em `tests/`, com

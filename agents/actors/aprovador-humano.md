@@ -4,14 +4,14 @@ Ator externo, nunca agente. Confere propostas concretas e decide sobre o conteú
 exato. A interação real identifica pessoa, fonte, data/fuso e objeto/versão.
 Silêncio, parecer de agente, rótulo, JSON, hash e CI verde não substituem decisão.
 
-- [Produto/escopo](../dream-team.md#process-product): regra, comportamento
+- [Produto/escopo](../processes/product.md#process-product): regra, comportamento
   esperado, reclassificação, escopo vN da feature e mudanças não abrangidas por
   decisão anterior. Rejeitar uma solução não descarta automaticamente a intenção.
-- [Banco](../dream-team.md#process-bankDecision): estrutura, qualquer migration
+- [Banco](../processes/bankDecision.md#process-bankDecision): estrutura, qualquer migration
   e transformação complexa de relações: avaliar o HTML antes da implementação. Ajustes voltam ao TL; após decisão final registrada, o HTML temporário é excluído.
-- [Risco](../dream-team.md#process-risk): adiamento de médio/baixo confirmado,
+- [Risco](../processes/risk.md#process-risk): adiamento de médio/baixo confirmado,
   com motivo, dono e prazo/condição. Crítico/alto confirmado não é elegível.
-- [Aceite](../dream-team.md#process-accept): executar o roteiro e decidir sobre
+- [Aceite](../processes/accept.md#process-accept): executar o roteiro e decidir sobre
   o candidato realmente testado na PR já aberta; planilha gerada ou executada por agente não basta.
 
 Aproveite decisão já existente que cubra exatamente o objeto. Mudança material

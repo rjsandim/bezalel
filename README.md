@@ -69,10 +69,18 @@ e metadado de invocação explícita; não são chamadas pelas etapas do fluxo.
 
 A [DreamTeam](agents/README.md) contém contratos e adaptadores para Product
 Manager, Tech Lead, DevOps, desenvolvedores fullstack/backend/web/mobile, QA e
-AppSec. O aprovador humano é externo. Os [21 processos do fluxo](agents/dream-team.md)
+AppSec. O aprovador humano é externo. Os [21 processos do fluxo](agents/dream-team.md#processos)
 são distribuídos por responsabilidade no [catálogo](agents/catalog.json); não há
 um agente para cada etapa. O TL coordena e revisa; um dev assume a integração
 inteira. QA e AppSec verificam independentemente dos autores.
+
+Cada agente lê o próprio contrato, as regras comuns de `agents/dream-team.md` e
+somente os arquivos dos seus processos em `agents/processes/`. Os 18 adaptadores
+Codex/Claude e o índice de processos do fluxo são gerados por `scripts/dream_team.py`
+a partir do catálogo, dos contratos, dos processos e do template
+`scripts/dream-team-adapter.txt`; não os edite à mão. Depois de mudar essas fontes,
+rode `python3 -B scripts/dream_team.py generate`. O checker falha quando um arquivo
+gerado diverge.
 
 O percurso é intenção/qualificação → planejamento e isolamento → investigação →
 interface/banco quando aplicáveis → implementação e integração → revisão TL,
@@ -271,6 +279,13 @@ usa formato 3, com HTML temporário e encerramento pós-merge; configurações d
 projeto continuam no formato 2. Não converta aprovações antigas inventando provas. Depois dessa
 migração, use os comandos abaixo normalmente.
 Plugins nativos recebem os arquivos renomeados pela atualização do plugin.
+
+**Processos em arquivos próprios:** a versão que separou os processos em
+`agents/processes/` mantém em `agents/dream-team.md` o índice que o checker anterior
+confere; por isso a atualização normal funciona sem passo manual. Ela reescreve os
+adaptadores gerenciados e o bloco de instruções, salvo customização ou colisão, que
+interrompe a atualização como nos demais casos. Os links antigos
+`dream-team.md#process-<referência>` continuam resolvendo pelas âncoras do índice.
 
 Para receber a versão publicada **antes** de abrir o aplicativo:
 

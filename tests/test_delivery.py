@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
+import dream_team
 import check_delivery as delivery
 import check_repository as repository
 import plugin
@@ -688,8 +689,41 @@ class DeliveryContractTests(unittest.TestCase):
             with patch.object(repository.tomllib, 'loads', return_value=adapter):
                 self.assertTrue(repository.validate_agents())
 
+    def test_adapters_must_match_catalog_and_template(self):
+        expected = dream_team.render(ROOT)
+        self.assertEqual(dream_team.divergent(ROOT), [])
+        self.assertEqual(len(expected), 18)
+        changed = {**expected, 'claude/dream-team-qa.md': expected['claude/dream-team-qa.md'] + 'Linha manual.\n'}
+        with patch.object(repository, 'expected_files', return_value={**dream_team.expected_files(ROOT), **changed}):
+            self.assertTrue(repository.validate_generated())
+            self.assertEqual(repository.validate_agents(), [])
+        with self.assertRaises(ValueError):
+            dream_team.quoted('Descrição com "aspas"')
+
+    def test_process_files_and_index_must_match_catalog(self):
+        expected = dream_team.expected_files(ROOT)
+        flow = 'dream-team.md'
+        self.assertIn('<a id="process-qa"></a>', expected[flow])
+        stale = {**expected, flow: expected[flow].replace('2. **Executar critérios e jornadas.** Skills: agent-browser.', '2. **Executar critérios e jornadas.**')}
+        with patch.object(repository, 'expected_files', return_value=stale):
+            self.assertTrue(repository.validate_generated())
+        original_read = repository.read_json
+        baseline = original_read(ROOT / 'agents/catalog.json')
+        for mutate in [lambda c: c['roles']['qa']['processes'][0].update(file='processes/qa.md'),
+                       lambda c: c['roles']['qa']['processes'][0].update(file='roles/qa.md')]:
+            catalog = deepcopy(baseline)
+            mutate(catalog)
+            with patch.object(repository, 'read_json', side_effect=lambda path: catalog if path.name == 'catalog.json' else original_read(path)):
+                self.assertTrue(repository.validate_agents())
+        # Cada papel lê somente os próprios processos.
+        qa = expected['codex/dream-team-qa.toml']
+        self.assertIn('agents/processes/ui.md, agents/processes/qa.md', qa)
+        self.assertNotIn('agents/processes/plan.md', qa)
+        self.assertNotIn('agents/README.md', qa)
+
     def test_package_catalog_links_and_adapters_are_consistent(self):
         self.assertEqual(repository.validate_agents(), [])
+        self.assertEqual(repository.validate_generated(), [])
         self.assertEqual(repository.validate_structure(repository.package_files()), [])
 if __name__ == '__main__':
     unittest.main()

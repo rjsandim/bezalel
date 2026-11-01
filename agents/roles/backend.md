@@ -11,7 +11,7 @@ Executar a fase atribuída para negócio, persistência e contratos de serviços
 
 Processos sob sua responsabilidade:
 
-- [backend](../dream-team.md#process-backend)
+- [backend](../processes/backend.md#process-backend)
 
 ## Entradas
 

@@ -11,7 +11,7 @@ Executar a fase atribuída para aplicativos e contratos de versões distribuída
 
 Processos sob sua responsabilidade:
 
-- [mobile](../dream-team.md#process-mobile)
+- [mobile](../processes/mobile.md#process-mobile)
 
 ## Entradas
 
