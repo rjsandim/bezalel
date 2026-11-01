@@ -8,8 +8,8 @@ import shutil
 import subprocess
 import sys
 
-from distribution import DistributionError, atomic_write, files, git, inside, json_bytes, read_json
-from project import apply, desired, lock, plan
+from distribution import DistributionError, atomic_write, files, git, inside, json_bytes, read_json, read_text
+from project import append_lines, apply, desired, lock, plan
 
 ROOT = Path(__file__).resolve().parents[1]
 STATE = '.bezalel/plugin.local.json'
@@ -106,7 +106,16 @@ def build(source, output):
     return version
 
 
-def bind(project, root, state, clients, automatic):
+def owner(clients):
+    """Cliente dono do vínculo: só o Codex lê os TOMLs do projeto, que apontam para `.bezalel/base`.
+
+    O Claude carrega agentes e skills do próprio cache. Sem dono único, aplicativos
+    em versões diferentes alternariam a base a cada sessão e poderiam regredi-la.
+    """
+    return 'codex' if 'codex' in clients else clients[0]
+
+
+def bind(project, root, state, clients, automatic, client=None):
     direct = project / '.bezalel/install.local.json'
     if direct.is_file() and read_json(direct).get('enabled'):
         raise DistributionError('Desligue a integração direta antes de conectar o plugin; evite duas cópias ativas.')
@@ -125,17 +134,22 @@ def bind(project, root, state, clients, automatic):
         'Atualização automática: ' + ('ligada.' if automatic else 'desligada.'),
     ])}
     changes, managed = plan(project, state.get('managed', {}), entries)
+    version = read_json(root / 'plugin.json')['version']
+    # Versão carregada por cliente: o dono só reaponta quando o próprio cache muda.
+    versions = {name: value for name, value in state.get('versions', {}).items() if name in clients}
+    if client:
+        versions[client] = version
     new = {'schema_version': 1, 'enabled': True, 'clients': clients, 'automatic': automatic,
-           'version': read_json(root / 'plugin.json')['version'], 'managed': managed}
-    changes[STATE] = {'kind': 'file', 'content': json_bytes(new).decode()}
+           'version': version, 'versions': versions, 'managed': managed}
+    changes[STATE] = {'kind': 'file', 'content': json_bytes(new).decode('utf-8')}
     context = inside(project, '.bezalel/project.json')
     if not context.exists():
-        changes['.bezalel/project.json'] = {'kind': 'file', 'content': (root / '.bezalel/project.example.json').read_text()}
+        changes['.bezalel/project.json'] = {'kind': 'file', 'content': read_text(root / '.bezalel/project.example.json')}
     ignore = inside(project, '.bezalel/.gitignore')
-    text = ignore.read_text() if ignore.exists() else ''
+    text = read_text(ignore) if ignore.exists() else ''
     extra = [p for p in ['/base', '/plugin.local.json', '/update.lock', '/vps-deploy.local.json', '/deliveries/*.local.json', '/reviews/'] if p not in text.splitlines()]
     if extra:
-        changes['.bezalel/.gitignore'] = {'kind': 'file', 'content': text.rstrip('\n') + '\n' + '\n'.join(extra) + '\n'}
+        changes['.bezalel/.gitignore'] = {'kind': 'file', 'content': append_lines(text, extra)}
     apply(project, changes)
     return new
 
@@ -187,27 +201,46 @@ def main():
                 raise DistributionError('Registro de plugin incompatível.')
             if args.action == 'enable':
                 clients = ['codex', 'claude'] if args.client == 'both' else [args.client]
-                bind(project, ROOT, state, clients, not args.no_auto_update)
+                bind(project, ROOT, state, clients, not args.no_auto_update,
+                     client=None if args.client == 'both' else args.client)
                 print('Plugin conectado ao projeto. Preencha o contexto e reabra a sessão.')
             elif args.action == 'disable':
                 changes, _ = plan(project, state.get('managed', {}), {})
-                changes[STATE] = {'kind': 'file', 'content': json_bytes({'schema_version': 1, 'enabled': False}).decode()}
+                changes[STATE] = {'kind': 'file', 'content': json_bytes({'schema_version': 1, 'enabled': False}).decode('utf-8')}
                 apply(project, changes)
                 print('Conexão desligada; desabilite também o plugin no aplicativo se não quiser suas skills disponíveis.')
             else:
                 if not state.get('enabled') or args.client not in state['clients']:
                     return 0
-                # Reaponta contratos/adaptadores somente para a versão carregada pelo aplicativo.
-                changed = state['version'] != read_json(ROOT / 'plugin.json')['version']
-                bind(project, ROOT, state, state['clients'], state['automatic'])
+                loaded = read_json(ROOT / 'plugin.json')['version']
+                seen = state.get('versions', {}).get(args.client)
+                # Só o dono reaponta a base, e só quando o próprio cache mudou de versão;
+                # outro cliente ou um vínculo explícito não fazem a base voltar.
+                rebind = (args.client == owner(state['clients']) and loaded != state['version']
+                          and seen != loaded)
+                # Na versão vinculada, o dono reconcilia como antes (recria gerenciados ausentes).
+                same = args.client == owner(state['clients']) and loaded == state['version']
+                notice = None
+                if rebind:
+                    notice = 'Bezalel: contratos e agentes atualizados. Reabra a sessão para carregar os novos TOMLs do Codex.'
+                elif loaded != state['version'] and seen != loaded:
+                    notice = ('Bezalel: ' + args.client + ' carregou a versão ' + loaded + '; contratos e TOMLs do projeto '
+                              'seguem a versão ' + state['version'] + ' do ' + owner(state['clients'])
+                              + '. Atualize o plugin nesse aplicativo para alinhá-los.')
                 if state['automatic']:
                     check_runtime_state(ROOT)
                     for command in refresh_commands(args.client):
                         subprocess.run(command, cwd=project, check=True, timeout=25,
                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                if changed:
+                # O registro só muda após o refresh concluir; uma falha repete o aviso na próxima sessão.
+                if rebind or same:
+                    bind(project, ROOT, state, state['clients'], state['automatic'], client=args.client)
+                elif seen != loaded:
+                    record = {**state, 'versions': {**state.get('versions', {}), args.client: loaded}}
+                    apply(project, {STATE: {'kind': 'file', 'content': json_bytes(record).decode('utf-8')}})
+                if notice:
                     print(json_bytes({'hookSpecificOutput': {'hookEventName': 'SessionStart',
-                          'additionalContext': 'Bezalel: contratos e agentes atualizados. Reabra a sessão para carregar os novos TOMLs do Codex.'}}).decode(), end='')
+                          'additionalContext': notice}}).decode('utf-8'), end='')
         return 0
     except (DistributionError, OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError) as error:
         print('Bezalel plugin: ' + (str(error) if isinstance(error, DistributionError)
