@@ -204,6 +204,94 @@ class DistributionTests(unittest.TestCase):
         self.assertIn('Regras do projeto.', (consumer / 'AGENTS.md').read_text())
         self.assertEqual((consumer / '.bezalel/project.json').read_text(), 'contexto próprio')
 
+    def test_missing_managed_files_are_recreated_and_ignored_by_disable(self):
+        consumer = self.consumer()
+        state = project.reconcile(consumer, ROOT, {}, ['codex', 'claude'], True, 'fixture')
+        missing = [consumer / '.codex/agents/dream-team-qa.toml', consumer / '.agents/skills/release',
+                   consumer / '.codex/hooks.json']
+        def remove_managed():
+            for path in missing:
+                path.unlink()
+            (consumer / 'AGENTS.md').write_text('Regras do projeto.\n')
+        remove_managed()
+        state = project.reconcile(consumer, ROOT, state, ['codex', 'claude'], True, 'fixture2')
+        self.assertTrue(all(path.is_symlink() or path.is_file() for path in missing))
+        self.assertIn(project.START, (consumer / 'AGENTS.md').read_text())
+        self.assertEqual(state['managed'], project.reconcile(consumer, ROOT, state, ['codex', 'claude'], True, 'fixture3')['managed'])
+        remove_managed()
+        disabled = project.reconcile(consumer, ROOT, state, ['codex', 'claude'], False, 'fixture3', disable=True)
+        self.assertEqual(disabled['managed'], {})
+        self.assertFalse(any(path.exists() or path.is_symlink() for path in missing))
+        self.assertEqual((consumer / 'AGENTS.md').read_text(), 'Regras do projeto.\n')
+        self.assertFalse((consumer / '.claude/agents/dream-team-qa.md').exists())
+
+    def test_existing_bezalel_hook_without_record_is_not_duplicated(self):
+        legacy = next(iter(project.LEGACY_HOOK_COMMANDS))
+        for command in [project.HOOK_COMMAND, legacy]:
+            with self.subTest(command=command):
+                consumer = self.root / ('hook-' + str(len(command)))
+                init(consumer)
+                hook_path = consumer / '.codex/hooks.json'
+                hook_path.parent.mkdir()
+                config = {'hooks': {'SessionStart': [{'matcher': 'startup', 'hooks': [
+                    {'type': 'command', 'command': command, 'timeout': 30}]}]}}
+                hook_path.write_text(json.dumps(config))
+                with self.assertRaises(dist.DistributionError):
+                    project.reconcile(consumer, ROOT, {}, ['codex'], True, 'fixture')
+                self.assertEqual(dist.read_json(hook_path), config)
+
+    def test_customized_registered_hook_still_blocks_update(self):
+        consumer = self.consumer()
+        state = project.reconcile(consumer, ROOT, {}, ['codex'], True, 'fixture')
+        hook_path = consumer / '.codex/hooks.json'
+        config = dist.read_json(hook_path)
+        config['hooks']['SessionStart'][0]['hooks'][0]['timeout'] = 5
+        hook_path.write_text(json.dumps(config))
+        with self.assertRaises(dist.DistributionError):
+            project.reconcile(consumer, ROOT, state, ['codex'], True, 'fixture2')
+        self.assertEqual(dist.read_json(hook_path), config)
+
+    def test_worktree_links_main_base_through_hook_and_cli(self):
+        source, consumer, base, state = self.connected()
+        ignore = consumer / '.bezalel/.gitignore'
+        ignore.write_text('/base/\n/install.local.json\n/update.lock\n')
+        commit(consumer)
+        def worktree(name):
+            path = self.root / name
+            dist.git(consumer, 'worktree', 'add', '-q', '-b', name, str(path))
+            return path
+        def cli(path):
+            return subprocess.run([sys.executable, '-B', str(base / 'scripts/project.py'), 'link-worktree',
+                                   '--project', str(path)], capture_output=True, text=True)
+        first = worktree('corrigir-cli')
+        self.assertFalse((first / '.agents/skills/release/SKILL.md').exists())
+        result = cli(first)
+        self.assertEqual(result.returncode, 1)
+        self.assertFalse((first / '.bezalel/base').is_symlink())
+        (first / '.bezalel/.gitignore').write_text('/base\n/install.local.json\n/update.lock\n')
+        for _ in range(2):
+            result = cli(first)
+            self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((first / '.agents/skills/release/SKILL.md').is_file())
+        ignore.write_text('/base\n/install.local.json\n/update.lock\n')
+        commit(consumer, 'Ignora link da base')
+        second = worktree('corrigir-hook')
+        result = subprocess.run(['sh', '-c', project.HOOK_COMMAND], cwd=second, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('Worktree ligada', result.stdout)
+        self.assertEqual(Path(os.readlink(second / '.bezalel/base')), base.resolve())
+        self.assertTrue((second / '.claude/skills/clean-code/SKILL.md').is_file())
+        self.assertEqual(dist.git(second, 'status', '--porcelain').strip(), b'')
+        self.assertFalse((second / '.bezalel/install.local.json').exists())
+        with self.assertRaises(subprocess.CalledProcessError):
+            subprocess.run(['git', '-C', str(consumer), 'rev-parse', '--verify', '-q', 'HEAD:.bezalel/base'],
+                           check=True, capture_output=True)
+
+    def test_hook_is_silent_without_base(self):
+        consumer = self.consumer()
+        result = subprocess.run(['sh', '-c', project.HOOK_COMMAND], cwd=consumer, capture_output=True, text=True)
+        self.assertEqual((result.returncode, result.stdout, result.stderr), (0, '', ''))
+
     def test_published_revision_adds_skill_and_updates_workflow_together(self):
         source, consumer, base, state = self.connected()
         path = source / 'skills/new-skill/SKILL.md'
@@ -479,7 +567,7 @@ class DistributionTests(unittest.TestCase):
                                      '--project', str(consumer)], capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(context.read_text(), '{"custom": "preservar"}')
-        self.assertIn('/base/', (consumer / '.bezalel/.gitignore').read_text())
+        self.assertIn('/base', (consumer / '.bezalel/.gitignore').read_text().splitlines())
         self.assertFalse((consumer / '.codex/agents/dream-team-qa.toml').exists())
 
 

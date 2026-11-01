@@ -300,6 +300,21 @@ carregado agentes quando o hook roda, uma atualização pede reabertura da sess�
 o comando `run` evita essa defasagem. No Codex, o usuário precisa revisar/confiar
 no hook pelo mecanismo do aplicativo. Instalar arquivos não contorna essa confiança.
 
+A base fica só no checkout principal (`.bezalel/base` é ignorada no Git). Em uma
+worktree, links de skills apontariam para uma base inexistente; por isso o hook
+localiza o checkout principal, atualiza aquela base e cria `.bezalel/base` na
+worktree como link para ela. Sem hook, ligue a worktree uma vez a partir da base
+do checkout principal:
+
+```sh
+python3 -B /caminho/do/projeto/.bezalel/base/scripts/project.py link-worktree --project .
+```
+
+O link exige a regra `/base` em `.bezalel/.gitignore` (`/base/` não ignora links);
+`enable` a acrescenta em instalações novas ou repetidas. Uma pasta `.bezalel/base`
+própria na worktree não é substituída. Sem base no checkout principal, o hook não
+faz nada.
+
 Para fixar a versão e desligar a consulta automática, repita `enable` com
 `--no-auto-update`; o comando `update` continua disponível quando solicitado.
 `--branch` seleciona outra branch publicada. Para desligar a integração:
@@ -311,6 +326,9 @@ python3 -B .bezalel/base/scripts/project.py disable --project .
 São removidos apenas links, agentes, hooks e blocos ainda iguais aos gerenciados.
 A base, o contexto próprio e as demais instruções permanecem. Customização detectada
 interrompe a operação para reconciliação, sem apagar o trabalho do projeto.
+Arquivo gerenciado ausente, por exemplo após trocar para uma branch anterior à
+instalação, não é customização: `update`/`enable` o recriam e `disable` apenas o
+retira do registro. Um hook Bezalel sem registro ou alterado bloqueia a operação.
 
 ### Instalar como plugin nativo
 
