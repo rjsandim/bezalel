@@ -23,4 +23,4 @@ caso contrário, não aplicável com razão. Registre compatibilidade, recupera�
 dependências e riscos. Abra/verifique PRs normais, prontas para revisão e sem draft; informe CI no estado
 observado e orientações manuais ao humano. Não habilite merge/deploy automático. Após aprovação ou aviso humano, consultar merge no serviço; somente com todas as PRs mergeadas, fechar/verificar issues aplicáveis e encaminhar ao DevOps o encerramento do ambiente da branch registrada.
 Este rascunho não comprova abertura ou execução: siga o
-[processo de PR](../dream-team.md#process-pr).
+[processo de PR](../processes/pr.md#process-pr).

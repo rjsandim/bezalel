@@ -11,7 +11,7 @@ Executar a fase atribuída para uma fatia vertical pequena entre camadas. Invest
 
 Processos sob sua responsabilidade:
 
-- [fullstack](../dream-team.md#process-fullstack)
+- [fullstack](../processes/fullstack.md#process-fullstack)
 
 ## Entradas
 

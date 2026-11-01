@@ -11,9 +11,9 @@ Qualificar a intenção e manter requisitos e destinos nas issues do cenário co
 
 Processos sob sua responsabilidade:
 
-- [bug](../dream-team.md#process-bug)
-- [improvement](../dream-team.md#process-improvement)
-- [feature](../dream-team.md#process-feature)
+- [bug](../processes/bug.md#process-bug)
+- [improvement](../processes/improvement.md#process-improvement)
+- [feature](../processes/feature.md#process-feature)
 
 ## Entradas
 

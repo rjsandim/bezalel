@@ -11,7 +11,7 @@ Preparar, comprovar e recuperar o ambiente; encerrá-lo após merge confirmado, 
 
 Processos sob sua responsabilidade:
 
-- [env](../dream-team.md#process-env)
+- [env](../processes/env.md#process-env)
 
 ## Entradas
 
