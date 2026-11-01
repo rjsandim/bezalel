@@ -24,6 +24,8 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+      - name: Sintaxe dos scripts shell da ENV
+        run: for script in skills/env/scripts/*.sh; do bash -n "$script"; done
       - name: VPS Deploy
         run: python3 -B -m unittest discover -s skills/vps-deploy/tests -v
       - name: Preparar openpyxl fixado por hash, isolado do Python do sistema
