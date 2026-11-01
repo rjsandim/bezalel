@@ -8,14 +8,14 @@
   ],
   "skills": {
     "security-audit": {
-      "revision": "7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a",
+      "revision": "1aba042a77754408af6ddc887d235345e89642ab",
       "preserve": [],
       "mode_overrides": {
         "scripts/security-surface.sh": 420
       },
       "files": {
         "SKILL.md": {
-          "sha256": "a05950e220e3071e47b8e5b57a21e62c1281f37e602c7e4a536e88e9ddfa6645",
+          "sha256": "fe7d6906abba7648e2f7b5f49df1f14f81c7dbc451323f9bc1315bc5a6818151",
           "mode": 420
         },
         "agents/openai.yaml": {
