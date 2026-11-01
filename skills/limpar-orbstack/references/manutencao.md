@@ -1,4 +1,12 @@
-# Cenários de revisão sem executar limpeza
+# Manutenção da skill
+
+Leia somente ao alterar esta skill. Ela é documental: no repositório do Bezalel,
+a manutenção consiste no checker (`python3 -B scripts/check_repository.py`), em
+`git diff --check` e na revisão dos cenários abaixo contra o contrato atual de
+`destroy` da skill env. Ao alterá-la, Docker mutável, limpeza e integração real
+ficam fora dos testes.
+
+## Cenários de revisão sem executar limpeza
 
 | Situação | Resultado exigido |
 |---|---|

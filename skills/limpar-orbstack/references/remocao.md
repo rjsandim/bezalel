@@ -4,7 +4,7 @@ Leia após comprovar o merge e o escopo no `SKILL.md`. Este procedimento não am
 
 ## Preservar o que não pode ser recriado
 
-Crie um diretório único por execução fora dos repositórios, por exemplo `~/.local/share/env-cleanup/<data-hora>/`, com diretórios privados (`0700`) e arquivos privados (`0600`). Não reutilize nem sobrescreva uma recuperação anterior.
+Crie um diretório único por execução, fora dos repositórios, no local de recuperação combinado com o usuário (por exemplo `<recuperação>/<projeto>-<data-hora>/`), com diretórios privados (`0700`) e arquivos privados (`0600`). Não reutilize nem sobrescreva uma recuperação anterior.
 
 Para cada candidato, guarde:
 
@@ -39,7 +39,7 @@ contratos diferentes. Não substitua o script nem contorne suas proteções.
 1. Confirme que o manifesto e o registro `docker-context` apontam para `orbstack`
    e que `project-root` corresponde ao repositório auditado. Se houver divergência
    ou estado legado sem associação verificável, preserve o candidato.
-2. Use a pasta explicitamente identificada da skill, a partir do repositório
+2. Use a pasta da skill env identificada no `SKILL.md` (`$ENV_SKILL_DIR`), a partir do repositório
    confirmado: `bash "$ENV_SKILL_DIR/scripts/destroy.sh" <ambiente>
    --confirm <projeto>/<ambiente> --keep-worktree`. Isso ainda remove volumes;
    só execute após autorização e preservação verificadas. Não altere o manifesto

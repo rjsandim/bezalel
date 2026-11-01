@@ -4,7 +4,7 @@ Esta skill foi sintetizada em 3 de outubro de 2026 a partir dos resumos em portu
 
 ## Conteúdo autocontido
 
-As instruções, as três referências práticas e **132 resumos selecionados** estão incluídos nesta pasta. Todos os links de arquivos são relativos e apontam para conteúdo da própria skill. Nenhum PDF, Markdown, manifesto ou diretório externo é necessário.
+As instruções, as três referências práticas e **132 resumos selecionados** estão incluídos nesta pasta. Todos os links de arquivos são relativos e apontam para conteúdo da própria skill.
 
 Comece pelas referências práticas ligadas em [SKILL.md](../SKILL.md). Consulte as cópias abaixo apenas quando um princípio exigir mais contexto, um exemplo concreto ou uma ressalva do autor; não carregue todos os resumos por padrão.
 

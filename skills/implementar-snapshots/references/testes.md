@@ -3,7 +3,7 @@
 O objetivo é testar a implementação criada no projeto, não provar que palavras
 ou títulos existem na skill. Use o runner já adotado e doubles para conexão,
 metadata, storage, relógio e efeitos externos. Nenhum cenário padrão conecta a
-banco real, usa Docker daemon, lê `.env`/dump real ou executa restore no Carisma.
+banco real, usa Docker daemon, lê `.env`/dump real ou executa restore no projeto de origem ou em outro projeto real.
 
 ## Fixture relacional
 

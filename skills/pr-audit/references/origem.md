@@ -14,6 +14,13 @@ do projeto do autor. A auditoria não decide produto, amplia credenciais nem pre
 que toda hipótese possa ser resolvida imediatamente. Achados são proporcionais ao
 impacto, com lacuna/retomada explícitas e sem substituir QA/AppSec.
 
+O rótulo de relatório “adjust before merge” da origem, usado para alimentar uma
+futura github-resolution, foi substituído pela conclusão **ajustes necessários**.
+É recomendação técnica, não aprovação humana de execução, e “sem achados” não
+equivale a “pode fazer merge”. Na revisão de 31/10/2026, o procedimento passou a
+ter oito passos numerados e a descrição passou a cobrir pedidos diretos ("revisa
+essa PR", "isso está pronto para merge?") além do papel do TL.
+
 A entrada e a interface foram traduzidas e organizadas no formato do Bezalel.
 Detalhes condicionais foram movidos para referências próprias. Nenhum programa,
 serviço, runtime ou definição de agente foi criado. Caminhos desta pasta são

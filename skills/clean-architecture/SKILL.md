@@ -1,41 +1,62 @@
 ---
 name: clean-architecture
-description: Revise e corrija a arquitetura de software usando Clean Architecture, SOLID e princípios de componentes. Use em revisões arquiteturais e em implementações ou refatorações que afetem responsabilidades, fronteiras ou dependências. Não se aplica a ajustes apenas cosméticos.
+description: Revisa e corrige a arquitetura com Clean Architecture, SOLID e princípios de componentes, olhando responsabilidades, fronteiras entre módulos/camadas e direção das dependências. Use quando o pedido for "isso está no lugar certo?", "o domínio está acoplado ao framework/ORM", "revisa a arquitetura desse módulo", "como separar essa regra", "tem dependência circular" ou quando uma implementação ou refatoração mexer em fronteiras. Para legibilidade, nomes e funções dentro do trecho, use clean-code; para estrutura de banco ou migrations, prepare a proposta com proposta-banco.
 ---
 
 # Clean Architecture
 
 ## Objetivo e escopo
 
-Corrija problemas arquiteturais concretos a partir dos princípios sintetizados de **Clean Architecture**, de Robert C. Martin. Proteja regras de negócio, contenha a propagação de mudanças e facilite desenvolvimento, testes, implantação e manutenção. Esta skill é autocontida: as referências práticas e 132 resumos de apoio estão incluídos na própria pasta, com links relativos. Use esse material local sem precisar de arquivos do projeto que originou a skill.
+Corrigir problemas arquiteturais concretos com os princípios de **Clean
+Architecture**, de Robert C. Martin: proteger regras de negócio, conter a
+propagação de mudanças e facilitar testes, implantação e manutenção. As
+referências práticas e 132 resumos de apoio estão nesta pasta.
 
+Escolha o modo de acordo com o pedido:
 
-- **Implementação ou correção:** aplique os princípios ao fluxo alterado e aos consumidores afetados. Execute as correções autorizadas; não substitua um pedido de implementação por recomendações.
-- **Revisão sem edição:** apresente violações demonstráveis, consequências e correções sugeridas. A revisão não autoriza alterar o projeto.
-- **Refatoração:** preserve comportamento e contratos observáveis, salvo mudanças solicitadas. Considere retornos, erros, autorização, transações, formatos persistidos, eventos e ordem dos efeitos externos.
+- **Implementação ou correção:** aplique os princípios ao fluxo alterado e aos
+  consumidores afetados e entregue a mudança, não apenas recomendações.
+- **Refatoração:** preserve comportamento e contratos observáveis, salvo mudança
+  solicitada.
+- **Revisão sem edição:** aponte violações demonstráveis, consequências e
+  correções sugeridas, sem alterar o projeto.
 
-Parta da arquitetura, linguagem e convenções existentes. Reduza o custo de mudança dentro do escopo, sem converter todo projeto para um modelo predeterminado. Não imponha quatro camadas, nomes de pastas, classes de caso de uso, uma interface por classe ou microsserviços. Funções, módulos e monólitos também podem preservar fronteiras.
+Parta da arquitetura, linguagem e convenções existentes. Quatro camadas, nomes
+de pastas, classe por caso de uso, interface por classe ou microsserviços são
+opções, não metas: funções, módulos e monólitos também preservam fronteiras.
 
 ## Entradas e pré-requisitos
 
-Use o pedido, os arquivos/diff relevantes, contratos, restrições e instruções do
-projeto alvo. Identifique se o escopo é análise, implementação ou refatoração.
-Não há runtime próprio nem dependências de execução desta skill; a validação
-depende das ferramentas do projeto analisado.
+- Pedido e modo (revisão, implementação ou refatoração).
+- Um fluxo real afetado: ponto de entrada, regra, persistência ou integração e saída.
+- Contratos, composição (bootstrap, container, Main), testes e regras de
+  arquitetura documentadas pelo projeto.
+- Requisitos operacionais conhecidos (latência, vazão, implantação), quando a
+  proposta envolver topologia.
 
 ## Procedimento
 
-Rastreie um fluxo real: entrada, aplicação, regra de negócio, persistência ou integração e saída. Examine contratos, composição e testes. Diferencie **quem chama quem em execução** de **quem depende de quem no código**. Inclua tipos, anotações, modelos de dados, configuração, carregamento dinâmico e acesso compartilhado quando relevantes; olhar somente imports ou pastas pode esconder acoplamento.
-
-Para cada problema, relacione evidência no código, princípio e consequência concreta. Exemplos: mudar o ORM exige alterar um cálculo; atores compartilham uma regra que precisa divergir; um controlador contorna autorização; um ciclo obriga testar ou implantar módulos em conjunto. Um nome, um diagrama ou uma métrica isolada não demonstra uma violação.
-
-Priorize o risco ao comportamento e às regras, depois o acoplamento que bloqueia a mudança atual. Defina a menor fronteira que resolve o problema e confira seu custo. Preserve separações que já funcionam. Quando a investigação for parcial, declare os limites em vez de certificar a arquitetura inteira.
-
-Escolha um cenário representativo de mudança e o ganho esperado: menos módulos afetados, regras testáveis isoladamente, menos coordenação de releases ou menos passos de implantação. Considere requisitos reais de latência, vazão, recursos e operação antes de propor outra topologia. Avalie o resultado contra esse cenário; reduzir dependências no diagrama não basta se o custo total aumentar.
-
-### Referências sob demanda
-
-Leia somente o material pertinente à decisão atual:
+1. **Rastreie um fluxo real** do ponto de entrada à saída. Diferencie quem chama
+   quem em execução de quem depende de quem no código. Inclua tipos, anotações,
+   modelos de dados, configuração, carregamento dinâmico e acesso compartilhado;
+   imports e pastas sozinhos escondem acoplamento.
+2. **Registre cada problema com evidência, princípio e consequência.** Exemplos:
+   trocar o ORM obriga a mudar um cálculo; dois atores compartilham uma regra que
+   precisa divergir; um controlador contorna a autorização; um ciclo obriga a
+   testar ou implantar módulos juntos. Nome, diagrama ou métrica isolados são
+   sinais para investigar, não prova.
+3. **Priorize** o risco ao comportamento e às regras, depois o acoplamento que
+   bloqueia a mudança atual. Preserve separações que já funcionam.
+4. **Defina a menor fronteira** que resolve o problema e um cenário de mudança
+   para medi-la: menos módulos afetados, regra testável isoladamente, menos
+   coordenação de releases ou menos passos de implantação.
+5. **Consulte a referência pertinente** (tabela abaixo) para a decisão atual.
+6. **Aplique em passos pequenos**, justificando a direção de cada dependência e a
+   responsabilidade movida. Atualize composição e consumidores reais; deixar a
+   implementação antiga como dependência oculta não resolve a fronteira.
+7. **Delimite o restante.** Se a correção exigir trocar banco, framework,
+   protocolo, esquema público ou modelo de implantação, descreva o diagnóstico e
+   a decisão pendente em vez de executá-la.
 
 | Questão | Referência |
 |---|---|
@@ -44,34 +65,51 @@ Leia somente o material pertinente à decisão atual:
 | Correção incremental, persistência, testes e proteção de fronteiras | [Correção e verificação](references/correcao-e-verificacao.md) |
 | Exemplos do livro, ressalvas e contexto adicional dos princípios | [Fontes e 132 resumos incluídos](references/fontes.md) |
 
-### Critérios de revisão
+Critérios de revisão:
 
-- **Dependências para dentro:** regras centrais não conhecem detalhes voláteis de web, banco, framework, UI ou provedores. O contrato de uma operação externa pertence ao lado que expressa a necessidade; o adaptador externo o implementa. O fluxo de controle pode seguir o sentido contrário.
-- **Responsabilidades pelo propósito:** domínio protege regras gerais; casos de uso coordenam objetivos específicos; adaptadores traduzem formatos externos. A montagem concreta fica em Main, bootstrap ou no mecanismo de composição equivalente do framework.
-- **Motivos de mudança:** separe atores e políticas que evoluem independentemente. Não unifique regras apenas porque os algoritmos parecem iguais.
-- **Duas dimensões de separação:** examine tanto níveis de política quanto atores e casos de uso. Camadas técnicas sozinhas podem continuar obrigando funcionalidades independentes a mudar juntas.
-- **Contratos substituíveis e pequenos:** preserve semântica, falhas e invariantes ao trocar implementações. Evite impor operações e dependências que um consumidor não utiliza. Abstrações devem proteger uma variação ou fronteira identificável.
-- **Componentes coesos e sem ciclos:** agrupe o que muda junto e observe quem precisará recompilar, testar, versionar ou implantar. Processos separados não comprovam independência.
-- **Fronteiras efetivas:** diretórios não impedem atalhos. Quando a fronteira for importante, use visibilidade, exportações, módulos ou regras verificáveis de dependência compatíveis com a linguagem e o projeto.
+- **Dependências para dentro:** regras centrais desconhecem web, banco,
+  framework, UI e provedores. O contrato de uma operação externa pertence a quem
+  expressa a necessidade; o adaptador o implementa.
+- **Responsabilidades pelo propósito:** domínio protege regras gerais, casos de
+  uso coordenam objetivos, adaptadores traduzem formatos. A montagem concreta
+  fica em Main, bootstrap ou mecanismo equivalente.
+- **Motivos de mudança:** separe atores e políticas que evoluem de forma
+  independente, mesmo quando os algoritmos parecem iguais.
+- **Duas dimensões:** examine níveis de política e também atores/casos de uso;
+  camadas técnicas sozinhas podem manter funcionalidades acopladas.
+- **Contratos pequenos e substituíveis:** preserve semântica, falhas e invariantes
+  ao trocar implementações. Abstrações protegem uma variação identificável.
+- **Componentes coesos e acíclicos:** agrupe o que muda junto e observe quem
+  precisará recompilar, testar ou implantar. Processos separados não comprovam
+  independência.
+- **Fronteiras efetivas:** quando a fronteira importa, use visibilidade,
+  exportações, módulos ou regras verificáveis de dependência.
 
 ## Saídas
 
-Entregue achados com localização, consequência e proposta concreta; quando
-houver autorização para editar, entregue mudanças e evidências de validação.
-Diferencie o que foi verificado de hipóteses e limitações.
+- **Com edição:** fronteira ou responsabilidade corrigida, efeito prático no
+  cenário de mudança, arquivos alterados e verificações executadas.
+- **Sem edição:** achados classificados como violação confirmada, escolha
+  aceitável ou questão não verificada, com evidência e correção sugerida.
+- Limites da investigação; se nenhuma mudança útil for necessária, diga isso.
 
 ## Validação
 
-Faça transformações pequenas, justificando a direção das dependências e a responsabilidade movida. Atualize composição e consumidores reais: deixar a implementação antiga como dependência oculta ou criar outro caminho de negócio não resolve a fronteira.
+Antes de entregar, confira o próprio trabalho:
 
-Verifique comportamento e propriedade arquitetural alterada. Use testes existentes e verificações proporcionais ao risco. Pode ser apropriado testar a regra sem infraestrutura real, validar o contrato do adaptador e impedir a dependência indevida pelo compilador ou por análise arquitetural. Um substituto em memória não prova o comportamento do banco ou serviço real.
-
-Não enfraqueça testes para acomodar a refatoração nem espelhe métodos privados em novas verificações. Corrigir estrutura não autoriza trocar banco, framework, protocolo, esquema público ou modelo de implantação. Se uma mudança mais ampla for indispensável, concretize o diagnóstico e delimite a decisão restante.
-
-Na entrega, explique a fronteira ou responsabilidade corrigida, o efeito prático, as verificações e os limites. Diferencie violação confirmada, escolha aceitável e questão não verificada. Se nenhuma mudança útil for necessária, diga isso.
+- Os testes existentes do fluxo alterado passam.
+- A propriedade arquitetural pretendida está verificada: a regra é testável sem a
+  infraestrutura real, o adaptador cumpre o contrato e a dependência indevida é
+  barrada pelo compilador, pela visibilidade ou por regra de arquitetura, quando
+  o projeto oferece esse recurso.
+- O cenário de mudança do passo 4 ficou mais barato; menos setas no diagrama
+  com custo total maior conta como regressão.
+- Substitutos em memória comprovam a regra, não o comportamento do banco ou
+  serviço real; o que dependeu deles está declarado.
 
 ## Limites operacionais
 
-Análise não autoriza alteração. Mantenha o escopo solicitado, preserve contratos
-e use testes proporcionais ao risco. Não amplie a tarefa para migrações,
-publicação, acesso a serviços ou mudanças destrutivas sem autorização aplicável.
+Siga as regras do projeto e os limites do papel. Pedido de revisão não autoriza
+editar. Corrigir estrutura não autoriza trocar banco, framework, protocolo,
+esquema público ou modelo de implantação; mudanças de banco seguem a aprovação
+humana prevista pelo projeto.
