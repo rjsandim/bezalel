@@ -87,6 +87,12 @@ class DistributionTests(unittest.TestCase):
         self.assertIn('disable-model-invocation: true', manual)
         self.assertIn('.bezalel/base/skills/release/SKILL.md', manual)
         self.assertEqual((ROOT / 'skills/release/SKILL.md').read_bytes(), before)
+        # ENV é implícita para o DevOps; as cinco manuais, VPS e limpeza seguem explícitas.
+        self.assertTrue((consumer / '.claude/skills/env').is_symlink())
+        self.assertFalse((consumer / '.claude/commands/bezalel-env.md').exists())
+        commands = sorted(p.stem for p in (consumer / '.claude/commands').glob('bezalel-*.md'))
+        self.assertEqual(commands, ['bezalel-' + name for name in sorted([
+            'github-resolution', 'limpar-orbstack', 'pr-bump', 'pr-post-audit', 'reflect', 'release', 'vps-deploy'])])
         self.assertEqual(len(list((consumer / '.codex/agents').glob('*.toml'))), 9)
         self.assertEqual(len(list((consumer / '.claude/agents').glob('*.md'))), 9)
         for adapter in [*(consumer / '.codex/agents').glob('*.toml'), *(consumer / '.claude/agents').glob('*.md')]:

@@ -1,110 +1,103 @@
 ---
 name: implementar-snapshots
-description: Implementa criação e restauração de snapshots full e tiny em um projeto, com recorte relacional, sanitização, integridade e proteção de destino. Use para construir ou corrigir essa funcionalidade no código; não para executar uma restauração avulsa ou administrar backups de produção.
+description: Implementa no código do projeto a criação e a restauração de snapshots full e tiny para desenvolvimento e teste, com recorte relacional, sanitização de dados sensíveis, verificação de integridade e proteção do destino. Use quando o pedido for "cria um comando de snapshot do banco", "quero um dump tiny anonimizado para dev", "o restore está quebrando FKs", "corrige o snapshot que vaza dados pessoais". Não use para rodar uma restauração avulsa, baixar snapshot real ou administrar backups de produção; para subir o ambiente onde restaurar, use env.
 ---
 
 # Implementar snapshots
 
 ## Objetivo e escopo
 
-Construa no projeto uma funcionalidade de snapshots reproduzíveis para ambientes
-de desenvolvimento e teste. `full` preserva os dados permitidos pela política;
-`tiny` reduz o volume sem quebrar os relacionamentos necessários aos fluxos
-escolhidos. Ambos obedecem à mesma política de dados sensíveis.
+Construir no projeto uma funcionalidade de snapshots reproduzíveis para
+ambientes de desenvolvimento e teste. `full` preserva os dados permitidos pela
+política; `tiny` reduz o volume mantendo os relacionamentos necessários aos
+fluxos escolhidos. Ambos obedecem à mesma política de dados sensíveis.
+Snapshot de desenvolvimento é diferente de backup de recuperação.
 
-A referência inicial é uma implementação Laravel/MySQL real. Seus mecanismos
-úteis e suas limitações estão em [Origem e diferenças](references/origem.md).
-Não copie nomes de tabelas, SQL de domínio, credenciais ou infraestrutura da
-origem. Snapshot de desenvolvimento não substitui backup de recuperação.
-
-O núcleo é independente de linguagem e framework. Adapte interfaces, formato,
-configuração e testes ao stack real do projeto; não instale nem converta o projeto
-para a tecnologia de origem. O [exemplo Laravel](references/exemplo-laravel.md)
-é opcional e só deve ser lido quando esse for o stack escolhido.
+O núcleo independe de linguagem e framework: adapte interfaces, formato,
+configuração e testes ao stack real. A implementação Laravel/MySQL que inspirou a
+skill está descrita em [Origem e diferenças](references/origem.md), como
+conceitos a reaproveitar, e o [exemplo Laravel](references/exemplo-laravel.md)
+só interessa quando esse for o stack.
 
 ## Entradas e pré-requisitos
 
 - Projeto alvo, instruções do repositório e escopo autorizado de implementação.
-- Stack e versões verificadas nos manifests, conexão de origem, destino de
-  restauração, storage e isolamento existentes. Descubra pelos arquivos de código
-  e configuração pública; não leia dumps ou segredos para entender a feature.
-- Migrations, modelos e regras dos fluxos que precisam funcionar no `tiny`.
-  Identifique FKs, pivôs, relações sem FK, polimórficas e limites entre tenants.
-- Contrato do ENV, quando adotado: `.envstack/stack.yaml`, contexto Docker
+- Stack e versões dos manifests, conexão de origem, destino de restauração,
+  storage e isolamento existentes, lidos no código e na configuração pública
+  (dumps e segredos ficam fora da leitura).
+- Migrations, modelos e regras dos fluxos que precisam funcionar no `tiny`:
+  FKs, pivôs, relações sem FK, polimórficas e limites entre tenants.
+- Quando o projeto usa a skill env: `.envstack/stack.yaml`, contexto Docker
   explícito e associação verificável entre projeto, ambiente e recursos locais.
-  Consulte a instalação de `env` efetivamente carregada antes de operá-la.
-- Ferramentas de teste já disponíveis no projeto. A skill não instala banco,
-  cliente, pacote, serviço ou runtime próprio.
+- Ferramentas de teste já disponíveis; a skill não instala banco, cliente,
+  pacote, serviço ou runtime.
 
 ## Procedimento
 
-1. **Mapeie o fluxo atual.** Localize comandos, serviços, configuração, scheduler
-   e testes pertinentes. Diferencie comportamento existente de requisito novo.
-   Registre se o escopo inclui só banco ou também arquivos. Preserve o checkout
-   e o trabalho concorrente; não execute criação/restauração para descobrir APIs.
-2. **Defina o contrato por projeto.** Use
-   [Implementação e configuração](references/implementacao.md). Classifique
-   tabelas e colunas, defina recorte, relações, tratamento de anexos, formato,
-   compatibilidade e critérios observáveis. Não converta configuração ausente
-   em exportação completa. O [modelo de política](templates/snapshot-policy.example.json)
-   ilustra as decisões a adaptar ao schema e às convenções locais; não exige
-   JSON, nomes de classes, comandos específicos ou um loader próprio.
-3. **Prepare proteção e isolamento antes dos efeitos.** Siga
+1. **Mapeie o fluxo atual.** Localize comandos, serviços, configuração,
+   scheduler e testes pertinentes. Separe comportamento existente de requisito
+   novo e registre se o escopo inclui só banco ou também arquivos. Descubra as
+   APIs lendo código, sem executar criação ou restauração.
+2. **Defina o contrato do projeto** com [Implementação e configuração](references/implementacao.md):
+   classifique tabelas e colunas e defina recorte, relações, anexos, formato,
+   compatibilidade e critérios observáveis. Configuração ausente significa
+   bloqueio, não exportação completa. O [modelo de política](templates/snapshot-policy.example.json)
+   ilustra as decisões; formato, nomes e loader seguem as convenções locais.
+3. **Trate mudança de banco antes de implementar.** Se a feature exigir tabela,
+   coluna, índice ou qualquer migration (inclusive tabela de controle), prepare
+   a proposta revisável com a skill proposta-banco e aguarde a aprovação humana
+   da versão exata antes de escrever a migration ou o código que depende dela.
+   Se o schema da aplicação não muda, registre "não aplicável" e siga.
+4. **Prepare proteção e isolamento antes dos efeitos**, conforme
    [Integridade e isolamento](references/seguranca.md). Valide a identidade real
-   de origem, destino e storage. Um rótulo de ambiente, hostname local ou flag de força não
-   demonstram isolamento. Não restaure no banco corrente por fallback.
-4. **Implemente criação e restauração.** Use pontos de entrada pequenos e funções/serviços
-   coesos conforme a arquitetura existente. Separe seleção/sanitização de I/O
-   para testá-las sem banco. Reaproveite bibliotecas e adaptadores presentes;
-   não crie uma plataforma de backups, uma camada por classe ou múltiplos
-   engines sem necessidade. Implemente primeiro o banco real do projeto.
-5. **Cubra os caminhos de falha.** Adapte os cenários de
-   [Validação com fixtures](references/testes.md). Comprove que os bloqueios
-   ocorrem antes de qualquer escrita e que uma falha não publica um snapshot
-   incompleto nem libera uma base parcialmente restaurada para a aplicação.
-6. **Documente e entregue.** Registre comandos efetivamente implementados,
-   configuração sem segredos, limites do `tiny`, garantias medidas e recuperação
-   após falha. Prepare o agendamento só se solicitado; não o habilite por inferência.
-
-Mudança estrutural de banco segue a aprovação humana anterior à implementação
-exigida pelo projeto/Bezalel, vinculada à proposta exata. Primeiro prepare a
-proposta revisável. Se a feature não altera o schema da aplicação, registre
-“não aplicável”; não invente migração ou tabela de controle só para esta skill.
+   de origem, destino e storage; rótulo de ambiente, hostname local ou flag de
+   força não demonstram isolamento. Restaurar no banco corrente por fallback
+   está fora de questão.
+5. **Implemente criação e restauração** com pontos de entrada pequenos e
+   serviços coesos na arquitetura existente. Separe seleção/sanitização do I/O
+   para testá-las sem banco. Reaproveite bibliotecas e adaptadores presentes e
+   comece pelo banco real do projeto, sem plataforma genérica de backups.
+6. **Cubra os caminhos de falha** adaptando os cenários de
+   [Validação com fixtures](references/testes.md): bloqueios antes de qualquer
+   escrita, snapshot incompleto nunca publicado e base parcialmente restaurada
+   mantida longe da aplicação.
+7. **Documente e entregue** comandos implementados, configuração sem segredos,
+   limites do `tiny`, garantias medidas e recuperação após falha. Agendamento só
+   quando pedido.
 
 ## Saídas
 
-- Código integrado à estrutura do projeto para criar e restaurar `full`/`tiny`.
+- Código integrado ao projeto para criar e restaurar `full` e `tiny`.
 - Política versionada de seleção, sanitização e compatibilidade, sem segredos.
 - Verificações de arquivo, dados e identidade do destino antes de liberar uso.
-- Testes e evidências com fixtures/mocks, instruções operacionais e limites.
-
-Informe separadamente o que foi implementado, o que foi testado com doubles e
-o que depende de ensaio real autorizado. Não descreva uma proposta como feature
-executada nem um checksum como prova de anonimização.
+- Testes com fixtures e mocks, instruções operacionais e limites.
+- Relato separando o que foi implementado, o que foi testado com doubles e o que
+  depende de ensaio real autorizado. Checksum prova integridade, não anonimização.
 
 ## Validação
 
-Execute a menor seleção de testes que cubra criação, restore e bloqueios no
-ambiente comprovadamente isolado. Nesta skill, os exemplos e o roteiro padrão
-usam somente fixtures sintéticas, diretórios temporários e mocks. A fixture
-incluída define resultados esperados, não implementa um motor de snapshots.
+Antes de entregar, confira o próprio trabalho:
 
-Para contribuir no Bezalel, execute o checker do repositório e `git diff --check`
-na árvore autorizada. Confira links e metadados. Não rode os comandos destrutivos
-do projeto como teste da documentação ou do template.
+- A menor seleção de testes do projeto que cobre criação, restore e bloqueios
+  passa, com fixtures sintéticas, diretórios temporários e mocks.
+- Os testes de falha mostram o bloqueio antes de qualquer escrita (destino
+  desconhecido, produção, artefato corrompido).
+- No `tiny` gerado pela fixture relacional, todo filho retido tem seu pai e a
+  verificação de órfãos passa; colunas sensíveis saem transformadas no arquivo.
+- A decisão do passo 3 está registrada: aprovação da proposta de banco ou "não aplicável".
+
+Manutenção da própria skill: [manutenção](references/manutencao.md).
 
 ## Limites operacionais
 
-Implementar a feature não autoriza ler produção, baixar snapshots reais,
-sobrescrever banco/storage, ligar scheduler, subir infraestrutura, publicar ou
-fazer deploy. Antes de uma operação real, identifique alvo, efeitos, preservação
-e autorização já dada; se faltar escopo, peça somente a decisão pendente.
+Siga as regras do projeto e os limites do papel. Implementar a feature não
+autoriza ler produção, baixar snapshots reais, sobrescrever banco ou storage,
+ligar scheduler, subir infraestrutura, publicar ou fazer deploy. Antes de uma
+operação real, identifique alvo, efeitos, preservação e autorização já dada e
+peça só a decisão que faltar.
 
-Restauração em produção é bloqueada pelo produto, sem bypass. Destino desconhecido
-ou divergente também é bloqueado. Uma flag de confirmação pode suprimir a pergunta
-interativa, mas não a validação de identidade, integridade ou isolamento.
-
-Não copie estado de outra instalação de ENV. Não altere DNS, CA, proxy ou contexto
-Docker global para validar a skill. Mantenha dumps, temporários e configuração
-local fora do Git e de relatórios. Falhas permanecem visíveis, sem retries
-destrutivos automáticos nem limpeza ampla por prefixo.
+Restauração em produção é bloqueada pelo produto, sem bypass; destino
+desconhecido ou divergente também. Uma flag de confirmação pode dispensar a
+pergunta interativa, nunca a validação de identidade, integridade ou isolamento.
+Dumps, temporários e configuração local ficam fora do Git e dos relatórios.
+Falhas ficam visíveis, sem retries destrutivos automáticos nem limpeza por prefixo.

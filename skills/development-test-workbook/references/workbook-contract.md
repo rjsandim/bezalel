@@ -1,6 +1,17 @@
 # Contrato do workbook
 
-Use este contrato como piso estrutural. Adapte nomes e cobertura ao domínio, mas preserve a relação entre casos, banco, evidências e backlog.
+Use este contrato como piso estrutural. Adapte conteúdo e cobertura ao domínio, mas preserve a relação entre casos, verificações de persistência, evidências e backlog.
+
+Os nomes de abas e colunas abaixo são fixos no template, no gerador e no checker,
+para manter compatibilidade com planilhas já geradas. Alguns nomes citam banco ou
+SQL, mas valem para qualquer persistência:
+
+- **Esperado no banco** = estado esperado na persistência afetada: banco, arquivos
+  ou storage, filas, cache ou serviço externo.
+- **Consultas SQL** e **SQL IDs** = verificações de dados somente leitura e seus
+  IDs `Q##`: consulta SQL, chamada de leitura a API/CLI, listagem de storage ou
+  fila, busca em log.
+- **Fonte no banco** = onde o dado de teste vive (tabela, bucket, fila, serviço).
 
 ## Abas obrigatórias
 
@@ -35,8 +46,9 @@ Regras:
 
 - IDs estáveis no formato `T001`, `T002` etc.;
 - passos reproduzíveis e observáveis, não descrições vagas;
-- esperado no banco deve citar tabelas/colunas ou invariantes quando aplicável;
-- `SQL IDs` referencia a aba Consultas SQL;
+- esperado no banco (persistência) cita tabelas/colunas, chaves, arquivos,
+  mensagens ou invariantes quando aplicável;
+- `SQL IDs` referencia as verificações da aba Consultas SQL;
 - `Ação backlog` é fórmula e exibe `Criar item` para `Falhou` ou `Bloqueado`;
 - resultado usa `Não iniciado`, `Em execução`, `Aprovado`, `Falhou` ou `Bloqueado`;
 - prioridade usa `Crítica`, `Alta`, `Média` ou `Baixa`.
@@ -49,9 +61,11 @@ Registre fixtures verificadas no ambiente autorizado; em simulações, identifiq
 
 Não copie dados pessoais além do mínimo necessário. Prefira código de caso, IDs e nomes sanitizados.
 
-### 5. Consultas SQL
+### 5. Consultas SQL (verificações de dados)
 
-Use consultas somente leitura para confrontar antes/depois:
+Use verificações somente leitura para confrontar antes/depois. A coluna
+"Consulta somente leitura" guarda a consulta SQL ou o comando de leitura
+equivalente da persistência envolvida:
 
 `SQL ID | Quando usar | Objetivo | Consulta somente leitura | Esperado antes | Esperado depois | Cuidados`
 
@@ -183,6 +197,6 @@ O plano está pronto quando outra pessoa consegue:
 
 1. escolher o ambiente correto;
 2. executar o caso sem contexto oral adicional;
-3. observar o resultado na superfície e no banco;
+3. observar o resultado na superfície e na persistência;
 4. distinguir falha de bloqueio ambiental;
 5. abrir e retestar o backlog com vínculo ao caso original.

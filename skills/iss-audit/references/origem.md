@@ -15,6 +15,17 @@ Lacunas reais podem aguardar evidência com dono e retomada, sem invalidar o rel
 A orientação de branches foi preservada para interoperabilidade manual; não há
 encaminhamento automático para github-resolution.
 
+Também foram retirados da entrada da skill: a fase “Approved Implementation” da
+origem (github-resolution, se explicitamente chamada, é tarefa separada e confere
+autorização real, objeto e decisões vigentes) e os rótulos de relatório “Fix now”,
+“Fix with design caution” e “Documentation only”. As recomendações equivalentes
+são **corrigir**, **propor mudança com decisão prévia** e **ajustar documentação**;
+nenhuma delas autoriza implementação, merge ou fechamento.
+
+Na revisão de 31/10/2026, o procedimento passou a ter passos numerados separados
+em modo qualificação e modo investigação, e a descrição passou a cobrir pedidos
+diretos ("investiga esse bug", "analisa essa issue") além do fluxo da DreamTeam.
+
 A entrada e a interface foram traduzidas e organizadas no formato do Bezalel.
 Detalhes condicionais foram movidos para referências próprias. Nenhum programa,
 serviço, runtime ou definição de agente foi criado. Caminhos desta pasta são

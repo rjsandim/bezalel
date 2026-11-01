@@ -238,7 +238,7 @@ Procedimento: [processes/plan.md](processes/plan.md).
 Procedimento: [processes/bank.md](processes/bank.md).
 
 1. **Conferir impacto e base.**
-2. **Preparar o HTML revisável.** Skills: clean-architecture, verification-planning.
+2. **Preparar o HTML revisável.** Skills: clean-architecture, verification-planning, proposta-banco.
 3. **Submeter e preservar a decisão.**
 
 <a id="process-review"></a>
@@ -310,7 +310,7 @@ Procedimento: [processes/env.md](processes/env.md).
 Procedimento: [processes/fullstack.md](processes/fullstack.md).
 
 1. **Receber a tarefa e conferir pré-condições.**
-2. **Executar a fase atribuída.** Skills: iss-audit, clean-code, clean-architecture, implementar-snapshots, agent-browser.
+2. **Executar a fase atribuída.** Skills: iss-audit, clean-code, clean-architecture, implementar-snapshots, agent-browser, depurar-bug.
 3. **Entregar a contribuição identificada.**
 
 <a id="process-backend"></a>
@@ -322,7 +322,7 @@ Procedimento: [processes/fullstack.md](processes/fullstack.md).
 Procedimento: [processes/backend.md](processes/backend.md).
 
 1. **Receber a tarefa e conferir pré-condições.**
-2. **Executar a fase atribuída.** Skills: iss-audit, clean-code, clean-architecture, implementar-snapshots.
+2. **Executar a fase atribuída.** Skills: iss-audit, clean-code, clean-architecture, implementar-snapshots, depurar-bug.
 3. **Entregar a contribuição identificada.**
 
 <a id="process-web"></a>
@@ -334,7 +334,7 @@ Procedimento: [processes/backend.md](processes/backend.md).
 Procedimento: [processes/web.md](processes/web.md).
 
 1. **Receber a tarefa e conferir pré-condições.**
-2. **Executar a fase atribuída.** Skills: iss-audit, clean-code, clean-architecture, agent-browser.
+2. **Executar a fase atribuída.** Skills: iss-audit, clean-code, clean-architecture, agent-browser, depurar-bug.
 3. **Entregar a contribuição identificada.**
 
 <a id="process-mobile"></a>
@@ -346,7 +346,7 @@ Procedimento: [processes/web.md](processes/web.md).
 Procedimento: [processes/mobile.md](processes/mobile.md).
 
 1. **Receber a tarefa e conferir pré-condições.**
-2. **Executar a fase atribuída.** Skills: iss-audit, clean-code, clean-architecture.
+2. **Executar a fase atribuída.** Skills: iss-audit, clean-code, clean-architecture, depurar-bug.
 3. **Entregar a contribuição identificada.**
 
 <a id="process-ui"></a>

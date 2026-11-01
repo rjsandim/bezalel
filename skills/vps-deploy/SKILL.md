@@ -1,125 +1,119 @@
 ---
 name: vps-deploy
-description: Opera e diagnostica serviços de uma VPS gerenciada pelo Coolify usando configuração por projeto em .bezalel e COOLIFY_API_TOKEN fornecido pelo usuário ao processo. Use para deploy, configuração, DNS, containers e diagnóstico quando o usuário indicar um projeto e uma operação.
+description: Opera e diagnostica serviços de uma VPS gerenciada pelo Coolify com configuração por projeto em .bezalel/vps-deploy.local.json e COOLIFY_API_TOKEN fornecido pelo usuário ao processo. Use quando o pedido for "faz o redeploy do serviço X", "troca a variável de ambiente Y no Coolify", "por que o container está reiniciando?", "o healthcheck está falhando", "aponta o domínio para esse serviço" e o usuário indicar projeto e operação. Para ambientes locais de desenvolvimento, use env; para limpar ambientes locais, use limpar-orbstack. É de invocação explícita e cada operação remota precisa de autorização própria.
 ---
 
 # VPS Deploy
 
 ## Objetivo e escopo
 
-Use a configuração do projeto que o usuário indicou. Não presuma que projetos
-diferentes usam a mesma instância, servidor ou credencial. Esta skill não instala
-serviços nem cria acesso persistente ao ser carregada.
+Operar e diagnosticar serviços no Coolify do projeto indicado pelo usuário: ler
+estado, alterar configuração, fazer redeploy e conferir a saúde do serviço. Cada
+projeto tem a própria instância, servidor e credencial; a skill não instala
+serviços nem cria acesso persistente.
 
 ## Entradas e pré-requisitos
 
-Projeto alvo explícito, Python 3.9+ para validação e configuração local criada
-pelo usuário a partir de `templates/vps-deploy.example.json`. Para operações
-remotas, o usuário deve fornecer ao processo `COOLIFY_API_TOKEN` da instância
-correta. O token não faz parte dos arquivos da skill.
+- Diretório absoluto do projeto alvo e a operação pedida (serviço, variável,
+  domínio ou sintoma).
+- `<projeto>/.bezalel/vps-deploy.local.json`, criado pelo usuário a partir de
+  `templates/vps-deploy.example.json` conforme [configuração por projeto](references/configuracao.md).
+- `COOLIFY_API_TOKEN` da instância correta, disponível só no processo da operação.
+- `$SKILL_DIR`: pasta desta skill na instalação carregada; Python 3.9+, `curl` e `jq`.
 
 ## Procedimento
 
-1. Identifique o diretório absoluto do projeto alvo. Se não estiver claro, peça
-   somente o projeto; nunca peça senha, token ou chave pelo chat.
-2. Leia [Configuração por projeto](references/configuracao.md). Use exclusivamente
-   `<projeto>/.bezalel/vps-deploy.local.json`, sem fallback para configuração global
-   ou para a configuração de outro projeto.
-3. Se o arquivo ou `COOLIFY_API_TOKEN` estiver ausente, explique ao usuário como
-   configurar no próprio ambiente e pare antes de conectar. Não procure tokens
-   em outras skills, projetos, arquivos antigos, histórico ou cofres de segredos.
-   Não copie, preencha ou gere a credencial por conta própria.
-4. Execute a validação local, passando o projeto explicitamente:
+### Preparar
+
+1. **Identifique o projeto.** Se não estiver claro, pergunte só o projeto; senha,
+   token ou chave nunca são pedidos pelo chat.
+2. **Valide a configuração local:**
 
    ```sh
-   python3 <pasta-desta-skill>/scripts/check_config.py --project <projeto>
+   python3 "$SKILL_DIR/scripts/check_config.py" --project <projeto>
    ```
 
-   Ela só lê a configuração e verifica a presença da variável no processo. Não
-   acessa rede, autentica, escreve arquivos ou comprova permissões do token.
-5. Confirme que o usuário selecionou uma credencial apropriada à instância deste
-   projeto. Uma variável presente pode pertencer a outro servidor: nunca conclua
-   a associação apenas pela validação local. Ao trocar de projeto, reconfirme.
-6. Relacione a operação pedida ao serviço alvo. Não deduza UUIDs ou domínios de
-   exemplos. Antes de uma alteração, informe o alvo e o efeito esperado.
+   Ela lê o JSON e confere que o token existe no processo, sem rede. Se faltar
+   arquivo ou token, explique ao usuário como configurar no ambiente dele e pare.
+   Tokens de outras skills, projetos, históricos ou cofres não são alternativa.
+3. **Confirme a associação** entre a credencial e a instância deste projeto com o
+   usuário; reconfirme ao trocar de projeto.
+4. **Prepare a chamada sem expor o token**, enviando o cabeçalho por stdin:
 
-### Credenciais e informações internas
+   ```sh
+   BASE="$(jq -r .coolify_base_url <projeto>/.bezalel/vps-deploy.local.json)"
+   coolify() { printf 'header = "Authorization: Bearer %s"\n' "$COOLIFY_API_TOKEN" | curl -sS --fail-with-body --config - "$@"; }
+   ```
 
-- A única referência ao token é `COOLIFY_API_TOKEN`, fornecida pelo usuário ao
-  processo da operação. O JSON não aceita campos de senha, token ou chave.
-- Não imprima o token, não o coloque no chat, Git, relatórios, arquivos de
-  configuração, comandos registrados, URLs, argumentos visíveis ou logs de erro.
-- Não habilite tracing de shell ou HTTP. Faça a autenticação pelo mecanismo de
-  cabeçalho do cliente escolhido, lendo o valor do ambiente e impedindo sua
-  inclusão em logs. Não monte comandos remotos com o token interpolado.
-- Se o cliente não permitir usar o segredo sem expô-lo, pare e explique a
-  limitação. Não recorra a uma credencial literal encontrada em outra fonte.
-- Sanitizar respostas é necessário: logs, env vars, compose e saídas de inspect
-  podem conter segredos mesmo quando o pedido é somente de diagnóstico.
+   Sem tracing de shell ou HTTP. Se o cliente disponível não permitir isso, pare
+   e explique a limitação.
 
-### Fluxo de trabalho
+### Operar
 
-### Diagnóstico
+Os caminhos abaixo são da API v4 do Coolify e servem de **exemplo**: confirme
+endpoints, parâmetros e nomes de campos na documentação da versão instalada
+(passo 5) antes de usá-los.
 
-Quando houver autorização para acessar a instância, comece por consultas de
-somente leitura, limitadas ao serviço solicitado. Confirme versão do Coolify,
-identidade do serviço, estado e configuração relevante. Consulte a documentação
-compatível com essa versão antes de escolher endpoints ou parâmetros.
+5. **Leia versão e estado (somente leitura):** `coolify "$BASE/api/v1/version"`;
+   localize o serviço pelo nome em `coolify "$BASE/api/v1/applications" | jq '.[] | {uuid, name, status, fqdn}'`
+   e confira com o usuário o UUID alvo. UUIDs e domínios nunca vêm de exemplos.
+6. **Leia as variáveis mascaradas:** `coolify "$BASE/api/v1/applications/<uuid>/envs" | jq '[.[] | {key, is_build_time}]'`.
+   Mostre só as chaves e flags; valores, logs, compose e saídas de inspect podem
+   conter segredos.
+7. **Antes de alterar, informe alvo, mudança e efeito esperado** (inclusive se o
+   serviço reinicia) e obtenha a autorização dessa operação.
+8. **Altere a variável** pelo mecanismo da versão instalada, por exemplo
+   `PATCH /api/v1/applications/<uuid>/envs` com o corpo JSON enviado por stdin
+   (`--data @-`), para o valor também ficar fora dos argumentos. Reinício de
+   container sozinho pode não aplicar configuração; use o redeploy da versão.
+9. **Faça o redeploy**, por exemplo `coolify "$BASE/api/v1/deploy?uuid=<uuid>"`,
+   e acompanhe o deployment retornado até um estado final.
+10. **Verifique a saúde** (veja Validação) antes de relatar sucesso.
 
-Use o painel/API do Coolify como primeira opção. Se SSH for necessário, confirme
-o alvo opcional `ssh_target` com o usuário e use somente o acesso que ele já
-disponibilizou. Não crie chaves nem configure acesso persistente. Não execute
-SSH se esse campo estiver vazio e não deduza um usuário privilegiado.
+### Diagnosticar
 
-Mostre apenas os dados mínimos para explicar o diagnóstico. Não despeje
-configurações de containers ou respostas integrais com variáveis de ambiente.
+Comece pelos passos 5–6 e pelos logs do deployment, limitados ao serviço pedido.
+Investigue healthchecks pela porta, interface e protocolo realmente atendidos;
+correções de IPv4/IPv6 ou prazos de certificado só com evidência do ambiente
+atual. SSH é segunda opção: use somente o `ssh_target` configurado, confirmado
+com o usuário e já autorizado, sem criar chaves nem deduzir usuário privilegiado.
 
-### Configuração e deploy
+### DNS e TLS
 
-- Faça alterações pelo mecanismo suportado na versão instalada do Coolify.
-  Não assuma que reiniciar um container aplica alterações de configuração.
-- Após uma alteração autorizada, confira a configuração efetiva e a saúde do
-  serviço. Não afirme sucesso só porque uma requisição retornou sem erro.
-- Não altere o banco interno via Tinker ou os arquivos gerados pelo Coolify como
-  procedimento padrão; isso pode divergir do estado gerenciado. Uma recuperação
-  excepcional exige diagnóstico, plano específico e autorização compatível.
-- Antes de apagar volumes ou dados, recriar um banco, substituir um domínio ou
-  realizar outra operação destrutiva, explique o impacto, confira preservação
-  dos dados e obtenha autorização específica. Falha de autenticação no banco
-  não é motivo suficiente para apagar um volume.
-
-### DNS, TLS e healthchecks
-
-Cloudflare é opcional, não uma propriedade presumida de todo projeto. Confirme
-zona, domínio, destino e política de proxy/TLS antes de qualquer alteração. O
-token do Coolify não concede autorização ou acesso ao provedor de DNS.
-
-Investigue healthchecks pela porta, interface e protocolo realmente atendidos.
-Não aplique correções de IPv4/IPv6 ou prazos fixos de emissão de certificado sem
-evidência no ambiente atual. Verifique o resultado depois de uma mudança.
+Cloudflare ou outro provedor de DNS é opcional por projeto. Confirme zona,
+domínio, destino e política de proxy/TLS antes de alterar; o token do Coolify
+não dá acesso ao provedor de DNS.
 
 ## Saídas
 
-Informe o que foi verificado, o que mudou e o que continua pendente, sem valores
-sensíveis. Diferencie validação local, autenticação, autorização e saúde do
-serviço. Não faça push, publicação ou rotação de credenciais por inferência.
-
-A [proveniência e as diferenças](references/proveniencia.md) documentam a versão
-comum, as remoções e as limitações desta preparação.
+Relato do que foi verificado, do que mudou e do que continua pendente, sem
+valores sensíveis. Separe validação local, autenticação, autorização e saúde do
+serviço. A [proveniência e as diferenças](references/proveniencia.md) documentam
+a versão comum, as remoções e as limitações desta preparação.
 
 ## Validação
 
-```sh
-python3 -B -m unittest discover -s "$SKILL_DIR/tests" -v
-```
+Antes de relatar, confira o resultado da própria operação:
 
-Os testes usam entradas sintéticas, sem rede. O validador não comprova validade,
-permissões ou associação do token ao servidor. A pasta inteira desta skill pode
-ser copiada; não depende de modelos ou arquivos da raiz do Bezalel.
+- A leitura posterior das variáveis mostra a chave alterada com o valor esperado
+  (comparado sem imprimi-lo, por exemplo com `jq` retornando `true`/`false`).
+- O deployment terminou com sucesso no estado retornado pela API.
+- O serviço está saudável no Coolify e a URL ou o healthcheck responde com o
+  status esperado (`curl -sS -o /dev/null -w '%{http_code}' <url>`).
+- Os logs recentes do serviço não mostram erro novo relacionado à mudança.
+
+Resposta HTTP sem erro, sozinha, não prova sucesso. Comandos de teste da própria
+skill ficam em [manutenção](references/manutencao.md).
 
 ## Limites operacionais
 
-Não crie credenciais, acesso persistente ou configuração global. Não procure
-segredos em outros projetos e nunca peça valores no chat. Cada operação remota
-precisa estar no escopo autorizado. Alterações destrutivas exigem impacto e
-preservação definidos; falhas devem ser relatadas sem exposição de conteúdo.
+Siga as regras do projeto e os limites do papel. O token aparece somente como
+`COOLIFY_API_TOKEN` no processo: fora do chat, Git, relatórios, arquivos, URLs,
+argumentos visíveis e logs. A configuração aceita apenas os campos documentados.
+
+Banco interno do Coolify (Tinker) e arquivos gerados por ele ficam fora do
+procedimento padrão; uma recuperação excepcional exige diagnóstico, plano e
+autorização específicos. Apagar volumes ou dados, recriar banco ou substituir
+domínio exige explicar o impacto, conferir a preservação dos dados e obter
+autorização específica; falha de autenticação no banco não justifica apagar um
+volume. Push, publicação e rotação de credenciais acontecem só quando pedidos.

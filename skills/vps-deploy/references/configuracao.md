@@ -46,7 +46,7 @@ dois projetos usem o mesmo arquivo sem que isso fique explícito.
 ## Validação local
 
 ```sh
-python3 <pasta-da-skill>/scripts/check_config.py --project <caminho-do-projeto>
+python3 "$SKILL_DIR/scripts/check_config.py" --project <caminho-do-projeto>
 ```
 
 Requer Python 3.9 ou superior, sem dependências externas. O comando apenas lê o

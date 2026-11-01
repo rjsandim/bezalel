@@ -6,6 +6,8 @@ A base inicial tinha **8 pacotes locais e 23 externos**, com security-audit em a
 **30 skills distintas examinadas**. Após as duas rodadas autorizadas, o Bezalel
 contém **18 pacotes**: **11 indicados condicionalmente no fluxo**, cinco novas skills
 somente manuais e os dois procedimentos operacionais anteriores fora do fluxo.
+Em 31/10/2026 foram criadas duas skills próprias, depurar-bug e proposta-banco,
+ligadas ao fluxo; o pacote vigente tem **20 skills**, **13 indicadas no fluxo**.
 
 O repositório completo foi baixado em `.local-review/skill-sources/my-skills-20261016/`,
 na revisão `7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a`. O diretório é local e ignorado.
@@ -24,6 +26,13 @@ não um mecanismo de atualização automática nem certificação de execução.
 | [security-audit](../skills/security-audit/SKILL.md) | Modelo de ameaças, auditoria e verificação adversarial. | Já importada da mesma revisão externa; selecionada no AppSec com os limites de responsabilidade e acesso do fluxo. |
 | [vps-deploy](../skills/vps-deploy/SKILL.md) | Operação e diagnóstico de VPS/Coolify por projeto. | Fora da execução dos três cenários: eles terminam na entrega da PR. Operação remota depende de outra tarefa autorizada. |
 | [limpar-orbstack](../skills/limpar-orbstack/SKILL.md) | Auditoria e remoção de ambientes concluídos. | Fora da execução dos três cenários: abrir PR não prova integração nem autoriza limpeza. |
+
+## Skills próprias criadas depois da seleção
+
+| Skill | Finalidade | Indicação |
+|---|---|---|
+| [depurar-bug](../skills/depurar-bug/SKILL.md) | Criada em 31/10/2026: reproduzir, provar a causa, teste que falha e menor correção. | Selecionada na etapa de execução dos quatro devs, para correção de bug. |
+| [proposta-banco](../skills/proposta-banco/SKILL.md) | Criada em 31/10/2026: proposta HTML de mudança de banco para aprovação humana. | Selecionada no processo de banco do TL; toda migration continua dependendo da decisão humana. |
 
 ## Todas as skills do repositório externo
 
@@ -97,7 +106,10 @@ aprovação de tarefas futuras nem certificam decisões humanas.
 As cinco novas skills manuais e suas condições estão no
 [guia de uso manual](skills-uso-manual.md). Não são uma continuação
 automática após a PR. A política `allow_implicit_invocation: false` foi registrada
-nos adaptadores; sua interpretação no aplicativo não foi certificada.
+nos adaptadores; sua interpretação no aplicativo não foi certificada. vps-deploy e
+limpar-orbstack também a mantêm, somando sete skills de invocação explícita. Em
+31/10/2026, env passou a implícita para que o DevOps possa acioná-la; suas
+travas de infraestrutura compartilhada e de destroy continuam nos scripts.
 
 release e github-resolution encontram a dependência pr-post-audit nesta árvore.
 Os originais ainda têm convenções do autor; pr-bump, por exemplo, contém comandos
@@ -130,7 +142,7 @@ A revisão de modelagem e migrations usa as fontes reais do projeto e parecer
 técnico identificado; não exige uma ferramenta específica de modelagem.
 Uma skill opcional indisponível não dispensa evidência obrigatória.
 
-A [relação por processo e etapa](dream-team-skills.md) registra as 11 skills
+A [relação por processo e etapa](dream-team-skills.md) registra as 13 skills
 indicadas em 24 etapas de 16 processos. O fluxo atual tem 21 processos e 63 etapas, incluindo a conferência pós-merge. Os [contratos e adaptadores](README.md) usam essa
 seleção; as skills não foram alteradas na conversão. Não houve execução de produto,
 produção, publicação ou infraestrutura para validar o pacote.
