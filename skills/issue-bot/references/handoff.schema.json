@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rjsandim/bezalel/skills/issue-bot/references/handoff.schema.json",
+  "title": "Handoff do modo issue-bot",
+  "description": "Contrato versionado do handoff entre revisor (claude) e implementador (codex), e da decisão humana após o limite de rodadas. Regras cruzadas (nome do arquivo, par da rodada, limite de rodadas, veredito coerente) ficam em scripts/check_handoff.py. O documento não autoriza merge.",
+  "oneOf": [
+    {"$ref": "#/$defs/claude"},
+    {"$ref": "#/$defs/codex"},
+    {"$ref": "#/$defs/decisao"}
+  ],
+  "$defs": {
+    "positivo": {"type": "integer", "minimum": 1},
+    "texto": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{7,40}$"},
+    "data": {"type": "string", "format": "date-time", "pattern": "(Z|[+-][0-9]{2}:[0-9]{2})$"},
+    "candidato": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base", "head", "sha"],
+      "properties": {
+        "base": {"$ref": "#/$defs/texto"},
+        "head": {"$ref": "#/$defs/texto"},
+        "sha": {"$ref": "#/$defs/sha"}
+      }
+    },
+    "claude": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "papel", "issue", "pr", "rodada", "candidato", "ci", "veredito", "criterios", "ajustes", "skills_usadas", "gerado_em"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "papel": {"const": "claude"},
+        "issue": {"$ref": "#/$defs/positivo"},
+        "pr": {"$ref": "#/$defs/positivo"},
+        "rodada": {"$ref": "#/$defs/positivo"},
+        "ciclo": {"$ref": "#/$defs/positivo"},
+        "candidato": {"$ref": "#/$defs/candidato"},
+        "ci": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "evidence"],
+          "properties": {
+            "status": {"const": "passed"},
+            "evidence": {"$ref": "#/$defs/texto"},
+            "url": {"type": ["string", "null"], "pattern": "^https://[^/@]+/"}
+          }
+        },
+        "veredito": {"enum": ["pode_mergear", "ajustes"]},
+        "criterios": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "criterio", "status", "evidencia"],
+            "properties": {
+              "id": {"$ref": "#/$defs/texto"},
+              "criterio": {"$ref": "#/$defs/texto"},
+              "status": {"enum": ["atendido", "parcial", "nao_atendido"]},
+              "evidencia": {"$ref": "#/$defs/texto"}
+            }
+          }
+        },
+        "ajustes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "gravidade", "problema", "porque", "sugestao"],
+            "properties": {
+              "id": {"$ref": "#/$defs/texto"},
+              "gravidade": {"enum": ["bloqueante", "sugestao"]},
+              "arquivo": {"type": ["string", "null"]},
+              "problema": {"$ref": "#/$defs/texto"},
+              "porque": {"$ref": "#/$defs/texto"},
+              "sugestao": {"$ref": "#/$defs/texto"}
+            }
+          }
+        },
+        "fora_de_escopo": {"type": "array", "items": {"$ref": "#/$defs/texto"}},
+        "skills_usadas": {"type": "array", "items": {"$ref": "#/$defs/texto"}, "allOf": [{"contains": {"const": "pr-audit"}}, {"contains": {"const": "security-audit"}}]},
+        "gerado_em": {"$ref": "#/$defs/data"}
+      }
+    },
+    "codex": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "papel", "issue", "pr", "rodada", "candidato", "ajustes", "gerado_em"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "papel": {"const": "codex"},
+        "issue": {"$ref": "#/$defs/positivo"},
+        "pr": {"$ref": "#/$defs/positivo"},
+        "rodada": {"$ref": "#/$defs/positivo"},
+        "ciclo": {"$ref": "#/$defs/positivo"},
+        "candidato": {"$ref": "#/$defs/candidato"},
+        "ajustes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "status", "como", "commit"],
+            "properties": {
+              "id": {"$ref": "#/$defs/texto"},
+              "status": {"enum": ["corrigido", "nao_corrigido"]},
+              "como": {"$ref": "#/$defs/texto"},
+              "commit": {"oneOf": [{"$ref": "#/$defs/sha"}, {"type": "null"}]}
+            },
+            "if": {"properties": {"status": {"const": "corrigido"}}},
+            "then": {"properties": {"commit": {"$ref": "#/$defs/sha"}}}
+          }
+        },
+        "gerado_em": {"$ref": "#/$defs/data"}
+      }
+    },
+    "decisao": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "issue", "pr", "apos_rodada", "decisao", "ator", "fonte", "registrado_em", "motivo"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "issue": {"$ref": "#/$defs/positivo"},
+        "pr": {"$ref": "#/$defs/positivo"},
+        "ciclo": {"$ref": "#/$defs/positivo"},
+        "apos_rodada": {"type": "integer", "minimum": 2},
+        "decisao": {"enum": ["iterar", "finalizar"]},
+        "autorizado_ate": {"type": ["integer", "null"], "minimum": 3},
+        "ator": {"$ref": "#/$defs/texto"},
+        "fonte": {"$ref": "#/$defs/texto"},
+        "registrado_em": {"$ref": "#/$defs/data"},
+        "motivo": {"$ref": "#/$defs/texto"}
+      },
+      "if": {"properties": {"decisao": {"const": "iterar"}}},
+      "then": {"required": ["autorizado_ate"], "properties": {"autorizado_ate": {"type": "integer"}}}
+    }
+  }
+}

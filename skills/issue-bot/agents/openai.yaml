@@ -1,0 +1,7 @@
+interface:
+  display_name: "Issue-bot"
+  short_description: "Conduz uma issue com Codex, CI verde, revisão do Claude e teste humano"
+  default_prompt: "Use $issue-bot na issue e no projeto que eu indicar, respeitando os limites da skill."
+
+policy:
+  allow_implicit_invocation: false

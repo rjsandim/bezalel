@@ -1,6 +1,6 @@
 # Skills e procedimentos por etapa do fluxo da DreamTeam
 
-As **20 skills estão presentes no Bezalel**. Destas, **13 orientam métodos em 24 das 63 etapas**, distribuídas por 16 dos 21 processos. As demais etapas mantêm pré-condições, encaminhamentos e decisões, reutilizando o resultado do método já aplicado. Os quatro processos humanos não recebem execução por skill.
+As **21 skills estão presentes no Bezalel**; a issue-bot conduz o [modo issue-bot](issue-bot.md), fora deste fluxo. Destas, **13 orientam métodos em 24 das 63 etapas**, distribuídas por 16 dos 21 processos. As demais etapas mantêm pré-condições, encaminhamentos e decisões, reutilizando o resultado do método já aplicado. Os quatro processos humanos não recebem execução por skill.
 
 O fluxo define o que entregar, quem responde, quando avançar e como retomar. A skill reúne o procedimento técnico. Uma mesma auditoria/plano pode atravessar várias etapas sem ser reiniciada. As descrições atuais estão nos [processos do fluxo](dream-team.md#processos); o [inventário](skills-inventario.md) registra todas as origens e decisões.
 

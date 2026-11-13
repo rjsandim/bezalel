@@ -20,7 +20,7 @@ class DeliveryContractTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.project = Path(temporary.name).resolve()
-        self.config = delivery.read_json(ROOT / '.bezalel/project.example.json')
+        self.config = delivery.read_json(ROOT / 'agents/templates/project.example.json')
         self.config['production_branches'] = {'principal': 'production'}
         for path in self.config['context'].values():
             self.write(path, 'Contexto sintético; sem serviços conectados.')
@@ -557,6 +557,20 @@ class DeliveryContractTests(unittest.TestCase):
         with self.assertRaises(delivery.ContractError):
             self.validate('handoff')
 
+    def test_review_ready_requires_green_ci_without_relaxing_classic_handoff(self):
+        self.ready_to_handoff()
+        for status in ['pending', 'failed', 'not_applicable']:
+            with self.subTest(status=status):
+                self.record['pull_requests'][0]['ci']['status'] = status
+                self.validate('handoff')
+                with self.assertRaises(delivery.ContractError):
+                    self.validate('review-ready')
+        self.record['pull_requests'][0]['ci']['status'] = 'passed'
+        self.validate('review-ready')
+        self.record['pull_requests'][0]['ci']['evidence'] = ''
+        with self.assertRaises(delivery.ContractError):
+            self.validate('review-ready')
+
     def test_multiple_repositories_require_distinct_complete_prs(self):
         self.ready_to_handoff()
         self.config['production_branches']['web'] = 'live'
@@ -636,6 +650,49 @@ class DeliveryContractTests(unittest.TestCase):
         with self.assertRaises(delivery.ContractError) as caught:
             delivery.read_json(path)
         self.assertNotIn('PRIVATE_FIXTURE_VALUE', str(caught.exception))
+
+    def test_schema_3_data_modes_and_legacy_rejection(self):
+        delivery.validate_config(self.config, self.project)
+        for config in [{**self.config, 'schema_version': 2}, {k: v for k, v in self.config.items() if k != 'data'},
+                       {**self.config, 'extra': True}]:
+            with self.assertRaises(delivery.ContractError):
+                delivery.validate_config(config)
+        snapshot = {'mode': 'snapshot', 'dataset': 'tiny', 'restore': ['php', 'artisan', 'snapshot:restore', 'tiny', '--force'],
+                    'workdir': 'api', 'docs': 'api/docs/snapshots.md'}
+        delivery.validate_config({**self.config, 'data': snapshot})
+        delivery.validate_config({**self.config, 'data': {'mode': 'empty'}})
+        invalid = [{'mode': 'snapshot', 'dataset': 'tiny'}, {'mode': 'snapshot', 'restore': ['x']},
+                   {**snapshot, 'dataset': 'producao'}, {**snapshot, 'restore': []}, {**snapshot, 'workdir': '../fora'},
+                   {'mode': 'empty', 'restore': ['x']}, {'mode': 'ask', 'dataset': 'tiny'}, {'mode': 'auto'},
+                   {'mode': 'empty', 'token': 'x'}]
+        for data in invalid:
+            with self.subTest(data=data), self.assertRaises(delivery.ContractError):
+                delivery.validate_config({**self.config, 'data': data})
+
+    def test_migration_from_schema_2_preserves_fields_and_is_idempotent(self):
+        legacy = delivery.read_json(ROOT / '.bezalel/project.example.json')
+        legacy['checks']['test'] = ['make', 'test']
+        legacy['production_branches'] = {'principal': 'production'}
+        migrated = delivery.migrate_config(legacy)
+        self.assertEqual(migrated['schema_version'], 3)
+        self.assertEqual(migrated['data'], {'mode': 'ask'})
+        self.assertEqual(migrated['checks']['test'], ['make', 'test'])
+        self.assertEqual(migrated['production_branches'], {'principal': 'production'})
+        self.assertEqual(list(migrated)[:6], list(legacy))
+        self.assertEqual(delivery.migrate_config(migrated), migrated)
+        with self.assertRaises(delivery.ContractError):
+            delivery.migrate_config({**legacy, 'schema_version': 1})
+        self.write('.bezalel/project.json', json.dumps(legacy, indent=2) + '\n')
+        subprocess.run(['git', 'init', '-q'], cwd=self.project, check=True)
+        command = [sys.executable, '-B', str(ROOT / 'scripts/project.py'), 'migrate-config', '--project', str(self.project)]
+        result = subprocess.run(command, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        first = (self.project / '.bezalel/project.json').read_text()
+        self.assertEqual(json.loads(first), migrated)
+        result = subprocess.run(command, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('já está no schema 3', result.stdout)
+        self.assertEqual((self.project / '.bezalel/project.json').read_text(), first)
 
     def test_v1_and_permission_grants_are_rejected(self):
         for field, value in [('permissions', {'push': True}), ('observers', {}), ('schema_version', 1)]:

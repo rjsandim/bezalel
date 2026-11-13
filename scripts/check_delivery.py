@@ -12,7 +12,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 DIMENSIONS = {"files", "database", "queues", "ports", "storage"}
-STAGES = ("plan", "database", "investigate", "implement", "accept", "deliver", "handoff", "accepted", "merged", "finish", "close")
+STAGES = ("plan", "database", "investigate", "implement", "accept", "deliver", "handoff", "review-ready", "accepted", "merged", "finish", "close")
 DEVELOPERS = {"dev-fullstack", "backend", "frontend-web", "mobile"}
 
 
@@ -73,10 +73,33 @@ def https_reference(value):
         return False
 
 
+CONFIG_FIELDS = {"schema_version", "project", "context", "interfaces", "checks", "production_branches", "data"}
+
+
+def relative_path(value, label):
+    require(text(value) and not Path(value).is_absolute() and ".." not in Path(value).parts, label + ": caminho relativo, sem '..'.")
+
+
+def validate_data(data):
+    """Dados do ambiente de teste: snapshot (restore declarado pelo projeto), empty ou ask."""
+    require(isinstance(data, dict) and set(data) <= {"mode", "dataset", "restore", "workdir", "docs"}
+            and data.get("mode") in {"snapshot", "empty", "ask"}, "Declare data.mode como snapshot, empty ou ask, sem campos extras.")
+    if data["mode"] == "snapshot":
+        require(data.get("dataset") in {"tiny", "full"}, "Snapshot exige data.dataset tiny ou full.")
+        restore = data.get("restore")
+        require(isinstance(restore, list) and restore and all(text(arg) for arg in restore),
+                "Snapshot exige data.restore como lista de argumentos; o validador não o executa.")
+        if "workdir" in data:
+            relative_path(data["workdir"], "data.workdir")
+    else:
+        require(not {"dataset", "restore", "workdir"} & set(data), "data.mode " + data["mode"] + " não declara dataset, restore ou workdir.")
+    if "docs" in data:
+        relative_path(data["docs"], "data.docs")
+
+
 def validate_config(config, project=None):
-    fields = {"schema_version", "project", "context", "interfaces", "checks", "production_branches"}
-    require(isinstance(config, dict) and set(config) == fields, "Configuração do projeto: campos ausentes/desconhecidos; não declare permissões, credenciais ou observadores.")
-    require(type(config["schema_version"]) is int and config["schema_version"] == 2 and text(config["project"]), "Use schema_version 2 e nome do projeto; migre o formato 1 explicitamente.")
+    require(isinstance(config, dict) and set(config) == CONFIG_FIELDS, "Configuração do projeto: campos ausentes/desconhecidos; não declare permissões, credenciais ou observadores.")
+    require(type(config["schema_version"]) is int and config["schema_version"] == 3 and text(config["project"]), "Use schema_version 3 e nome do projeto; migre o formato 2 com project.py migrate-config.")
     context = config["context"]
     require(isinstance(context, dict) and set(context) == {"architecture", "business"}, "Declare contexto de arquitetura e negócio.")
     for value in context.values():
@@ -89,6 +112,18 @@ def validate_config(config, project=None):
     require(all(isinstance(command, list) and all(text(arg) for arg in command) for command in checks.values()), "Comandos são listas de argumentos; não são executados pelo validador.")
     branches = config["production_branches"]
     require(isinstance(branches, dict) and branches and all(text(repo) and text(branch) for repo, branch in branches.items()), "Declare branch de produção real por repositório, sem presumir main/master.")
+    validate_data(config["data"])
+
+
+def migrate_config(config):
+    """Schema 2 -> 3, preservando campos e ordem; acrescenta data.mode ask. Idempotente no 3."""
+    require(isinstance(config, dict) and config.get("schema_version") in {2, 3}, "Migração aceita somente schema_version 2 ou 3.")
+    migrated = {}
+    for key, value in config.items():
+        migrated[key] = 3 if key == "schema_version" else value
+    migrated.setdefault("data", {"mode": "ask"})
+    validate_config(migrated)
+    return migrated
 
 
 def human_decision(value, subject, decision="approved"):
@@ -282,7 +317,8 @@ def delivery_prs(record):
     return prs
 
 
-def verify_handoff(record, config, candidate):
+def verify_handoff(record, config, candidate, require_green_ci=False):
+    """Handoff clássico aceita CI observado; review-ready (modo issue-bot) exige CI verde."""
     prs = delivery_prs(record)
     repos = record["candidate"]["repositories"]
     for pr in prs:
@@ -292,6 +328,8 @@ def verify_handoff(record, config, candidate):
         timestamp(pr.get("verified_at"))
         ci = pr.get("ci")
         require(isinstance(ci, dict) and ci.get("status") in {"passed", "pending", "failed", "not_applicable"} and text(ci.get("evidence")), "Informe CI pós-abertura no estado observado.")
+        if require_green_ci:
+            require(ci["status"] == "passed", "review-ready exige CI verde em todas as PRs; correções de CI voltam ao implementador.")
     handoff = record.get("handoff")
     passed(handoff, "Handoff", candidate)
     require(text(handoff.get("next_steps")), "Entregue próximos passos manuais, inclusive CI pendente/falho.")
@@ -448,8 +486,8 @@ def validate_delivery(record, project, stage, config=None):
         require(text(record["acceptance"].get("execution_evidence")), "Aceite exige roteiro realmente executado pelo humano.")
         return
     require(local_file(project, record.get("pr_draft"), "Rascunho de PR").stat().st_size > 0, "Rascunho de PR vazio.")
-    if stage == "handoff":
-        verify_handoff(record, config, candidate)
+    if stage in {"handoff", "review-ready"}:
+        verify_handoff(record, config, candidate, require_green_ci=stage == "review-ready")
 
 
 def main():

@@ -104,5 +104,10 @@ cancelar CI, publicar review, aprovar workflow, push, merge, release e deploy
 ficam fora dela. Use o acesso já concedido; o que ficou inacessível é registrado
 e segue o destino da tarefa, sem busca por credenciais mais amplas.
 
+No modo issue-bot, o parecer em prosa é auxiliar: o contrato obrigatório é o
+handoff JSON da skill issue-bot (`references/handoff.schema.json`). O veredito
+`pode_mergear` significa "sem impedimento de revisão no escopo examinado"; continua
+sem autorizar merge, que é ordem humana.
+
 [Origem e adaptações](references/origem.md) registram a revisão externa e as
 mudanças autorizadas para o Bezalel.

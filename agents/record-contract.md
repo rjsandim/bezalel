@@ -7,9 +7,8 @@ manter um MD paralelo por demanda. O
 [modelo](templates/delivery.example.json) é incompleto por intenção; não contém
 aprovações ou resultados fictícios.
 
-O registro e o catálogo usam `schema_version: 3`; a configuração do projeto
-permanece em `schema_version: 2`. Esses campos identificam o formato dos dados,
-não uma versão da equipe ou dos agentes.
+O registro, o catálogo e a configuração do projeto usam `schema_version: 3`. Esses
+campos identificam o formato dos dados, não uma versão da equipe ou dos agentes.
 
 Guarde o snapshot em `.bezalel/deliveries/<id>.local.json`; incorpore
 `/deliveries/*.local.json` ao `.bezalel/.gitignore`. Referências privadas não entram
@@ -18,11 +17,24 @@ demanda, não fontes concorrentes. O validador só lê arquivos, não acessa ser
 
 ## Configuração do projeto
 
-O [modelo](../.bezalel/project.example.json) declara `project`, documentos reais
+O [modelo](templates/project.example.json) declara `project`, documentos reais
 em `context.architecture/business`, interfaces, `checks.test/lint/build` como
-listas de argumentos e `production_branches` como mapa repositório → branch real.
-Não presuma main/master. Os nomes de repositórios precisam coincidir com os do
-candidato. Configuração não contém permissões ou segredos e não executa comandos.
+listas de argumentos, `production_branches` como mapa repositório → branch real e
+`data`, os dados do ambiente de teste. Não presuma main/master. Os nomes de
+repositórios precisam coincidir com os do candidato. Configuração não contém
+permissões ou segredos e não executa comandos.
+
+| Campo | Obrigatório | Conteúdo |
+|---|---|---|
+| `data.mode` | sim | `snapshot`, `empty` ou `ask` |
+| `data.dataset` | com `snapshot` | `tiny` ou `full`; `tiny` é o recomendado para dev |
+| `data.restore` | com `snapshot` | Lista de argumentos executada na worktree do ambiente, depois de pronto; o validador não a executa |
+| `data.workdir` | não | Subpasta relativa da worktree para o restore (padrão: raiz) |
+| `data.docs` | não | Documentação do padrão, relativa à raiz, para o humano |
+
+`empty` e `ask` não declaram `dataset`, `restore` nem `workdir`. `ask` faz o `env-up`
+do [modo issue-bot](issue-bot.md) parar e perguntar. O comando de restore é do projeto
+e deve recusar destino de produção; o Bezalel não baixa nem lê produção.
 
 ## Etapas conferidas
 
@@ -39,6 +51,7 @@ python3 .bezalel/base/scripts/check_delivery.py --project . --record .bezalel/de
 | `accept` | Candidato integrado, checks prévios, revisão TL, AppSec, QA e roteiro pronto para execução humana. |
 | `deliver` | Candidato tecnicamente validado, roteiro e rascunho da PR. Não exige aceite humano para abrir a PR. |
 | `handoff` | Acrescenta todas as PRs abertas/verificadas na base/head previstos, `draft: false`, CI observado e orientações manuais. |
+| `review-ready` | Igual a `handoff`, mas exige `ci.status: passed` com evidência em todas as PRs. Etapa opcional no caminho clássico; equivale ao portão de CI do modo issue-bot. |
 | `accepted` | Aceite humano da versão/roteiro realmente executados na PR aberta. Não prova merge. |
 | `merged` | Interação humana e consulta posterior ao serviço confirmando todas as PRs mergeadas na base/head previstos. |
 | `finish` | Acrescenta issues existentes fechadas/verificadas e resultado completo do destroy do alvo registrado, ou ambiente comprovadamente não aplicável. |
@@ -148,7 +161,9 @@ dono e retomada, sem confundir observação técnica de estado com decisão huma
 
 O CI que só inicia após abrir a PR pode ser `pending` ou `failed` no handoff,
 com evidência e próximos passos reais. Isso não dispensa checks prévios obrigatórios
-nem autoriza esperar/corrigir, merge ou deploy automaticamente.
+nem autoriza esperar/corrigir, merge ou deploy automaticamente. No
+[modo issue-bot](issue-bot.md), a CI verde é portão (`review-ready`): vermelha volta ao
+implementador sem contar rodada de revisão, e nada disso autoriza merge ou deploy.
 
 ## Conferência de merge e encerramento
 
@@ -203,7 +218,13 @@ provas reais. Para banco, não troque um MD antigo por aprovação de HTML inven
 se ainda houver implementação dependente, prepare/apresente a proposta adequada.
 Confirme referências, base/hash, decisão e exclusão. Aceite funcional fica separado
 da abertura de PR; não preencha aceites, merges ou limpeza para satisfazer o checker.
-A configuração de projeto permanece no formato 2. Atualizadores anteriores ao
+A configuração de projeto passou ao formato 3 (campo `data`); o formato 2 é recusado.
+Migre explicitamente com `python3 .bezalel/base/scripts/project.py migrate-config --project .`,
+que preserva os campos, acrescenta `data.mode: ask` e não altera arquivos já no 3.
+Revise `data` antes do primeiro ambiente. O `.bezalel/project.example.json` do pacote
+permanece no formato 2 apenas porque os checkers já instalados o validam ao atualizar;
+o modelo vigente é `agents/templates/project.example.json`, e o checker novo exige
+que o modelo legado migre sem perdas. Atualizadores anteriores ao
 catálogo local precisam da migração pelo atualizador novo descrita no README.
 
 Os checks são estruturais. Autenticação humana, independência real, veracidade da

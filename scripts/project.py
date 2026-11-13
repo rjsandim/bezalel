@@ -5,6 +5,7 @@ import contextlib
 import copy
 import fcntl
 import io
+import json
 import os
 from pathlib import Path
 import re
@@ -496,6 +497,27 @@ def update(project, state):
     return resumed or revision != previous
 
 
+def migrate_project_config(project):
+    """Migra .bezalel/project.json 2 -> 3 explicitamente; preserva campos e não grava segredos."""
+    from check_delivery import ContractError, migrate_config
+    path = inside(project, '.bezalel/project.json')
+    if path.is_symlink() or not path.is_file():
+        raise DistributionError('Configuração .bezalel/project.json ausente ou vinculada por link.')
+    original = read_text(path)
+    try:
+        config = read_json(path)
+        if config.get('schema_version') == 3:
+            migrate_config(config)
+            return 'Configuração já está no schema 3; nada alterado.'
+        migrated = migrate_config(config)
+    except ContractError as error:
+        raise DistributionError('Configuração não migrável: ' + str(error)) from None
+    nl = newline(original)
+    content = json.dumps(migrated, ensure_ascii=False, indent=2).replace('\n', nl) + nl
+    atomic_write(path, content.encode('utf-8'))
+    return 'Configuração migrada para o schema 3 com data.mode ask; revise data antes do primeiro env-up.'
+
+
 @contextlib.contextmanager
 def lock(project):
     path = inside(project, '.bezalel/update.lock')
@@ -510,7 +532,7 @@ def lock(project):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['enable', 'update', 'status', 'disable', 'run', 'link-worktree'])
+    parser.add_argument('action', choices=['enable', 'update', 'status', 'disable', 'run', 'link-worktree', 'migrate-config'])
     parser.add_argument('--project', type=Path, default=Path.cwd())
     parser.add_argument('--platform', choices=['both', 'codex', 'claude', 'grok'], default='both')
     parser.add_argument('--branch', default='master')
@@ -522,6 +544,9 @@ def main():
         project = args.project.resolve()
         if Path(git(project, 'rev-parse', '--show-toplevel').decode().strip()).resolve() != project:
             raise DistributionError('Use a raiz do projeto Git.')
+        if args.action == 'migrate-config':
+            print(migrate_project_config(project))
+            return 0
         if args.action == 'link-worktree':
             worktree, project = project, main_checkout(project)
             if worktree == project:
@@ -555,11 +580,11 @@ def main():
                 state['branch'] = args.branch
                 extra = {}
                 if not context.exists():
-                    extra['.bezalel/project.json'] = {'kind': 'file', 'content': read_text(base / '.bezalel/project.example.json')}
+                    extra['.bezalel/project.json'] = {'kind': 'file', 'content': read_text(base / 'agents/templates/project.example.json')}
                 ignore = inside(project, '.bezalel/.gitignore')
                 rules = read_text(ignore) if ignore.exists() else ''
                 # '/base' também ignora o link criado em worktrees; '/base/' só ignora diretórios.
-                additions = [p for p in ['/base', '/install.local.json', '/update.lock', '/vps-deploy.local.json', '/deliveries/*.local.json', '/reviews/'] if p not in rules.splitlines()]
+                additions = [p for p in ['/base', '/install.local.json', '/update.lock', '/vps-deploy.local.json', '/deliveries/*.local.json', '/reviews/', '/handoff/', '/logs/'] if p not in rules.splitlines()]
                 if additions:
                     extra['.bezalel/.gitignore'] = {'kind': 'file', 'content': append_lines(rules, additions)}
                 reconcile(project, base, state, platforms, not args.no_auto_update, revision, extra=extra)

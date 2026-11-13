@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "papel": "claude",
+  "issue": 122,
+  "pr": 130,
+  "rodada": 1,
+  "candidato": {
+    "base": "main",
+    "head": "issue-122",
+    "sha": "abc123def"
+  },
+  "ci": {
+    "status": "passed",
+    "evidence": "gh pr checks 130 (exemplo sintético)",
+    "url": "https://github.com/exemplo/projeto/pull/130/checks"
+  },
+  "veredito": "ajustes",
+  "criterios": [
+    {
+      "id": "AC-01",
+      "criterio": "O usuário consegue filtrar a lista por período.",
+      "status": "atendido",
+      "evidencia": "Diff no controlador da lista e teste de filtro por período; coberto pelo check tests."
+    },
+    {
+      "id": "AC-02",
+      "criterio": "Somente o próprio tenant vê os registros filtrados.",
+      "status": "parcial",
+      "evidencia": "A rota nova não aplica a policy de tenant; ver ajuste A1."
+    }
+  ],
+  "ajustes": [
+    {
+      "id": "A1",
+      "gravidade": "bloqueante",
+      "arquivo": "app/Domain/Foo.php:42",
+      "problema": "A autorização da rota não é conferida.",
+      "porque": "Qualquer sessão autenticada lê registros de outro tenant.",
+      "sugestao": "Reutilizar a policy existente e cobrir com teste de regressão."
+    },
+    {
+      "id": "A2",
+      "gravidade": "sugestao",
+      "arquivo": null,
+      "problema": "Nome do parâmetro de período pouco claro.",
+      "porque": "Facilita a leitura da API.",
+      "sugestao": "Renomear para periodo_inicio/periodo_fim, se não quebrar clientes."
+    }
+  ],
+  "fora_de_escopo": [
+    "Refatorar o módulo de relatórios, citado no diff apenas como consumidor."
+  ],
+  "skills_usadas": ["pr-audit", "security-audit"],
+  "gerado_em": "2026-11-13T20:15:00-03:00"
+}

@@ -25,3 +25,7 @@ A entrada e a interface foram traduzidas e organizadas no formato do Bezalel.
 Detalhes condicionais foram movidos para referências próprias. Nenhum programa,
 serviço, runtime ou definição de agente foi criado. Caminhos desta pasta são
 relativos; a skill pode ser copiada com suas referências sem depender da raiz.
+
+Em 13/11/2026, a skill passou a registrar que, no modo issue-bot, o parecer em prosa
+é auxiliar e o handoff JSON da skill issue-bot é o contrato obrigatório; `pode_mergear`
+continua sem autorizar merge. O procedimento de revisão não mudou.

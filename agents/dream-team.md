@@ -6,6 +6,14 @@ etapas, com 19 processos em cada cenário; os quatro devs são opções de espec
 Os contratos em [agents](README.md) distribuem os processos por responsabilidade,
 sem criar um agente por etapa. O aprovador humano é externo.
 
+O [modo issue-bot](issue-bot.md) é um caminho adicional, não interativo para o
+orquestrador: Codex implementa, a CI da PR precisa estar verde, Claude revisa em até
+duas rodadas de handoff JSON e o humano testa no ambiente local. Ele usa um rito
+enxuto próprio, sem os nove papéis nem o roteiro Excel, e preserva a decisão humana
+de banco (R6) e o merge manual (R10). Lá a CI pós-PR é portão e volta ao implementador;
+aqui ela continua apenas observada no handoff. Os dois caminhos não se misturam numa
+mesma demanda sem decisão explícita.
+
 Este arquivo reúne as regras comuns, os percursos dos cenários e o índice dos
 processos. Cada papel lê estas regras e somente os [processos](#processos) que o
 [catálogo](catalog.json) lhe atribui.

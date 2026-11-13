@@ -7,7 +7,8 @@ A base inicial tinha **8 pacotes locais e 23 externos**, com security-audit em a
 contém **18 pacotes**: **11 indicados condicionalmente no fluxo**, cinco novas skills
 somente manuais e os dois procedimentos operacionais anteriores fora do fluxo.
 Em 31/10/2026 foram criadas duas skills próprias, depurar-bug e proposta-banco,
-ligadas ao fluxo; o pacote vigente tem **20 skills**, **13 indicadas no fluxo**.
+ligadas ao fluxo. Em 13/11/2026 foi criada a issue-bot, operacional e de invocação
+explícita, fora do fluxo da DreamTeam; o pacote vigente tem **21 skills**, **13 indicadas no fluxo**.
 
 O repositório completo foi baixado em `.local-review/skill-sources/my-skills-20261016/`,
 na revisão `7b8a5e5e0259da8cabcdaf806cca9d1d55abf20a`. O diretório é local e ignorado.

@@ -4,7 +4,7 @@
 **DreamTeam** é sua equipe de nove agentes para corrigir bugs e desenvolver melhorias e features.
 O fluxo é mantido nos arquivos do pacote, sem depender de ferramenta externa de modelagem.
 
-O plugin reúne a DreamTeam, seu fluxo de desenvolvimento e 20 skills, incluindo nove
+O plugin reúne a DreamTeam, seu fluxo de desenvolvimento, o modo issue-bot e 21 skills, incluindo nove
 importações com conteúdo preservado e duas auditorias adaptadas.
 Há contratos portáteis, adaptadores para Codex e Claude Code, instalação por
 projeto, pacote de plugin e validadores locais.
@@ -13,10 +13,10 @@ hospedado, monitoramento ou runtime próprio que aplique autorizações.
 
 ## Inventário de skills
 
-As **20 skills disponíveis** estão organizadas pelo uso: **13 indicadas no
-fluxo da DreamTeam**, **cinco reservadas à chamada manual** e **duas operacionais
-fora do fluxo**. Sete delas são de invocação explícita (`allow_implicit_invocation: false`):
-as cinco manuais do Akita, vps-deploy e limpar-orbstack; as outras 13 podem ser
+As **21 skills disponíveis** estão organizadas pelo uso: **13 indicadas no
+fluxo da DreamTeam**, **cinco reservadas à chamada manual** e **três operacionais
+fora do fluxo**. Oito delas são de invocação explícita (`allow_implicit_invocation: false`):
+as cinco manuais do Akita, vps-deploy, limpar-orbstack e issue-bot; as outras 13 podem ser
 escolhidas pelo agente quando o pedido combina com a descrição. A indicação no fluxo depende da etapa, do escopo e dos
 pré-requisitos; não significa executar todas em cada demanda.
 
@@ -60,6 +60,7 @@ uma PR não inicia deploy nem comprova que um ambiente pode ser removido.
 |---|---|---|
 | [vps-deploy](skills/vps-deploy/SKILL.md) | Orientar operações de VPS com configuração por projeto | Markdown e validador Python |
 | [limpar-orbstack](skills/limpar-orbstack/SKILL.md) | Auditar e limpar ambientes explicitamente autorizados | Markdown e roteiros de preservação |
+| [issue-bot](skills/issue-bot/SKILL.md) | Conduzir uma issue no [modo issue-bot](#modo-issue-bot): Codex implementa, CI verde, Claude revisa, teste humano | Python e Bash (tmux, gh), prompts e schema de handoff |
 
 O [inventário de todas as skills analisadas](agents/skills-inventario.md)
 e a [relação por processo e etapa](agents/dream-team-skills.md) registram a
@@ -164,14 +165,46 @@ Os contratos e adaptadores estão preparados. Descoberta no aplicativo, ferramen
 reais e piloto no projeto consumidor precisam ser verificados antes de alegar
 operação validada. Os testes locais usam fixtures sintéticas, sem decisões reais.
 
+## Modo issue-bot
+
+Caminho **adicional** à DreamTeam clássica, sem removê-la nem substituí-la: uma issue
+por vez, com o Codex implementando e o Claude revisando em CLIs interativos numa sessão
+tmux `<projeto>-<issue>` (ex.: `rcastello-122`), que o humano acompanha com
+`tmux attach -t rcastello-122`. A [fonte canônica](agents/issue-bot.md) define papéis,
+etapas, o rito enxuto e o que continua obrigatório; a [skill](skills/issue-bot/SKILL.md)
+traz os comandos. A instalação do plugin, sozinha, não dispara o modo: chame o CLI ou a
+skill com uma issue concreta.
+
+```sh
+python3 .bezalel/base/skills/issue-bot/scripts/issue_bot.py session-up --project . --issue 122
+python3 .bezalel/base/skills/issue-bot/scripts/issue_bot.py implement  --project . --issue 122
+python3 .bezalel/base/skills/issue-bot/scripts/issue_bot.py review     --project . --issue 122
+```
+
+- **CI antes da revisão.** O Claude só revisa com a CI da PR verde; CI vermelha volta
+  ao Codex e não conta rodada. O caminho clássico continua apenas observando a CI no
+  handoff (`--stage handoff`); `--stage review-ready` exige CI verde.
+- **Handoff JSON e rodadas.** Cada rodada grava `.bezalel/handoff/<issue>-r<n>-claude.json`
+  e a resposta do Codex no mesmo contrato; no máximo duas rodadas, depois decisão humana
+  (`iterar` ou `finalizar`). `pode_mergear` nunca autoriza merge.
+- **Ambiente.** `env-up` sobe `issue-<n>` pela skill env na branch da PR e aplica
+  `data` de `.bezalel/project.json` (schema 3). Infra compartilhada só com
+  `--allow-shared-infra` na execução autorizada.
+- **Contas, não chaves.** Codex logado no ChatGPT e Claude Code no claude.ai; o script
+  da sessão remove variáveis de chave de API e recusa outro tipo de login.
+- **Merge e deploy** continuam manuais, somente por ordem explícita do humano (R10).
+
+Projetos já ligados precisam acrescentar `/handoff/` e `/logs/` ao `.bezalel/.gitignore`
+e migrar a configuração: `python3 .bezalel/base/scripts/project.py migrate-config --project .`.
+
 ## Estrutura comum
 
 As skills mantidas no Bezalel declaram `name` e `description` e contêm objetivo/escopo,
 entradas/pré-requisitos, procedimento, saídas, validação e limites operacionais.
 `references/`, `scripts/`, `templates/` e `tests/` aparecem quando necessários.
 `agents/openai.yaml` é um adaptador opcional de interface, não um agente em
-execução. Sete skills usam invocação explícita nesse metadado: as cinco manuais
-do Akita, vps-deploy e limpar-orbstack. ENV é implícita para que o DevOps possa
+execução. Oito skills usam invocação explícita nesse metadado: as cinco manuais
+do Akita, vps-deploy, limpar-orbstack e issue-bot. ENV é implícita para que o DevOps possa
 acioná-la; new, start, ensure e update continuam exigindo `ENV_ALLOW_SHARED_INFRA=1`
 e destroy continua exigindo `--confirm`. As demais podem ser selecionadas em tarefas compatíveis,
 conforme os metadados preservados e as ferramentas disponíveis. A interpretação
@@ -219,9 +252,13 @@ o hook de atualização. Ele não substitui as regras do projeto pelo `AGENTS.md
 de contribuição do Bezalel. Configurações e hooks de terceiros são preservados.
 
 Preencha `.bezalel/project.json` com o nome do projeto, documentos reais de
-arquitetura e negócio, interfaces, comandos de teste/lint/build e branches de
-produção. O exemplo só é copiado se o arquivo não existir; preencher contexto é
-necessário antes de executar o fluxo. Comandos declarados não são executados na
+arquitetura e negócio, interfaces, comandos de teste/lint/build, branches de
+produção e `data` (dados do ambiente de teste: `snapshot`, `empty` ou `ask`), no
+[schema 3](agents/templates/project.example.json). O exemplo só é copiado se o arquivo
+não existir; preencher contexto é necessário antes de executar o fluxo. Configurações
+no schema 2 são recusadas: migre com
+`python3 .bezalel/base/scripts/project.py migrate-config --project .`, que preserva os
+campos e acrescenta `data.mode: ask`. Comandos declarados não são executados na
 instalação. Configure MCPs e pré-requisitos das skills conforme a tarefa.
 
 No Codex, as skills ficam em `.agents/skills` e os agentes em `.codex/agents`.
@@ -443,7 +480,7 @@ claude plugin validate --strict .local-review/bezalel-plugin/.claude-plugin/plug
 claude plugin validate --strict .local-review/bezalel-plugin/.claude-plugin/marketplace.json
 ```
 
-O destino precisa ser novo. O gerador preserva as 20 pastas de skills, inclui
+O destino precisa ser novo. O gerador preserva as 21 pastas de skills, inclui
 adaptadores/manuais, não inclui estado operacional e não instala o resultado.
 
 ### Atualizar as importações do Akita
@@ -547,6 +584,11 @@ configure essa variável permanentemente. `destroy` exige
 `--keep-worktree` mantém branch/arquivos, **mas permite remover os volumes do
 ambiente confirmado**. Dados devem ser preservados antes. Imagens não são
 removidas pelo destroy. Consulte o [guia](skills/env/references/operacao.md).
+
+`new`/`ensure` aceitam `--branch <branch-existente>` (reutiliza a branch local da PR,
+sem fetch e sem criar branch nova da base) e `--issue <n>` (nome padrão `issue-<n>` e
+vínculo registrado no estado). `ctl.sh status <nome> --json` informa worktree, branch,
+URLs, portas, prontidão e banco, sem segredos (0 pronto; 5 existe mas não está pronto).
 
 ### VPS Deploy
 

@@ -144,10 +144,10 @@ def bind(project, root, state, clients, automatic, client=None):
     changes[STATE] = {'kind': 'file', 'content': json_bytes(new).decode('utf-8')}
     context = inside(project, '.bezalel/project.json')
     if not context.exists():
-        changes['.bezalel/project.json'] = {'kind': 'file', 'content': read_text(root / '.bezalel/project.example.json')}
+        changes['.bezalel/project.json'] = {'kind': 'file', 'content': read_text(root / 'contracts/templates/project.example.json')}
     ignore = inside(project, '.bezalel/.gitignore')
     text = read_text(ignore) if ignore.exists() else ''
-    extra = [p for p in ['/base', '/plugin.local.json', '/update.lock', '/vps-deploy.local.json', '/deliveries/*.local.json', '/reviews/'] if p not in text.splitlines()]
+    extra = [p for p in ['/base', '/plugin.local.json', '/update.lock', '/vps-deploy.local.json', '/deliveries/*.local.json', '/reviews/', '/handoff/', '/logs/'] if p not in text.splitlines()]
     if extra:
         changes['.bezalel/.gitignore'] = {'kind': 'file', 'content': append_lines(text, extra)}
     apply(project, changes)

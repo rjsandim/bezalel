@@ -8,7 +8,7 @@ import tomllib
 import zipfile
 from xml.etree import ElementTree
 from dream_team import REFERENCE, expected_files, processes
-from check_delivery import ContractError, local_file, read_json, require, text, validate_config
+from check_delivery import ContractError, local_file, migrate_config, read_json, require, text, validate_config
 
 ROOT = Path(__file__).resolve().parents[1]
 SECTIONS = ["Objetivo e escopo", "Entradas e pré-requisitos", "Procedimento", "Saídas", "Validação", "Limites operacionais"]
@@ -155,12 +155,49 @@ def validate_agents():
         require(declared == set((ROOT / "agents/roles").glob("*.md")), "Contrato de agente órfão.")
         require(adapters == set((ROOT / "agents/codex").glob("*.toml")), "Adaptador de agente órfão.")
         require(claude_adapters == set((ROOT / 'agents/claude').glob('*.md')), "Adaptador Claude órfão.")
-        validate_config(read_json(ROOT / ".bezalel/project.example.json"))
+        validate_config(read_json(ROOT / "agents/templates/project.example.json"))
+        # Modelo legado (schema 2) mantido só porque checkers já instalados o validam ao
+        # atualizar; ele precisa migrar sem perdas para o schema 3 vigente.
+        validate_config(migrate_config(read_json(ROOT / ".bezalel/project.example.json")))
     except ContractError as error:
         return [str(error)]
     except (OSError, UnicodeError, TypeError, ValueError, KeyError, AttributeError):
         return ["Não foi possível validar catálogo, contratos ou adaptadores; conteúdo omitido."]
     return []
+
+
+ISSUE_BOT_FILES = [
+    "agents/issue-bot.md", "skills/issue-bot/SKILL.md", "skills/issue-bot/agents/openai.yaml",
+    "skills/issue-bot/scripts/issue_bot.py", "skills/issue-bot/scripts/ci_gate.py",
+    "skills/issue-bot/scripts/check_handoff.py", "skills/issue-bot/scripts/issue_session.sh",
+    "skills/issue-bot/references/handoff.schema.json", "skills/issue-bot/references/handoff-claude.example.json",
+    "skills/issue-bot/references/handoff-codex.example.json", "skills/issue-bot/references/decisao.example.json",
+    "skills/issue-bot/references/sessao-tmux.md",
+    "scripts/issue_bot.py", "scripts/ci_gate.py", "scripts/check_handoff.py", "scripts/issue_session.sh",
+]
+ISSUE_BOT_PROMPTS = ["implementar", "corrigir-ci", "revisar", "responder-handoff", "subir-ambiente"]
+
+
+def validate_issue_bot():
+    """Modo issue-bot: arquivos, prompts com as regras obrigatórias e ligações da documentação."""
+    errors = [f"Modo issue-bot: arquivo ausente: {name}" for name in ISSUE_BOT_FILES if not (ROOT / name).is_file()]
+    for name in ISSUE_BOT_PROMPTS:
+        path = ROOT / "skills/issue-bot/prompts" / (name + ".md")
+        if not path.is_file():
+            errors.append(f"Modo issue-bot: prompt ausente: {name}")
+            continue
+        content = path.read_text()
+        for rule in ["{{project_root}}", "merge", "chave de API", "critérios de aceite", "português do Brasil"]:
+            if rule not in content:
+                errors.append(f"Modo issue-bot: prompt {name} sem a regra obrigatória '{rule}'.")
+    links = {"README.md": "agents/issue-bot.md", "agents/README.md": "issue-bot.md", "agents/dream-team.md": "issue-bot.md"}
+    for source, target in links.items():
+        if not (ROOT / source).is_file() or "](" + target not in (ROOT / source).read_text():
+            errors.append(f"Modo issue-bot: {source} precisa ligar {target}.")
+    metadata = ROOT / "skills/issue-bot/agents/openai.yaml"
+    if metadata.is_file() and not re.search(r"allow_implicit_invocation:\s*false\b", metadata.read_text()):
+        errors.append("Modo issue-bot: a skill é de invocação explícita.")
+    return errors
 
 
 def validate_generated():
@@ -226,12 +263,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.parse_args()
     files = package_files()
-    errors = validate_structure(files) + validate_agents() + validate_generated() + validate_upstream() + validate_workbook_template()
+    errors = (validate_structure(files) + validate_agents() + validate_generated() + validate_upstream()
+              + validate_workbook_template() + validate_issue_bot())
     if errors:
         for error in errors:
             print(error, file=sys.stderr)
         return 1
-    print("Estrutura, catálogo de papéis, configuração de exemplo, metadados, links locais e template Excel verificados.")
+    print("Estrutura, catálogo de papéis, configuração de exemplo, metadados, links locais, template Excel e modo issue-bot verificados.")
     return 0
 
 

@@ -105,6 +105,16 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   confira etapas/decisões/condições entre contratos, catálogo e instruções locais.
   Não envie propostas ou sincronize o fluxo com ferramenta externa. Diferencie
   checker estrutural de revisão semântica; arquivos não provam decisões ou execução.
+- O [modo issue-bot](agents/issue-bot.md) é caminho adicional, sem remover a DreamTeam:
+  Codex implementa, CI verde é portão, Claude revisa em até duas rodadas de handoff
+  JSON e o humano testa e ordena o merge. Mantenha a skill `issue-bot` autocontida
+  (scripts, prompts, schema e exemplos na própria pasta; `scripts/issue_bot.py` e afins
+  na raiz são só atalhos). Nenhum comando faz merge, deploy ou usa chave de API; a
+  decisão humana de banco (R6) não é enxugada.
+- `.bezalel/project.json` está no schema 3 (campo `data`); o modelo vigente é
+  `agents/templates/project.example.json`. Preserve `.bezalel/project.example.json`
+  no schema 2 enquanto houver instalações cujo checker o valide ao atualizar; o
+  checker novo exige que ele migre sem perdas.
 
 ## Manutenção das instruções e da adoção
 
@@ -204,7 +214,10 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   `bash -n` nos scripts shell alterados. Os testes usam Docker simulado; o CLI
   real só pode ser usado por eles para `compose config`, sem daemon.
 - Mudanças em VPS: `python3 -B -m unittest discover -s skills/vps-deploy/tests -v`.
-- O CI (`validate.yml`) roda VPS, workbook e ENV (ferramentas do runner, sem
+- Mudanças no issue-bot usam a suíte em `tests/` (gh, tmux, CLIs e env simulados) e
+  `bash -n` nos scripts shell; o teste com tmux real só roda com `ISSUE_BOT_TMUX_SMOKE=1`,
+  em servidor isolado. Não inicie Codex/Claude reais nem envie prompts a sessões reais.
+- O CI (`validate.yml`) roda VPS, workbook, ENV e a sintaxe do issue-bot (ferramentas do runner, sem
   instalar); ao mudar comandos de validação ou dependências fixadas, atualize o
   workflow e a lista com hashes.
 - Mudanças documentais: confira links e comandos descritos; não execute comandos

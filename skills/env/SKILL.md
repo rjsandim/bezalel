@@ -42,7 +42,11 @@ usuário, prefixo e bancos lógicos por serviço. Para configurar ou migrar, lei
    exceto os `*.env.example`.
 3. **Confira base e contexto.** A branch nova parte de `base_ref`, depois de
    `origin/HEAD` já conhecido, depois da única entre `main` e `master`; falta ou
-   ambiguidade interrompe (sem fetch automático). O contexto Docker é explícito:
+   ambiguidade interrompe (sem fetch automático). Para revisar uma PR, use
+   `--branch <branch-da-pr>`: a worktree aponta para essa branch local (ou para a
+   única ref de tracking local já conhecida), sem fetch nem branch nova; `--issue <n>`
+   sem nome usa `issue-<n>`. Trocar a branch ou a issue de um ambiente existente
+   falha sem alterar nada. O contexto Docker é explícito:
    `auto` exige `docker_context`, e divergência com o estado salvo bloqueia.
 4. **Para gerar só arquivos**, use `ENV_DRY_RUN=1 bash "$SKILL_DIR/scripts/new.sh" <nome>`:
    cria worktree, Compose e `.env` sem tocar em infraestrutura.
@@ -59,11 +63,11 @@ usuário, prefixo e bancos lógicos por serviço. Para configurar ou migrar, lei
 |---|---|---|
 | `scripts/detect.sh` | Gera `.envstack/stack.yaml` se ausente | Pedido do usuário (arquivo local) |
 | `scripts/init.sh` | Gera Dockerfiles, `boot.sh`, `.env.example` e `.gitignore` em `.envstack/` | Pedido do usuário (arquivos locais) |
-| `scripts/new.sh <nome> [serviço...\|--all]` | Cria branch, worktree e Compose; sobe serviços; pode instalar dnsmasq/mkcert, usar sudo e reiniciar Traefik | `ENV_ALLOW_SHARED_INFRA=1`; `ENV_DRY_RUN=1` só gera arquivos |
-| `scripts/ctl.sh start\|ensure <nome> [serviço...\|--all]` | Liga serviços e dependências e o Traefik global | `ENV_ALLOW_SHARED_INFRA=1` |
+| `scripts/new.sh <nome> [--branch <branch>] [--issue <n>] [serviço...\|--all]` | Cria branch, worktree e Compose; sobe serviços; pode instalar dnsmasq/mkcert, usar sudo e reiniciar Traefik | `ENV_ALLOW_SHARED_INFRA=1`; `ENV_DRY_RUN=1` só gera arquivos |
+| `scripts/ctl.sh start\|ensure <nome> [serviço...\|--all]` | Liga serviços e dependências e o Traefik global; `ensure --branch/--issue` cria o ambiente pelo `new` quando ainda não existe | `ENV_ALLOW_SHARED_INFRA=1` |
 | `scripts/ctl.sh stop <nome>` | Para o ambiente; preserva containers, volumes e arquivos | Pedido do usuário |
 | `scripts/ctl.sh restart <nome>` | Reinicia só os serviços já ativos | Pedido do usuário |
-| `scripts/ctl.sh status <nome>` | Lista containers, inclusive parados | Leitura |
+| `scripts/ctl.sh status <nome> [serviço...] --json` | Lista containers (ou, com `--json`, worktree, branch, issue, URLs, portas, prontidão e banco, sem segredos; 0 pronto, 5 não pronto) | Leitura |
 | `scripts/update.sh <nome> [serviço...\|--all]` | Regenera Compose e reconstrói; preserva `.env`, worktree e volumes | `ENV_ALLOW_SHARED_INFRA=1` |
 | `scripts/destroy.sh <nome> --confirm <projeto>/<nome> [--keep-worktree]` | Remove containers, volumes exclusivos e estado; sem `--keep-worktree`, também worktree e branch | Pedido explícito do usuário com projeto e ambiente |
 

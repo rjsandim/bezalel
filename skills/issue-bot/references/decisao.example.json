@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "issue": 122,
+  "pr": 130,
+  "apos_rodada": 2,
+  "decisao": "iterar",
+  "autorizado_ate": 4,
+  "ator": "pessoa responsável (exemplo sintético)",
+  "fonte": "mensagem no chat da issue-bot",
+  "registrado_em": "2026-11-13T21:00:00-03:00",
+  "motivo": "Pedir para cobrir o AC-02 que restou parcial."
+}

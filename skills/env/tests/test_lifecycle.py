@@ -54,6 +54,9 @@ if command == 'config':
 if command == 'ps':
     if '--services' in rest:
         print('\n'.join(state['running']))
+    elif '--format' in rest:
+        for name in state['running']:
+            print(json.dumps({'Service': name, 'State': 'running', 'Health': ''}))
     sys.exit(0)
 if command == 'up':
     if os.environ.get('ENV_TEST_FAIL_UP') == '1':
@@ -161,6 +164,85 @@ services:
                     'config', '--format', 'json']).stdout)
                 self.assertEqual(config['name'], 'fixture-' + name)
                 self.assertEqual(config['services']['api']['container_name'], 'fixture-' + name + '-api')
+
+    def branch_with_commit(self, name):
+        self.run_process(['git', 'checkout', '-q', '-b', name])
+        (self.repo / 'api/feature.txt').write_text('commit da PR\n')
+        self.run_process(['git', 'add', '.'])
+        self.run_process(['git', '-c', 'user.name=Env Test', '-c', 'user.email=env@example.invalid', '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'pr'])
+        self.run_process(['git', 'checkout', '-q', 'main'])
+        return self.run_process(['git', 'rev-parse', name]).stdout.strip()
+
+    def test_existing_pr_branch_is_reused_instead_of_base(self):
+        sha = self.branch_with_commit('feature/foo')
+        base = self.run_process(['git', 'rev-parse', 'main']).stdout.strip()
+        self.command('new.sh', 'issue-122', '--branch', 'feature/foo', extra={'ENV_DRY_RUN': '1'})
+        worktree = self.repo / '.worktrees/issue-122'
+        head = self.run_process(['git', '-C', str(worktree), 'rev-parse', 'HEAD']).stdout.strip()
+        self.assertEqual(head, sha)
+        self.assertNotEqual(head, base)
+        state = self.skill / 'state/fixture/issue-122'
+        self.assertEqual((state / 'worktree-branch').read_text().strip(), 'feature/foo')
+        self.assertEqual((state / 'source-branch').read_text().strip(), 'feature/foo')
+        self.assertFalse((state / 'issue').exists())
+        self.assertFalse(self.run_process(['git', 'branch', '--list', 'issue-122']).stdout.strip())
+
+    def test_issue_alias_names_environment_and_records_issue(self):
+        self.branch_with_commit('pr-122')
+        self.command('ctl.sh', 'ensure', '--issue', '122', '--branch', 'pr-122', extra={'ENV_DRY_RUN': '1'})
+        state = self.skill / 'state/fixture/issue-122'
+        self.assertEqual((state / 'issue').read_text().strip(), '122')
+        self.assertEqual((state / 'worktree-branch').read_text().strip(), 'pr-122')
+        self.command('new.sh', '--issue', '123', extra={'ENV_DRY_RUN': '1'})
+        branch = self.run_process(['git', '-C', str(self.repo / '.worktrees/issue-123'), 'branch', '--show-current']).stdout.strip()
+        self.assertEqual(branch, 'issue-123')
+
+    def test_missing_branch_is_refused_without_fetch_and_tracking_ref_is_used(self):
+        calls = len(self.observed()['calls'])
+        self.command('new.sh', 'issue-9', '--branch', 'nao-existe', extra={'ENV_DRY_RUN': '1'}, expected=1)
+        self.assertFalse((self.repo / '.worktrees/issue-9').exists())
+        self.assertFalse(any(call[0] == 'compose' for call in self.observed()['calls'][calls:]))
+        sha = self.branch_with_commit('remota')
+        self.run_process(['git', 'remote', 'add', 'origin', str(self.base / 'remoto-inexistente.git')])
+        self.run_process(['git', 'update-ref', 'refs/remotes/origin/remota', sha])
+        self.run_process(['git', 'branch', '-D', 'remota'])
+        self.command('new.sh', 'issue-9', '--branch', 'remota', extra={'ENV_DRY_RUN': '1'})
+        head = self.run_process(['git', '-C', str(self.repo / '.worktrees/issue-9'), 'rev-parse', 'HEAD']).stdout.strip()
+        self.assertEqual(head, sha)
+
+    def test_divergent_branch_or_issue_for_existing_environment_fails(self):
+        self.branch_with_commit('outra')
+        result = self.command('new.sh', 'check', '--branch', 'outra', extra={'ENV_DRY_RUN': '1'}, expected=1)
+        self.assertIn('diverge', result.stderr)
+        self.command('ctl.sh', 'ensure', 'check', '--branch', 'outra', expected=1)
+        self.command('ctl.sh', 'ensure', 'check', '--branch', 'check', '--issue', '5', 'api')
+        self.command('ctl.sh', 'ensure', 'check', '--issue', '6', expected=1)
+        self.command('ctl.sh', 'start', 'check', '--branch', 'check', expected=1)
+        self.assertEqual(self.run_process(['git', '-C', str(self.worktree), 'branch', '--show-current']).stdout.strip(), 'check')
+
+    def test_status_json_reports_urls_ports_readiness_without_secrets(self):
+        self.command('ctl.sh', 'start', 'check')
+        result = self.command('ctl.sh', 'status', 'check', '--json')
+        status = json.loads(result.stdout)
+        self.assertEqual((status['project'], status['environment'], status['branch']), ('fixture', 'check', 'check'))
+        self.assertTrue(status['ready'])
+        self.assertEqual(Path(status['worktree']).resolve(), self.worktree.resolve())
+        self.assertEqual(status['docker_context'], 'fixture')
+        api = next(s for s in status['services'] if s['folder'] == 'api')
+        self.assertEqual((api['url'], api['port'], api['ready']), ('https://check-api.fixture.local', 8000, True))
+        self.assertFalse(next(s for s in status['services'] if s['folder'] == 'docs')['ready'])
+        self.assertEqual(status['database']['engine'], 'mysql')
+        self.assertNotIn('secret', result.stdout)
+        self.command('ctl.sh', 'status', 'check', 'docs', '--json', expected=5)
+        self.command('ctl.sh', 'stop', 'check')
+        self.assertFalse(json.loads(self.command('ctl.sh', 'status', 'check', '--json', expected=5).stdout)['ready'])
+        self.command('ctl.sh', 'status', 'check')
+        self.command('ctl.sh', 'status', 'check', 'api', expected=1)
+
+    def test_invalid_names_remain_rejected(self):
+        for name in ['Issue_122', 'codex/foo']:
+            with self.subTest(name=name):
+                self.command('new.sh', name, '--branch', 'main', extra={'ENV_DRY_RUN': '1'}, expected=1)
 
     def test_agent_prefix_is_rejected_before_creating_environment(self):
         calls = self.observed()['calls']

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "papel": "codex",
+  "issue": 122,
+  "pr": 130,
+  "rodada": 1,
+  "candidato": {
+    "base": "main",
+    "head": "issue-122",
+    "sha": "def456abc"
+  },
+  "ajustes": [
+    {
+      "id": "A1",
+      "status": "corrigido",
+      "como": "A policy passou a ser aplicada na rota e foi adicionado o teste de tenant.",
+      "commit": "def456abc"
+    },
+    {
+      "id": "A2",
+      "status": "nao_corrigido",
+      "como": "Renomear quebraria clientes existentes; fica fora desta rodada.",
+      "commit": null
+    }
+  ],
+  "gerado_em": "2026-11-13T20:40:00-03:00"
+}

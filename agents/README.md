@@ -94,6 +94,13 @@ TL e especialistas segue o fluxo. Peça delegação aos agentes pertinentes quan
 suportada/autorizada pelo aplicativo. Não use os agentes de entrega para executar
 merge, deploy ou as skills reservadas ao uso manual.
 
+## Modo issue-bot
+
+O [modo issue-bot](issue-bot.md) não usa estes nove agentes: o Codex implementa, o
+Claude revisa e o humano aprova, conduzidos pela [skill issue-bot](../skills/issue-bot/SKILL.md)
+em uma sessão tmux por issue. Os limites deste pacote valem igualmente: nenhuma etapa
+faz merge ou deploy, e a instalação não inicia o modo.
+
 ## Branches, entrega e encerramento
 
 Nomes de branches, worktrees e ambientes seguem R5 e o [processo de ambiente](processes/env.md).

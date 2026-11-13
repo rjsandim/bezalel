@@ -79,8 +79,8 @@ Revise o manifesto e os artefatos antes de operar. Detect/init geram arquivos lo
 4. **Remover o ambiente de validação.** Com autorização de remoção, rode `bash "$SKILL_DIR/scripts/destroy.sh" validar-env --confirm <projeto>/validar-env --keep-worktree` (sem a opção, o destroy recusa a worktree porque ela contém `.env` e `.idea/` gerados). Revise `git -C .worktrees/validar-env status --short --ignored`: sem trabalho a preservar, remova a worktree e a branch com `git worktree remove .worktrees/validar-env` e `git branch -d validar-env`, sem força. Se o Git recusar por arquivo não rastreado gerado pela skill, apague esse arquivo e repita. Confirme com `git worktree list` e `git branch --list validar-env` que nada restou. Em dry-run não há containers: pule o destroy e remova só a worktree, a branch e `$SKILL_DIR/state/<projeto>/validar-env/`.
 5. **Commitar.** Instrua o usuario a commitar `.envstack/` (`stack.yaml`, `boot.sh`, `*.Dockerfile` e `.envstack/.gitignore`) + o `.gitignore` da raiz. Os `*.env.example` ficam de fora (gitignored pelo `.envstack/.gitignore`, pois podem ter segredos do app); as worktrees tambem.
 
-## Roteiro: `new <nome> [serviço...|--all]`
-1. Escolha a descrição curta conforme as convenções e confira o nome exato da branch, worktree e ambiente; não crie uma worktree paralela com prefixo do aplicativo.
+## Roteiro: `new <nome> [--branch <branch>] [--issue <n>] [serviço...|--all]`
+1. Escolha a descrição curta conforme as convenções e confira o nome exato da branch, worktree e ambiente; não crie uma worktree paralela com prefixo do aplicativo. Para uma PR existente, passe `--branch <branch-da-pr>`: a branch precisa existir localmente (ou como única ref de tracking local); sem fetch implícito, a ausência falha e pede `git fetch` ao operador. Nesse caso branch e ambiente podem ter nomes diferentes (ex.: ambiente `issue-122`, branch `feature/foo`); o vínculo fica em `state/<projeto>/<nome>/worktree-branch`, `source-branch` e `issue`.
 2. `ENV_ALLOW_SHARED_INFRA=1 bash "$SKILL_DIR/scripts/new.sh" <nome>` (variável só nesta execução autorizada) inicia o padrão do manifesto; argumentos selecionam outros serviços. Repetir `new` em ambiente existente delega ao start, sem regenerar arquivos.
 3. Relate o que está ativo e como ligar os serviços restantes. O catálogo de URLs não significa que todas estejam atendendo.
 
@@ -108,6 +108,8 @@ services:
 - `bash "$SKILL_DIR/scripts/ctl.sh" stop <nome>` — guarda a seleção e para com prazo de 60s para encerramento; preserva containers, volumes e arquivos.
 - `bash "$SKILL_DIR/scripts/ctl.sh" restart <nome>` — reinicia só o que já está ativo; não acorda serviços desligados.
 - `bash "$SKILL_DIR/scripts/ctl.sh" status <nome>` — mostra também containers parados.
+- `bash "$SKILL_DIR/scripts/ctl.sh" status <nome> [serviço...] --json` — JSON com projeto, ambiente, issue, branch, worktree, contexto, URLs/portas/aliases, prontidão por serviço e porta do banco no host; nunca inclui senhas, tokens ou `.env`. Sem serviços, avalia o conjunto ativo (ou o último lembrado). Saída 0 pronto, 5 existe mas não está pronto, 1 erro.
+- `ENV_ALLOW_SHARED_INFRA=1 bash "$SKILL_DIR/scripts/ctl.sh" ensure <nome> --branch <branch> --issue <n>` — com o ambiente ausente, delega ao `new` (worktree na branch existente da PR, sem fetch); com ele presente, confere que branch e issue coincidem com as registradas e só garante os serviços. O modo issue-bot usa este comando e depois aplica o `data` do `.bezalel/project.json` (restore de snapshot) fora da skill env.
 
 A seleção é aditiva. `ensure` não desligará outros serviços. A prontidão HTTP/healthcheck não substitui os testes funcionais da tarefa. Compose antigo que não contém um serviço solicitado exige `update`; o controle falha sem regenerar configurações automaticamente.
 

@@ -151,6 +151,66 @@ validate_env_name() {
         fail "Nome invalido: '$name'. Use minusculas, numeros e traco (kebab-case)."
 }
 
+# ─── Alvo do ambiente: nome, branch existente e issue ──────────
+# Uso: parse_target_args [<nome>] [--branch <branch>] [--issue <n>] [--json] [servico...|--all]
+# Define ENV_NAME, TARGET_BRANCH, TARGET_ISSUE, TARGET_JSON e SERVICE_ARGS.
+# Sem <nome>, --issue N usa o nome padrao issue-N.
+parse_target_args() {
+    ENV_NAME="" TARGET_BRANCH="" TARGET_ISSUE="" TARGET_JSON=0
+    SERVICE_ARGS=()
+    if [ "$#" -gt 0 ] && [[ "$1" != --* ]]; then ENV_NAME="$1"; shift; fi
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --branch)
+                [ "$#" -ge 2 ] && [ -z "$TARGET_BRANCH" ] || fail "Informe uma unica branch depois de --branch."
+                TARGET_BRANCH="$2"; shift 2 ;;
+            --issue)
+                [ "$#" -ge 2 ] && [ -z "$TARGET_ISSUE" ] || fail "Informe um unico numero depois de --issue."
+                [[ "$2" =~ ^[1-9][0-9]*$ ]] || fail "--issue deve ser inteiro positivo."
+                TARGET_ISSUE="$2"; shift 2 ;;
+            --json) TARGET_JSON=1; shift ;;
+            *) SERVICE_ARGS+=("$1"); shift ;;
+        esac
+    done
+    if [ -z "$ENV_NAME" ] && [ -n "$TARGET_ISSUE" ]; then ENV_NAME="issue-$TARGET_ISSUE"; fi
+    validate_env_name "$ENV_NAME"
+    if [ -n "$TARGET_BRANCH" ]; then
+        [[ "$TARGET_BRANCH" != -* ]] && git check-ref-format --branch "$TARGET_BRANCH" >/dev/null 2>&1 \
+            || fail "Branch invalida: '$TARGET_BRANCH'."
+    fi
+}
+
+# Recusa trocar em silencio a branch ou a issue ja vinculadas ao ambiente.
+# Requer STATE_DIR e WORKTREE_DIR definidos.
+check_target_binding() {
+    local registered=""
+    if [ -f "$STATE_DIR/worktree-branch" ]; then
+        registered="$(cat "$STATE_DIR/worktree-branch")"
+    elif [ -d "$WORKTREE_DIR" ]; then
+        registered="$(git -C "$WORKTREE_DIR" symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
+    fi
+    if [ -n "$TARGET_BRANCH" ] && [ -n "$registered" ] && [ "$registered" != "$TARGET_BRANCH" ]; then
+        fail "Ambiente '$ENV_NAME' vinculado a branch '$registered'; --branch '$TARGET_BRANCH' diverge. Nada foi alterado."
+    fi
+    if [ -n "$TARGET_ISSUE" ] && [ -f "$STATE_DIR/issue" ] && [ "$(cat "$STATE_DIR/issue")" != "$TARGET_ISSUE" ]; then
+        fail "Ambiente '$ENV_NAME' vinculado a issue $(cat "$STATE_DIR/issue"); --issue $TARGET_ISSUE diverge. Nada foi alterado."
+    fi
+}
+
+# Worktree a partir de uma branch existente, sem fetch implicito nem branch nova da base.
+# Aceita a branch local ou uma unica ref de tracking local ja conhecida.
+add_worktree_for_branch() {
+    local root="$1" path="$2" branch="$3" tracking count
+    if git -C "$root" show-ref --verify --quiet "refs/heads/$branch"; then
+        git -C "$root" worktree add "$path" "$branch"
+        return
+    fi
+    tracking="$(git -C "$root" for-each-ref --format='%(refname:short)' "refs/remotes/*/$branch")"
+    count="$(printf '%s' "$tracking" | grep -c . || true)"
+    [ "$count" -eq 1 ] || fail "Branch '$branch' ausente localmente (ou ambigua entre remotos). Rode git fetch explicitamente e repita; nenhum fetch automatico."
+    git -C "$root" worktree add --track -b "$branch" "$path" "$tracking"
+}
+
 # ─── Deteccao ──────────────────────────────────────────────────
 detect_folder_type() {
     local dir="$1"
