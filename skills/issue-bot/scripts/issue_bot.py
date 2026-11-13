@@ -3,7 +3,7 @@
 
 Uso: issue_bot.py <comando> --project <pasta-do-projeto> --issue <n> [opções]
 Comandos: session-up, session-down, implement, ci-gate, review, respond, env-up, status,
-prepare-prompt <implement|review|respond|corrigir-ci|subir-ambiente>.
+prepare-prompt <implement|review|respond|corrigir-ci|subir-ambiente>, approve-restore (humano, em TTY).
 
 Códigos: 0 etapa concluída (CI verde; review com pode_mergear; ambiente pronto);
 1 erro de uso, contrato inválido, ferramenta ausente ou CLI sem login;
@@ -506,7 +506,8 @@ def cmd_env_up(ctx):
         result = restore_snapshot(ctx, data, status)
         if result.get('decisao_pendente'):
             emit({'ambiente': status, 'dados': result, 'decisao_pendente': 'restore',
-                  'detalhe': 'Confira o comando exato; com aprovação humana, repita com --restore-digest ' + result['digest'] + '.'})
+                  'detalhe': 'O humano confere o comando e aprova em terminal interativo: '
+                             'issue_bot.py approve-restore --project <raiz> --issue <n>; depois repita o env-up.'})
             return DECISION
         if result.get('codigo_saida'):
             emit({'ambiente': status, 'dados': result})
@@ -519,6 +520,57 @@ def restore_digest(data):
     canonical = json.dumps({'restore': data['restore'], 'workdir': data.get('workdir', '.')},
                            ensure_ascii=False, sort_keys=True, separators=(',', ':'))
     return hashlib.sha256(canonical.encode('utf-8')).hexdigest()
+
+
+def approvals_path(ctx):
+    base = os.environ.get('ISSUE_BOT_STATE_DIR') or os.path.join(
+        os.environ.get('XDG_STATE_HOME') or os.path.expanduser('~/.local/state'), 'bezalel-issue-bot')
+    path = Path(base).resolve() / 'restore-approvals.json'
+    # Fora da área de escrita do Codex (raiz do projeto); dentro dela a aprovação seria forjável.
+    if ctx.project == path.parent or ctx.project in path.parents:
+        raise BotError('O registro de aprovações não pode ficar dentro do projeto.')
+    return path
+
+
+def approvals(ctx):
+    path = approvals_path(ctx)
+    if not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        raise BotError('Registro de aprovações de restore ilegível: ' + str(path)) from None
+    return data if isinstance(data, dict) else {}
+
+
+def cmd_approve_restore(ctx):
+    """Aprovação humana do argv exato de restore; exige terminal interativo e confirmação digitada."""
+    if not (sys.stdin.isatty() and sys.stdout.isatty()):
+        raise BotError('approve-restore exige terminal interativo do humano; agentes não aprovam restore.')
+    data = data_settings(ctx)
+    if data['mode'] != 'snapshot':
+        raise BotError('data.mode não é snapshot; não há restore a aprovar.')
+    print('Comando de restore (project.json commitado):')
+    print('  argv:    ' + json.dumps(data['restore'], ensure_ascii=False))
+    print('  workdir: ' + data.get('workdir', '.') + ' (dentro da worktree do ambiente)')
+    print('Ele roda na sua máquina, fora do sandbox dos agentes, e deve recusar destino de produção.')
+    answer = input('Digite o nome do projeto (' + ctx.project_name + ') para aprovar: ').strip()
+    if answer != ctx.project_name:
+        print('Aprovação não registrada.')
+        return DECISION
+    path = approvals_path(ctx)
+    registry = approvals(ctx)
+    approved = registry.setdefault(str(ctx.project), [])
+    digest = restore_digest(data)
+    if digest not in approved:
+        approved.append(digest)
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    temporary = path.with_suffix('.tmp')
+    temporary.write_text(json.dumps(registry, indent=2) + '\n', encoding='utf-8')
+    os.chmod(temporary, 0o600)
+    os.replace(temporary, path)
+    print('Restore aprovado para este comando exato; qualquer mudança exige nova aprovação.')
+    return OK
 
 
 def restore_snapshot(ctx, data, status):
@@ -535,13 +587,11 @@ def restore_snapshot(ctx, data, status):
     workdir = (worktree / data.get('workdir', '.')).resolve()
     if workdir != worktree and worktree not in workdir.parents or not workdir.is_dir():
         raise BotError('data.workdir fora da worktree do ambiente ou inexistente.')
-    # Os agentes podem commitar no projeto: o restore só roda com o hash do argv exato
-    # aprovado pelo humano nesta execução; qualquer mudança no comando invalida a aprovação.
-    digest = restore_digest(data)
-    if ctx.args.restore_digest != digest:
+    # Os agentes podem commitar no projeto: o restore só roda se este argv exato foi aprovado
+    # pelo humano com approve-restore (terminal interativo), registrado fora do projeto.
+    if restore_digest(data) not in approvals(ctx).get(str(ctx.project), []):
         return {'modo': 'snapshot', 'restaurado': False, 'decisao_pendente': True, 'restore': data['restore'],
-                'workdir': data.get('workdir', '.'), 'digest': digest,
-                'digest_recebido_diverge': ctx.args.restore_digest is not None}
+                'workdir': data.get('workdir', '.')}
     # Comando do projeto, como lista e sem shell; deve recusar destino de produção por si.
     print('issue-bot: restore (project.json commitado): ' + json.dumps(data['restore'], ensure_ascii=False)
           + ' em ' + str(workdir), file=sys.stderr)
@@ -635,7 +685,7 @@ def cmd_prepare_prompt(ctx):
 
 COMMANDS = {'session-up': cmd_session_up, 'session-down': cmd_session_down, 'implement': cmd_implement,
             'ci-gate': cmd_ci_gate, 'review': cmd_review, 'respond': cmd_respond, 'env-up': cmd_env_up,
-            'status': cmd_status, 'prepare-prompt': cmd_prepare_prompt}
+            'status': cmd_status, 'prepare-prompt': cmd_prepare_prompt, 'approve-restore': cmd_approve_restore}
 
 
 def parser():
@@ -661,7 +711,8 @@ def parser():
              'implement': 'envia o prompt de implementação ao Codex', 'ci-gate': 'portão de CI da PR da issue',
              'review': 'com CI verde, envia a revisão ao Claude e valida o handoff', 'respond': 'envia o handoff ao Codex e valida a resposta',
              'env-up': 'sobe o ambiente da issue e aplica data do project.json', 'status': 'estado da issue em JSON',
-             'prepare-prompt': 'gera um prompt sem enviar'}
+             'prepare-prompt': 'gera um prompt sem enviar',
+             'approve-restore': 'humano aprova, em terminal interativo, o comando exato de restore'}
     commands = {}
     for name in COMMANDS:
         commands[name] = sub.add_parser(name, parents=[common], help=helps[name])
@@ -673,7 +724,6 @@ def parser():
     env.add_argument('--allow-shared-infra', action='store_true', help='autorização humana para esta execução')
     env.add_argument('--data-mode', choices=['empty'], help='só nesta execução, ignora data.mode ask')
     env.add_argument('--restore-again', action='store_true')
-    env.add_argument('--restore-digest', help='sha256 do comando de restore aprovado pelo humano (mostrado pelo env-up)')
     env.add_argument('--allow-before-review', action='store_true')
     env.add_argument('--env-skill-dir', help=argparse.SUPPRESS)
     env.add_argument('services', nargs='*', help='serviços do env (padrão do manifesto)')
@@ -682,7 +732,7 @@ def parser():
 
 # Opções específicas de um comando; os demais recebem estes valores.
 DEFAULTS = {'kind': None, 'output': None, 'send_fix': False, 'offline': False, 'allow_shared_infra': False,
-            'data_mode': None, 'restore_again': False, 'restore_digest': None, 'allow_before_review': False, 'env_skill_dir': None, 'services': None}
+            'data_mode': None, 'restore_again': False, 'allow_before_review': False, 'env_skill_dir': None, 'services': None}
 
 
 def main(argv=None):

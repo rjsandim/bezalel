@@ -122,10 +122,13 @@ e o status da env.
   issue não consegue fechar, com aviso explícito. PR de fork nunca é escolhida por
   inferência (`Closes #<n>` não basta); informe `--pr` quando for o caso.
 - O `env-up` só usa o `.bezalel/project.json` commitado e recusa alteração não
-  commitada. Como os agentes também podem commitar, o restore só roda com
-  `--restore-digest <sha256>` do argv exato e do `workdir`, que o `env-up` mostra
-  (código 5) para o humano conferir e aprovar; qualquer mudança no comando invalida
-  a aprovação.
+  commitada. Como os agentes também podem commitar, o restore só roda se o argv exato
+  e o `workdir` foram aprovados pelo humano com `approve-restore`, que exige terminal
+  interativo e o nome do projeto digitado. A aprovação fica fora do projeto
+  (`~/.local/state/bezalel-issue-bot/`, ou `ISSUE_BOT_STATE_DIR`), onde o sandbox do
+  Codex não escreve; qualquer mudança no comando exige nova aprovação. O Claude roda
+  sem prompts de permissão e não tem essa barreira: o limite dele é o papel de revisor
+  e o log da sessão.
 - Os agentes escrevem na raiz do projeto, inclusive em `.bezalel/handoff/`. Handoffs e a
   decisão humana são conferidos estruturalmente, não autenticados: o humano confere a
   decisão registrada e o histórico da sessão antes de agir sobre ela.

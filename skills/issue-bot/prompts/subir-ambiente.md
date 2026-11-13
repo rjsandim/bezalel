@@ -13,9 +13,9 @@ Regras obrigatórias:
 - Infra compartilhada (proxy, DNS, certificados): só com autorização humana nesta
   execução, via `--allow-shared-infra`. Nunca exporte ENV_ALLOW_SHARED_INFRA no shell.
 - `data.mode ask` (código 5): pergunte ao humano; `--data-mode empty` só se ele pedir.
-- Snapshot (código 5 com `decisao_pendente: restore`): mostre ao humano o comando e o
-  hash; só repita com `--restore-digest <hash>` depois que ele aprovar. Nunca calcule
-  nem repasse o hash por conta própria.
+- Snapshot (código 5 com `decisao_pendente: restore`): mostre o comando ao humano e peça
+  que ele rode `approve-restore` no próprio terminal. Não tente aprovar nem gravar o
+  registro de aprovações por conta própria.
 - Não crie máquina OrbStack por issue; não use `env destroy` sem pedido explícito.
 - Textos para o humano em português do Brasil.
 

@@ -49,8 +49,8 @@ Todos os comandos: `python3 "$SKILL_DIR/scripts/issue_bot.py" <comando> --projec
    skill env na branch da PR (`--branch`), com `--allow-shared-infra` somente quando o
    humano autorizar a infra compartilhada nesta execução, e aplica `data` do
    `project.json` commitado (`ask` sai 5; alteração não commitada é recusada).
-   `snapshot` mostra o comando exato e seu hash (código 5); depois da aprovação humana,
-   repita com `--restore-digest <hash>`. O restore roda uma vez por ambiente.
+   `snapshot` só restaura um comando aprovado pelo humano com `approve-restore`, em
+   terminal interativo; sem aprovação, mostra o comando e sai 5. Roda uma vez por ambiente.
 7. **Teste humano.** Ajustes de usabilidade voltam ao passo 2 e abrem novo ciclo de
    revisão (`review --cycle <n+1>`, arquivos `<issue>-c<ciclo>-r<n>-…`). Merge só com
    ordem explícita do humano, fora deste CLI.

@@ -257,6 +257,7 @@ class IssueBotTests(unittest.TestCase):
         (worktree / 'api').mkdir(parents=True)
         (state / 'status.json').write_text(json.dumps({'environment': 'issue-122', 'worktree': str(worktree), 'services': []}))
         self.env['FAKE_ENV_DIR'] = str(state)
+        self.env['ISSUE_BOT_STATE_DIR'] = str(self.base / 'aprovacoes')
         self.write('122-r1-claude.json', approved(self.claude))
         return ['--env-skill-dir', str(skill)], state, worktree
 
@@ -283,10 +284,14 @@ class IssueBotTests(unittest.TestCase):
         pending = json.loads(self.bot('env-up', *extra, expected=5).stdout)
         self.assertEqual(pending['decisao_pendente'], 'restore')
         self.assertEqual(pending['dados']['restore'], self.config['data']['restore'])
+        self.assertNotIn('digest', json.dumps(pending))
         self.assertFalse(flag.exists())
-        digest = pending['dados']['digest']
-        self.assertTrue(json.loads(self.bot('env-up', *extra, '--restore-digest', '0' * 64, expected=5).stdout)['dados']['digest_recebido_diverge'])
-        extra = [*extra, '--restore-digest', digest]
+        # Sem terminal interativo (como as ferramentas dos agentes), não há aprovação.
+        self.assertIn('terminal interativo', self.bot('approve-restore', expected=1).stderr)
+        self.assertEqual(self.approve_tty('outro-nome')[0], 5)
+        self.bot('env-up', *extra, expected=5)
+        code, output = self.approve_tty('rcastello')
+        self.assertEqual(code, 0, output)
         result = json.loads(self.bot('env-up', *extra).stdout)
         self.assertTrue(result['dados']['restaurado'])
         self.assertEqual(flag.read_text(), 'ok')
@@ -298,11 +303,41 @@ class IssueBotTests(unittest.TestCase):
         self.config['data']['restore'] = [sys.executable, '-c', 'raise SystemExit(7)']
         self.save_config()
         # Comando trocado (mesmo commitado) invalida a aprovação anterior.
-        changed = json.loads(self.bot('env-up', *extra, '--restore-again', expected=5).stdout)['dados']
-        self.assertTrue(changed['digest_recebido_diverge'])
-        extra[-1] = changed['digest']
+        self.bot('env-up', *extra, '--restore-again', expected=5)
+        self.assertEqual(self.approve_tty('rcastello')[0], 0)
         result = json.loads(self.bot('env-up', *extra, '--restore-again', expected=1).stdout)
         self.assertEqual(result['dados']['codigo_saida'], 7)
+
+    def approve_tty(self, answer):
+        import pty
+        try:
+            master, slave = pty.openpty()
+        except OSError:
+            self.skipTest('Sem pseudo-terminal disponível neste ambiente.')
+        process = subprocess.Popen([sys.executable, '-B', str(SKILL / 'scripts/issue_bot.py'), 'approve-restore',
+                                    '--project', str(self.project), '--issue', '122'],
+                                   stdin=slave, stdout=slave, stderr=slave, env=self.env, close_fds=True)
+        os.close(slave)
+        os.write(master, (answer + '\n').encode())
+        output = b''
+        while True:
+            try:
+                chunk = os.read(master, 4096)
+            except OSError:
+                break
+            if not chunk:
+                break
+            output += chunk
+        os.close(master)
+        return process.wait(), output.decode(errors='replace')
+
+    def test_approval_registry_cannot_live_inside_project(self):
+        extra, state, _ = self.env_fixture()
+        (state / 'ready').touch()
+        self.config['data'] = {'mode': 'snapshot', 'dataset': 'tiny', 'restore': ['true']}
+        self.save_config()
+        self.env['ISSUE_BOT_STATE_DIR'] = str(self.project / '.bezalel/aprovacoes')
+        self.assertIn('dentro do projeto', self.bot('env-up', *extra, expected=1).stderr)
 
     def test_env_up_uses_only_committed_restore_command(self):
         extra, state, worktree = self.env_fixture()
