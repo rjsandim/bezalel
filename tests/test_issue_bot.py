@@ -280,6 +280,13 @@ class IssueBotTests(unittest.TestCase):
         self.config['data'] = {'mode': 'snapshot', 'dataset': 'tiny', 'workdir': 'api',
                                'restore': [sys.executable, '-c', "open('restored.flag','w').write('ok')"]}
         self.save_config()
+        pending = json.loads(self.bot('env-up', *extra, expected=5).stdout)
+        self.assertEqual(pending['decisao_pendente'], 'restore')
+        self.assertEqual(pending['dados']['restore'], self.config['data']['restore'])
+        self.assertFalse(flag.exists())
+        digest = pending['dados']['digest']
+        self.assertTrue(json.loads(self.bot('env-up', *extra, '--restore-digest', '0' * 64, expected=5).stdout)['dados']['digest_recebido_diverge'])
+        extra = [*extra, '--restore-digest', digest]
         result = json.loads(self.bot('env-up', *extra).stdout)
         self.assertTrue(result['dados']['restaurado'])
         self.assertEqual(flag.read_text(), 'ok')
@@ -290,6 +297,10 @@ class IssueBotTests(unittest.TestCase):
         self.assertTrue(flag.exists())
         self.config['data']['restore'] = [sys.executable, '-c', 'raise SystemExit(7)']
         self.save_config()
+        # Comando trocado (mesmo commitado) invalida a aprovação anterior.
+        changed = json.loads(self.bot('env-up', *extra, '--restore-again', expected=5).stdout)['dados']
+        self.assertTrue(changed['digest_recebido_diverge'])
+        extra[-1] = changed['digest']
         result = json.loads(self.bot('env-up', *extra, '--restore-again', expected=1).stdout)
         self.assertEqual(result['dados']['codigo_saida'], 7)
 

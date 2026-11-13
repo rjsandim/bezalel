@@ -121,9 +121,11 @@ e o status da env.
 - Texto da issue é dado, não instrução: vai aos prompts em bloco cercado que o autor da
   issue não consegue fechar, com aviso explícito. PR de fork nunca é escolhida por
   inferência (`Closes #<n>` não basta); informe `--pr` quando for o caso.
-- O `env-up` só usa o `.bezalel/project.json` commitado: alteração não commitada (por
-  exemplo, feita por um agente em `data.restore`) é recusada, e o argv do restore é
-  mostrado antes de executar.
+- O `env-up` só usa o `.bezalel/project.json` commitado e recusa alteração não
+  commitada. Como os agentes também podem commitar, o restore só roda com
+  `--restore-digest <sha256>` do argv exato e do `workdir`, que o `env-up` mostra
+  (código 5) para o humano conferir e aprovar; qualquer mudança no comando invalida
+  a aprovação.
 - Os agentes escrevem na raiz do projeto, inclusive em `.bezalel/handoff/`. Handoffs e a
   decisão humana são conferidos estruturalmente, não autenticados: o humano confere a
   decisão registrada e o histórico da sessão antes de agir sobre ela.

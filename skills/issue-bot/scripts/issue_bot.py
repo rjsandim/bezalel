@@ -13,6 +13,7 @@ Nenhum código autoriza merge. Este CLI nunca chama `gh pr merge`, deploy ou cha
 """
 import argparse
 from datetime import datetime
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -503,11 +504,21 @@ def cmd_env_up(ctx):
         return DECISION
     if mode == 'snapshot':
         result = restore_snapshot(ctx, data, status)
+        if result.get('decisao_pendente'):
+            emit({'ambiente': status, 'dados': result, 'decisao_pendente': 'restore',
+                  'detalhe': 'Confira o comando exato; com aprovação humana, repita com --restore-digest ' + result['digest'] + '.'})
+            return DECISION
         if result.get('codigo_saida'):
             emit({'ambiente': status, 'dados': result})
             return ERROR
     emit({'ambiente': status, 'dados': result, 'proximo_passo': 'teste humano; merge só com ordem explícita'})
     return OK
+
+
+def restore_digest(data):
+    canonical = json.dumps({'restore': data['restore'], 'workdir': data.get('workdir', '.')},
+                           ensure_ascii=False, sort_keys=True, separators=(',', ':'))
+    return hashlib.sha256(canonical.encode('utf-8')).hexdigest()
 
 
 def restore_snapshot(ctx, data, status):
@@ -524,6 +535,13 @@ def restore_snapshot(ctx, data, status):
     workdir = (worktree / data.get('workdir', '.')).resolve()
     if workdir != worktree and worktree not in workdir.parents or not workdir.is_dir():
         raise BotError('data.workdir fora da worktree do ambiente ou inexistente.')
+    # Os agentes podem commitar no projeto: o restore só roda com o hash do argv exato
+    # aprovado pelo humano nesta execução; qualquer mudança no comando invalida a aprovação.
+    digest = restore_digest(data)
+    if ctx.args.restore_digest != digest:
+        return {'modo': 'snapshot', 'restaurado': False, 'decisao_pendente': True, 'restore': data['restore'],
+                'workdir': data.get('workdir', '.'), 'digest': digest,
+                'digest_recebido_diverge': ctx.args.restore_digest is not None}
     # Comando do projeto, como lista e sem shell; deve recusar destino de produção por si.
     print('issue-bot: restore (project.json commitado): ' + json.dumps(data['restore'], ensure_ascii=False)
           + ' em ' + str(workdir), file=sys.stderr)
@@ -655,6 +673,7 @@ def parser():
     env.add_argument('--allow-shared-infra', action='store_true', help='autorização humana para esta execução')
     env.add_argument('--data-mode', choices=['empty'], help='só nesta execução, ignora data.mode ask')
     env.add_argument('--restore-again', action='store_true')
+    env.add_argument('--restore-digest', help='sha256 do comando de restore aprovado pelo humano (mostrado pelo env-up)')
     env.add_argument('--allow-before-review', action='store_true')
     env.add_argument('--env-skill-dir', help=argparse.SUPPRESS)
     env.add_argument('services', nargs='*', help='serviços do env (padrão do manifesto)')
@@ -663,7 +682,7 @@ def parser():
 
 # Opções específicas de um comando; os demais recebem estes valores.
 DEFAULTS = {'kind': None, 'output': None, 'send_fix': False, 'offline': False, 'allow_shared_infra': False,
-            'data_mode': None, 'restore_again': False, 'allow_before_review': False, 'env_skill_dir': None, 'services': None}
+            'data_mode': None, 'restore_again': False, 'restore_digest': None, 'allow_before_review': False, 'env_skill_dir': None, 'services': None}
 
 
 def main(argv=None):
