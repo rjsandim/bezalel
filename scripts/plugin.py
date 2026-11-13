@@ -24,7 +24,8 @@ def build(source, output):
     for directory in ['skills', 'agents']:
         for name, value in files(source / directory).items():
             content[('contracts' if directory == 'agents' else directory) + '/' + name] = value
-    for script in ['distribution.py', 'project.py', 'plugin.py', 'check_delivery.py']:
+    for script in ['distribution.py', 'project.py', 'plugin.py', 'check_delivery.py',
+                   'check_handoff.py', 'ci_gate.py', 'issue_bot.py', 'issue_session.py', 'issue_session.sh']:
         content['scripts/' + script] = ((source / 'scripts' / script).read_bytes(), 0o644)
     for name in ['.bezalel/project.example.json']:
         content[name] = ((source / name).read_bytes(), 0o644)
@@ -147,7 +148,7 @@ def bind(project, root, state, clients, automatic, client=None):
         changes['.bezalel/project.json'] = {'kind': 'file', 'content': read_text(root / '.bezalel/project.example.json')}
     ignore = inside(project, '.bezalel/.gitignore')
     text = read_text(ignore) if ignore.exists() else ''
-    extra = [p for p in ['/base', '/plugin.local.json', '/update.lock', '/vps-deploy.local.json', '/deliveries/*.local.json', '/reviews/'] if p not in text.splitlines()]
+    extra = [p for p in ['/base', '/plugin.local.json', '/update.lock', '/vps-deploy.local.json', '/deliveries/*.local.json', '/reviews/', '/handoff/', '/logs/', '/issue-bot/'] if p not in text.splitlines()]
     if extra:
         changes['.bezalel/.gitignore'] = {'kind': 'file', 'content': append_lines(text, extra)}
     apply(project, changes)

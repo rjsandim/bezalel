@@ -70,6 +70,12 @@ usuário, prefixo e bancos lógicos por serviço. Para configurar ou migrar, lei
 `destroy` encerra **um** ambiente identificado. Auditoria e limpeza de vários
 ambientes concluídos, com backup e remoção de imagens, ficam com limpar-orbstack.
 
+Com `new.sh <nome> --branch X` ou `ctl.sh ensure <nome> --branch X`, use a
+branch/ref de tracking já existente localmente, sem criar outra pela base.
+`--issue N` usa nome padrão issue-N e registra a issue; pode acompanhar --branch.
+O vínculo é preservado e divergências são recusadas. `status <nome> --json`
+informa URLs/portas/branch/worktree/readiness, sem credenciais (5 se não pronto).
+
 ## Saídas
 
 - `.envstack/`: manifesto, Dockerfiles e `boot.sh` versionáveis; `*.env.example`

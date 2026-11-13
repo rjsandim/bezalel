@@ -4,7 +4,7 @@
 **DreamTeam** é sua equipe de nove agentes para corrigir bugs e desenvolver melhorias e features.
 O fluxo é mantido nos arquivos do pacote, sem depender de ferramenta externa de modelagem.
 
-O plugin reúne a DreamTeam, seu fluxo de desenvolvimento e 20 skills, incluindo nove
+O plugin reúne a DreamTeam, seu fluxo de desenvolvimento e 21 skills, incluindo nove
 importações com conteúdo preservado e duas auditorias adaptadas.
 Há contratos portáteis, adaptadores para Codex e Claude Code, instalação por
 projeto, pacote de plugin e validadores locais.
@@ -13,10 +13,10 @@ hospedado, monitoramento ou runtime próprio que aplique autorizações.
 
 ## Inventário de skills
 
-As **20 skills disponíveis** estão organizadas pelo uso: **13 indicadas no
+As **21 skills disponíveis** estão organizadas pelo uso: **13 indicadas no
 fluxo da DreamTeam**, **cinco reservadas à chamada manual** e **duas operacionais
-fora do fluxo**. Sete delas são de invocação explícita (`allow_implicit_invocation: false`):
-as cinco manuais do Akita, vps-deploy e limpar-orbstack; as outras 13 podem ser
+fora do fluxo** e **uma para issue-bot**. Sete delas são de invocação explícita (`allow_implicit_invocation: false`):
+as cinco manuais do Akita, vps-deploy e limpar-orbstack; as outras 14 podem ser
 escolhidas pelo agente quando o pedido combina com a descrição. A indicação no fluxo depende da etapa, do escopo e dos
 pré-requisitos; não significa executar todas em cada demanda.
 
@@ -61,6 +61,12 @@ uma PR não inicia deploy nem comprova que um ambiente pode ser removido.
 | [vps-deploy](skills/vps-deploy/SKILL.md) | Orientar operações de VPS com configuração por projeto | Markdown e validador Python |
 | [limpar-orbstack](skills/limpar-orbstack/SKILL.md) | Auditar e limpar ambientes explicitamente autorizados | Markdown e roteiros de preservação |
 
+### Modo issue-bot
+
+| Skill | Finalidade | Implementação |
+|---|---|---|
+| [issue-bot](skills/issue-bot/SKILL.md) | Conduzir issue com Codex, CI verde, revisão Claude e aceite humano local | Python padrão, sessão tmux e prompts |
+
 O [inventário de todas as skills analisadas](agents/skills-inventario.md)
 e a [relação por processo e etapa](agents/dream-team-skills.md) registram a
 seleção de 13 skills em 24 etapas do fluxo da DreamTeam. As cópias ficam somente nesta árvore;
@@ -68,6 +74,31 @@ os agentes referenciam os métodos pertinentes sem instalar ferramentas ou alter
 as instalações globais.
 As cinco novas skills manuais têm [condições de uso próprias](agents/skills-uso-manual.md)
 e metadado de invocação explícita; não são chamadas pelas etapas do fluxo.
+
+## Modo issue-bot
+
+O [modo issue-bot](agents/issue-bot.md) é um caminho adicional: issue com critérios e
+fora de escopo → Codex implementa e abre PR → CI verde → Claude revisa issue versus
+PR → handoff JSON → ambiente ENV e dados configurados → teste humano. Até duas
+rodadas por ciclo; depois o humano decide iterar ou finalizar. Correções de CI não
+contam como rodada. Não exige nove papéis nem Excel; o gate humano anterior a
+schema de banco/migrations/relações complexas permanece. A DreamTeam clássica
+continua disponível com seus requisitos, incluindo revisão pré-PR e Excel.
+
+Instalar o plugin não inicia o modo: chame a [skill](skills/issue-bot/SKILL.md) ou
+`python3 /caminho/bezalel/scripts/issue_bot.py session-up --project . --issue N`
+com uma issue concreta. O [guia tmux](skills/issue-bot/references/sessao-tmux.md)
+descreve login de conta, flags verificadas, acompanhamento e limites do sandbox.
+Somente sessões de conta, nunca chave de API. Merge e deploy continuam manuais.
+
+Configuração de projeto usa schema 3, com `data.mode` (`ask`, `empty`, `snapshot`).
+Atualize o pacote e execute explicitamente
+`python3 .bezalel/base/scripts/project.py migrate-config --project .` para migrar
+schema 2 preservando campos e acrescentando `ask`. Sem decisão de dados ou
+autorização de infraestrutura compartilhada, env-up sai 5; não restaura produção.
+O [contrato](agents/issue-bot.md) documenta todos os comandos, handoffs e códigos.
+As atualizações nos projetos consumidores são tarefas separadas; testes do pacote
+não certificam sessões reais, CI remota, infraestrutura ou restore.
 
 ## DreamTeam e seu fluxo de desenvolvimento
 

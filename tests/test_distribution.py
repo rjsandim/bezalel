@@ -701,6 +701,11 @@ class DistributionTests(unittest.TestCase):
         self.assertIn('contracts/processes/qa.md', (package / 'contracts/codex/dream-team-qa.toml').read_text())
         self.assertTrue((package / 'contracts/processes/qa.md').is_file())
         self.assertFalse((package / 'agents').exists())
+        for script in ['issue_bot.py', 'check_handoff.py', 'ci_gate.py']:
+            result = subprocess.run([sys.executable, '-B', str(package / 'scripts' / script), '--help'], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((package / 'contracts/contracts/handoff.schema.json').is_file())
+        self.assertIn('./skills/issue-bot', claude['skills'])
         with (source / 'agents/dream-team.md').open('a') as stream:
             stream.write('\nNova versão\n')
         v2 = plugin.build(source, self.root / 'plugin2')

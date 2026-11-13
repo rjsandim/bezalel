@@ -53,6 +53,16 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
 
 ## Papéis e contratos de entrega
 
+- O [modo issue-bot](agents/issue-bot.md) é adicional ao clássico: Codex implementa,
+  CI verde antes do Claude, handoffs JSON e duas rodadas por ciclo, depois decisão
+  humana. Não exige nove papéis/Excel/accept clássico; preserva R6, isolamento e
+  merge/deploy manuais. Instalação não inicia o CLI. Scripts/testes novos devem
+  funcionar tanto com `agents/` quanto com `contracts/` no pacote nativo.
+- Configuração de projeto usa schema 3 com `data`; migrar schema 2 é explícito via
+  project.py migrate-config. Handoffs/logs/estado de issue são locais ignorados.
+  ENV aceita vínculo explícito de branch diferente do ambiente no modo issue-bot;
+  fora dessa extensão, mantenha a convenção existente. Nunca fetch implícito.
+
 - Agente define papel/processo; `.bezalel/project.json` aponta instruções de
   arquitetura/negócio do projeto; skills definem procedimentos. Não misture as três
   responsabilidades. A instalação e distribuição autorizadas disponibilizam

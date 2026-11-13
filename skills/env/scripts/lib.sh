@@ -151,6 +151,52 @@ validate_env_name() {
         fail "Nome invalido: '$name'. Use minusculas, numeros e traco (kebab-case)."
 }
 
+# Opções de vínculo são consumidas antes da seleção de serviços; não há fetch.
+parse_environment_args() {
+    ENV_NAME=""; SOURCE_BRANCH=""; TARGET_BRANCH=""; TRACKING_REF=""; ISSUE_NUMBER=""; STATUS_JSON=0; SERVICE_ARGS=()
+    if [ "$#" -gt 0 ] && [[ "$1" != --* ]]; then ENV_NAME="$1"; shift; fi
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --branch) [ "$#" -ge 2 ] || fail "Falta branch."; SOURCE_BRANCH="$2"; shift 2 ;;
+            --issue) [ "$#" -ge 2 ] || fail "Falta issue."; ISSUE_NUMBER="$2"; shift 2 ;;
+            --json) STATUS_JSON=1; shift ;;
+            --all) SERVICE_ARGS+=("$1"); shift ;;
+            --*) fail "Opcao desconhecida." ;;
+            *) SERVICE_ARGS+=("$1"); shift ;;
+        esac
+    done
+    if [ -n "$ISSUE_NUMBER" ]; then
+        [[ "$ISSUE_NUMBER" =~ ^[1-9][0-9]*$ ]] || fail "Issue invalida."
+        ENV_NAME="${ENV_NAME:-issue-$ISSUE_NUMBER}"
+    fi
+    validate_env_name "$ENV_NAME"
+    if [ -n "$SOURCE_BRANCH" ]; then
+        git check-ref-format --branch "$SOURCE_BRANCH" >/dev/null 2>&1 || fail "Branch invalida."
+        if git -C "$(repo_root)" show-ref --verify --quiet "refs/heads/$SOURCE_BRANCH"; then
+            TARGET_BRANCH="$SOURCE_BRANCH"
+        elif git -C "$(repo_root)" show-ref --verify --quiet "refs/remotes/$SOURCE_BRANCH"; then
+            TRACKING_REF="refs/remotes/$SOURCE_BRANCH"; TARGET_BRANCH="$ENV_NAME"
+        else fail "Branch/ref local ausente; solicite fetch/checkout explicito ao operador."; fi
+    fi
+}
+
+validate_requested_branch() {
+    local path="$1" actual
+    if [ -f "$STATE_DIR/issue" ] && [ -n "$ISSUE_NUMBER" ]; then
+        [ "$(cat "$STATE_DIR/issue")" = "$ISSUE_NUMBER" ] || fail "Issue difere do vinculo salvo."
+    fi
+    if [ -d "$path" ]; then
+        validate_worktree "$path" "${TARGET_BRANCH:-$ENV_NAME}"
+        actual="$(git -C "$path" symbolic-ref --quiet --short HEAD)"
+        [ -z "$TARGET_BRANCH" ] || [ "$actual" = "$TARGET_BRANCH" ] || fail "Branch solicitada difere da worktree registrada."
+        if [ -n "$SOURCE_BRANCH" ] && [ -f "$STATE_DIR/source-branch" ]; then
+            [ "$(cat "$STATE_DIR/source-branch")" = "$SOURCE_BRANCH" ] || fail "Origem solicitada difere do vinculo salvo."
+        fi
+    elif [ -f "$STATE_DIR/worktree-branch" ]; then
+        fail "Estado existe mas a worktree esta ausente."
+    fi
+}
+
 # ─── Deteccao ──────────────────────────────────────────────────
 detect_folder_type() {
     local dir="$1"

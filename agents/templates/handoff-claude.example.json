@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "issue": 122,
+  "pr": 130,
+  "rodada": 1,
+  "candidato": {
+    "base": "main",
+    "head": "issue-122",
+    "sha": "abc123def"
+  },
+  "gerado_em": "2026-11-13T20:15:00-03:00",
+  "papel": "claude",
+  "ci": {
+    "status": "passed",
+    "evidence": "Fixture sintética: gh pr checks",
+    "url": "https://github.com/example/fixture/pull/130/checks"
+  },
+  "veredito": "ajustes",
+  "criterios": [
+    {
+      "id": "AC-01",
+      "criterio": "Filtrar a lista por período.",
+      "status": "parcial",
+      "evidencia": "Fixture: validação do período ausente no diff."
+    }
+  ],
+  "ajustes": [
+    {
+      "id": "A1",
+      "gravidade": "bloqueante",
+      "arquivo": "src/list.py:42",
+      "problema": "Período inválido aceito.",
+      "porque": "Critério AC-01 incompleto.",
+      "sugestao": "Validar limites do período."
+    }
+  ],
+  "fora_de_escopo": [],
+  "skills_usadas": [
+    "pr-audit",
+    "security-audit"
+  ]
+}

@@ -87,6 +87,20 @@ class DeliveryContractTests(unittest.TestCase):
         self.record['pull_requests'] = [{'repository': 'principal', 'url': 'https://github.com/example/fixture/pull/1', 'base': 'production', 'head': 'fixture-head-1', 'state': 'open', 'draft': False, 'verified_at': '2026-01-01T12:00:00+00:00', 'ci': {'status': 'pending', 'evidence': 'fixture://ci-after-open'}}]
         self.record['handoff'] = self.result(next_steps='Humano acompanha CI e decide merge/deploy.')
 
+    def test_review_ready_requires_passed_without_relaxing_classic_handoff(self):
+        self.ready_to_handoff()
+        for status in ['pending', 'failed', 'not_applicable']:
+            with self.subTest(status=status):
+                self.record['pull_requests'][0]['ci']['status'] = status
+                self.validate('handoff')
+                with self.assertRaises(delivery.ContractError):
+                    self.validate('review-ready')
+        self.record['pull_requests'][0]['ci']['status'] = 'passed'
+        self.validate('review-ready')
+        self.record['pull_requests'][0]['ci']['evidence'] = ''
+        with self.assertRaises(delivery.ContractError):
+            self.validate('review-ready')
+
     def validate(self, stage='deliver'):
         delivery.validate_delivery(self.record, self.project, stage, self.config)
 

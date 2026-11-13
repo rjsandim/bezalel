@@ -7,8 +7,8 @@ manter um MD paralelo por demanda. O
 [modelo](templates/delivery.example.json) é incompleto por intenção; não contém
 aprovações ou resultados fictícios.
 
-O registro e o catálogo usam `schema_version: 3`; a configuração do projeto
-permanece em `schema_version: 2`. Esses campos identificam o formato dos dados,
+O registro, o catálogo e a configuração do projeto usam `schema_version: 3`.
+O handoff do modo issue-bot usa schema 1. Esses campos identificam o formato dos dados,
 não uma versão da equipe ou dos agentes.
 
 Guarde o snapshot em `.bezalel/deliveries/<id>.local.json`; incorpore
@@ -23,6 +23,14 @@ em `context.architecture/business`, interfaces, `checks.test/lint/build` como
 listas de argumentos e `production_branches` como mapa repositório → branch real.
 Não presuma main/master. Os nomes de repositórios precisam coincidir com os do
 candidato. Configuração não contém permissões ou segredos e não executa comandos.
+
+O campo obrigatório `data` declara `mode: ask|empty|snapshot`. Snapshot exige
+`dataset: tiny|full` e `restore` como lista de argumentos; `workdir` e `docs` são
+caminhos relativos opcionais. Empty/ask não aceitam restore/dataset. O validador
+nunca executa comandos; apenas env-up do [issue-bot](issue-bot.md) usa restore após
+readiness e conferência do destino. Migre schema 2 explicitamente com
+`python3 .bezalel/base/scripts/project.py migrate-config --project .`; campos são
+preservados e data inicia em ask. Não há migração automática na atualização.
 
 ## Etapas conferidas
 
@@ -39,6 +47,7 @@ python3 .bezalel/base/scripts/check_delivery.py --project . --record .bezalel/de
 | `accept` | Candidato integrado, checks prévios, revisão TL, AppSec, QA e roteiro pronto para execução humana. |
 | `deliver` | Candidato tecnicamente validado, roteiro e rascunho da PR. Não exige aceite humano para abrir a PR. |
 | `handoff` | Acrescenta todas as PRs abertas/verificadas na base/head previstos, `draft: false`, CI observado e orientações manuais. |
+| `review-ready` | Opcional no clássico: mesmos requisitos de handoff e CI `passed` com evidência em todas as PRs. No issue-bot, o gate equivalente é obrigatório via ci_gate.py e check_handoff.py, sem exigir este registro clássico. |
 | `accepted` | Aceite humano da versão/roteiro realmente executados na PR aberta. Não prova merge. |
 | `merged` | Interação humana e consulta posterior ao serviço confirmando todas as PRs mergeadas na base/head previstos. |
 | `finish` | Acrescenta issues existentes fechadas/verificadas e resultado completo do destroy do alvo registrado, ou ambiente comprovadamente não aplicável. |

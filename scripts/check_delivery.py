@@ -12,12 +12,19 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 DIMENSIONS = {"files", "database", "queues", "ports", "storage"}
-STAGES = ("plan", "database", "investigate", "implement", "accept", "deliver", "handoff", "accepted", "merged", "finish", "close")
+STAGES = ("plan", "database", "investigate", "implement", "accept", "deliver", "handoff", "review-ready", "accepted", "merged", "finish", "close")
 DEVELOPERS = {"dev-fullstack", "backend", "frontend-web", "mobile"}
 
 
 class ContractError(ValueError):
     """Diagnóstico fixo, sem reproduzir dados privados da entrada."""
+
+
+class ContractParser(argparse.ArgumentParser):
+    """CLIs do issue-bot reservam exit 2 para CI/ajustes, não erro de uso."""
+    def error(self, message):
+        self.print_usage(sys.stderr)
+        self.exit(1, 'Argumentos inválidos; consulte --help.\n')
 
 
 def require(condition, message):
@@ -74,9 +81,9 @@ def https_reference(value):
 
 
 def validate_config(config, project=None):
-    fields = {"schema_version", "project", "context", "interfaces", "checks", "production_branches"}
+    fields = {"schema_version", "project", "context", "interfaces", "checks", "production_branches", "data"}
     require(isinstance(config, dict) and set(config) == fields, "Configuração do projeto: campos ausentes/desconhecidos; não declare permissões, credenciais ou observadores.")
-    require(type(config["schema_version"]) is int and config["schema_version"] == 2 and text(config["project"]), "Use schema_version 2 e nome do projeto; migre o formato 1 explicitamente.")
+    require(type(config["schema_version"]) is int and config["schema_version"] == 3 and text(config["project"]), "Use schema_version 3 e nome do projeto; migre o formato 2 explicitamente com project.py migrate-config.")
     context = config["context"]
     require(isinstance(context, dict) and set(context) == {"architecture", "business"}, "Declare contexto de arquitetura e negócio.")
     for value in context.values():
@@ -89,6 +96,18 @@ def validate_config(config, project=None):
     require(all(isinstance(command, list) and all(text(arg) for arg in command) for command in checks.values()), "Comandos são listas de argumentos; não são executados pelo validador.")
     branches = config["production_branches"]
     require(isinstance(branches, dict) and branches and all(text(repo) and text(branch) for repo, branch in branches.items()), "Declare branch de produção real por repositório, sem presumir main/master.")
+    data = config['data']
+    require(isinstance(data, dict) and set(data) <= {'mode', 'dataset', 'restore', 'workdir', 'docs'} and data.get('mode') in {'snapshot', 'empty', 'ask'}, 'Declare data.mode: snapshot, empty ou ask.')
+    if data['mode'] == 'snapshot':
+        require(data.get('dataset') in {'tiny', 'full'} and isinstance(data.get('restore'), list) and data['restore'] and all(text(a) for a in data['restore']), 'Snapshot exige dataset tiny/full e restore como lista de argumentos.')
+    else:
+        require('restore' not in data and 'dataset' not in data, 'Restore/dataset só se aplicam a snapshot.')
+    for key in ('workdir', 'docs'):
+        if key in data:
+            path = Path(data[key]) if text(data[key]) else None
+            require(path is not None and not path.is_absolute() and '..' not in path.parts, 'Caminho de data deve ser relativo e interno ao projeto.')
+            if project is not None:
+                require((project / path).resolve() == project or project in (project / path).resolve().parents, 'Caminho de data fora do projeto.')
 
 
 def human_decision(value, subject, decision="approved"):
@@ -448,8 +467,11 @@ def validate_delivery(record, project, stage, config=None):
         require(text(record["acceptance"].get("execution_evidence")), "Aceite exige roteiro realmente executado pelo humano.")
         return
     require(local_file(project, record.get("pr_draft"), "Rascunho de PR").stat().st_size > 0, "Rascunho de PR vazio.")
-    if stage == "handoff":
+    if stage in {"handoff", "review-ready"}:
         verify_handoff(record, config, candidate)
+        if stage == 'review-ready':
+            for pr in delivery_prs(record):
+                passed(pr.get('ci'), 'CI antes da revisão')
 
 
 def main():

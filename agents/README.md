@@ -3,6 +3,10 @@
 DreamTeam é a equipe de nove agentes do plugin **Bezalel**. Seu fluxo é mantido
 neste pacote, sem envio obrigatório a ferramenta externa.
 
+O [modo issue-bot](issue-bot.md) é um caminho adicional com Codex implementador,
+CI verde e Claude revisor, sem personificar os nove papéis. Ele tem contrato próprio
+de handoff e ambiente para teste humano; não substitui o fluxo clássico abaixo.
+
 Os agentes definem papéis; o [fluxo](dream-team.md) define regras comuns e
 cenários, e cada [processo](processes/) tem seu arquivo com etapas e condições;
 as [skills](dream-team-skills.md) descrevem métodos. O contexto de

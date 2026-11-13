@@ -11,8 +11,10 @@ source "$SCRIPT_DIR/lib.sh"
 source "$SCRIPT_DIR/services.sh"
 require_tools git yq jq envsubst docker python3
 
-ENV_NAME="${1:-}"; validate_env_name "$ENV_NAME"
-shift
+ORIGINAL_ARGS=("$@")
+parse_environment_args "$@"
+[ "$STATUS_JSON" = 0 ] || fail "--json so se aplica ao status."
+set -- ${SERVICE_ARGS[@]+"${SERVICE_ARGS[@]}"}
 apply_docker_engine
 [ "${ENV_DRY_RUN:-0}" = 1 ] || require_shared_infra_authorization
 
@@ -25,11 +27,12 @@ WORKTREE_DIR="$ROOT/.worktrees/$ENV_NAME"
 STATE_DIR="$SKILL_DIR/state/$PROJECT/$ENV_NAME"
 COMPOSE="$STATE_DIR/docker-compose.yml"
 [ ! -d "$STATE_DIR" ] || validate_state_owner "$STATE_DIR"
+validate_requested_branch "$WORKTREE_DIR"
 
 # Repetir new e aditivo, sem reescrever configuracoes de um ambiente existente.
 if [ -f "$COMPOSE" ] && [ "${ENVSTACK_UPDATE:-0}" != '1' ]; then
     [ "${ENV_DRY_RUN:-0}" != '1' ] || { info "Compose existente preservado: $COMPOSE"; exit 0; }
-    exec bash "$SCRIPT_DIR/ctl.sh" start "$ENV_NAME" "$@"
+    exec bash "$SCRIPT_DIR/ctl.sh" start "${ORIGINAL_ARGS[@]}"
 fi
 
 COUNT="$(yq -r '.services | length' "$MANIFEST")"
@@ -60,7 +63,11 @@ step "Ambiente '${ENV_NAME}' — projeto '${PROJECT}' (*.${PROJECT}.${TLD})"
 
 # ─── 1. Worktree a partir de referencia local verificavel ──────
 if [ ! -d "$WORKTREE_DIR" ]; then
-    if git -C "$ROOT" show-ref --verify --quiet "refs/heads/$ENV_NAME"; then
+    if [ -n "$TRACKING_REF" ]; then
+        git -C "$ROOT" worktree add -b "$TARGET_BRANCH" "$WORKTREE_DIR" "$TRACKING_REF"
+    elif [ -n "$SOURCE_BRANCH" ]; then
+        git -C "$ROOT" worktree add "$WORKTREE_DIR" "$SOURCE_BRANCH"
+    elif git -C "$ROOT" show-ref --verify --quiet "refs/heads/$ENV_NAME"; then
         git -C "$ROOT" worktree add "$WORKTREE_DIR" "$ENV_NAME"
     else
         BASE_REF="$(base_ref)"
@@ -68,9 +75,11 @@ if [ ! -d "$WORKTREE_DIR" ]; then
     fi
     ok "Worktree .worktrees/$ENV_NAME (branch $ENV_NAME)"
 else ok "Worktree ja existe"; fi
-validate_worktree "$WORKTREE_DIR" "$ENV_NAME"
+validate_worktree "$WORKTREE_DIR" "${TARGET_BRANCH:-$ENV_NAME}"
 mkdir -p "$STATE_DIR"
 git -C "$WORKTREE_DIR" symbolic-ref --quiet --short HEAD > "$STATE_DIR/worktree-branch"
+[ -z "$SOURCE_BRANCH" ] || printf '%s\n' "$SOURCE_BRANCH" > "$STATE_DIR/source-branch"
+[ -z "$ISSUE_NUMBER" ] || printf '%s\n' "$ISSUE_NUMBER" > "$STATE_DIR/issue"
 
 # ─── 2. Infra ──────────────────────────────────────────────────
 # DNS + certificado do projeto sao criados no `init`. Aqui so garantimos o
