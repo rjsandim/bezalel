@@ -129,7 +129,7 @@ def validate_round(project, issue, round_number=None, cycle=1, role=None):
     require(claude['issue'] == issue and claude['rodada'] == number and claude.get('ciclo',1) == cycle, 'Objeto do handoff divergente.')
     if number > 2:
         d = decision(project,issue,claude['pr'],cycle)
-        require(d and d['decisao'] == 'iterar' and d['apos_rodada'] < number <= d['autorizado_ate'], 'Rodada adicional exige decisão humana iterar.')
+        require(d and d['decisao'] == 'iterar' and number <= d['autorizado_ate'], 'Rodada adicional exige decisão humana iterar.')
     if number > 1:
         previous, _ = validate_round(project,issue,number-1,cycle,'par')
         require(previous['veredito'] == 'ajustes' and previous['pr'] == claude['pr'], 'Rodada anterior não exige ajustes ou pertence a outra PR.')

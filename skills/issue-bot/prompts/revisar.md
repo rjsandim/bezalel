@@ -14,6 +14,12 @@ da rodada anterior, item a item. Não implemente correções. Grave somente o JS
 do papel claude no caminho indicado, por arquivo temporário seguido de rename
 atômico. O parecer em prosa é auxiliar. Grave SHA exato, CI passed e evidência.
 
+Pacote Bezalel carregado: {{package_root}}. Leia o AGENTS.md e a configuração
+.bezalel/project.json do projeto, com seus contextos de arquitetura e negócio.
+Carregue as skills necessárias pelos caminhos absolutos em {{package_root}}/skills/
+(por exemplo pr-audit/SKILL.md e security-audit/SKILL.md), mesmo se a descoberta
+na worktree ainda não estiver instalada. Use os scripts dessa mesma distribuição.
+
 Trabalhe só dentro de {{project_root}}, com alterações de código exclusivamente na
 worktree {{worktree}}, branch {{branch}}. Não faça merge nem deploy, não ative
 auto-merge e não use chave de API. Use apenas login da conta. Não invente critérios

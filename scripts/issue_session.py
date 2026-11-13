@@ -15,6 +15,7 @@ from check_delivery import ContractError, ContractParser, require
 KEY_VARIABLES = ('OPENAI_API_KEY','ANTHROPIC_API_KEY','ANTHROPIC_AUTH_TOKEN','CODEX_API_KEY',
                  'AZURE_OPENAI_API_KEY','OPENAI_BASE_URL','ANTHROPIC_BASE_URL',
                  'CLAUDE_CODE_USE_BEDROCK','CLAUDE_CODE_USE_VERTEX','CLAUDE_CODE_USE_FOUNDRY')
+CLI_PROCESS_NAMES = {'codex': {'codex'}, 'claude': {'claude'}}
 
 
 def run(args, cwd=None, allowed=(0,)):
@@ -62,7 +63,7 @@ def cli_commands(cwd, root):
     require(all(flag in codex for flag in ('--sandbox','--ask-for-approval','--cd','--no-alt-screen','--no-daemon')),'Codex sem flags interativas suportadas; confira a versão.')
     require(all(flag in claude for flag in ('--dangerously-skip-permissions','--settings','--setting-sources','--strict-mcp-config','--tools')),'Claude sem flags suportadas; confira a versão.')
     login=run(['codex','login','status'],allowed=(0,1))
-    require(login.returncode==0 and 'chatgpt' in (login.stdout+login.stderr).lower(),'Faça codex login com sua conta ChatGPT.')
+    require(login.returncode==0 and re.search(r'^Logged in using ChatGPT\b',login.stdout+login.stderr,re.M|re.I),'Faça codex login com sua conta ChatGPT.')
     login=run(['claude','auth','status','--json'],allowed=(0,1))
     try:
         account=json.loads(login.stdout)
@@ -87,7 +88,7 @@ def cli_commands(cwd, root):
 def pane(session,window):
     require(window in {'codex','claude'},'Janela inválida.')
     result=tmux('display-message','-p','-t',session+':'+window,'#{pane_dead}\t#{pane_current_command}\t#{pane_current_path}\t#{pane_pipe}')
-    values=result.stdout.strip().split('\t')
+    values=result.stdout.rstrip('\n').split('\t')
     require(len(values)==4 and values[0]=='0','Janela ausente ou morta.')
     return values
 
@@ -103,10 +104,10 @@ def status(session):
     require(tmux('list-windows','-t','='+session,'-F','#{window_name}').stdout.splitlines()==['codex','claude'],'Sessão não possui exatamente as duas janelas esperadas.')
     windows=[]
     for window in ('codex','claude'):
-        data=tmux('display-message','-p','-t',session+':'+window,'#{pane_dead}\t#{pane_current_command}\t#{pane_current_path}').stdout.strip().split('\t')
+        data=tmux('display-message','-p','-t',session+':'+window,'#{pane_dead}\t#{pane_current_command}\t#{pane_current_path}').stdout.rstrip('\n').split('\t')
         require(len(data)==3,'Janela ausente.')
         log=tmux('show-options','-qv','-t',session,'@bezalel-log-'+window).stdout.strip()
-        windows.append({'name':window,'alive':data[0]=='0' and data[1]==window,'cwd':data[2],'log':log})
+        windows.append({'name':window,'alive':data[0]=='0' and data[1] in CLI_PROCESS_NAMES[window],'cwd':data[2],'log':log})
     return {'session':session,'exists':True,'windows':windows}
 
 
@@ -145,7 +146,11 @@ def create(args):
         os.fchmod(fd,0o600)
         os.close(fd)
         tmux('set-option','-t',session,'@bezalel-log-'+window,str(log))
-        tmux('pipe-pane','-o','-t',session+':'+window,'cat >> '+shlex.quote(str(log)))
+        target=session+':'+window
+        # pipe-pane -o também fecha o pipe anterior quando usado como toggle.
+        # Idempotência precisa consultar pane_pipe antes de chamar novamente.
+        if tmux('display-message','-p','-t',target,'#{pane_pipe}').stdout.strip()!='1':
+            tmux('pipe-pane','-o','-t',target,'cat >> '+shlex.quote(str(log)))
     return hint(session)
 
 
@@ -179,7 +184,7 @@ def main():
                     output='Sessão encerrada; logs e ambiente preservados.'
                 else:
                     values=pane(session,args.window)
-                    require(values[1]==args.window,'CLI não está em primeiro plano; não enviaremos texto ao shell.')
+                    require(values[1] in CLI_PROCESS_NAMES[args.window],'CLI não está em primeiro plano; não enviaremos texto ao shell.')
                     target=session+':'+args.window
                     if args.command=='send':
                         require(args.text_file and not args.text_file.is_symlink(),'Informe arquivo de texto real.')
@@ -188,7 +193,7 @@ def main():
                         # load-buffer/paste-buffer evita interpretar $(), ``, - ou teclas.
                         buffer='bezalel-'+session+'-'+args.window
                         tmux('load-buffer','-b',buffer,str(args.text_file.resolve()))
-                        tmux('paste-buffer','-d','-b',buffer,'-t',target)
+                        tmux('paste-buffer','-p','-d','-b',buffer,'-t',target)
                         tmux('send-keys','-t',target,'Enter')
                         output='Prompt enviado.'
                     elif args.command=='capture':

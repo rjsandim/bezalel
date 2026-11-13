@@ -47,6 +47,7 @@ ou infraestrutura. Nenhum código autoriza merge.
 `python3 "$BEZALEL_ROOT/scripts/check_handoff.py" --project . --issue N` confere
 contratos sem rede. CI é conferida por ci_gate.py; ENV usa status --json. Testes
 sintéticos do pacote não comprovam um piloto com CLIs ou infraestrutura reais.
+Testes da própria skill ficam em [manutenção](references/manutencao.md).
 
 ## Limites operacionais
 

@@ -7,6 +7,12 @@ justificativa explícita. Não invente decisão humana nem altere o arquivo do C
 Execute checks locais e atualize a PR; grave JSON do papel codex, candidato após
 as correções, por rename atômico. A próxima revisão aguarda CI verde.
 
+Pacote Bezalel carregado: {{package_root}}. Leia o AGENTS.md e a configuração
+.bezalel/project.json do projeto, com seus contextos de arquitetura e negócio.
+Carregue as skills necessárias pelos caminhos absolutos em {{package_root}}/skills/
+(por exemplo pr-audit/SKILL.md e security-audit/SKILL.md), mesmo se a descoberta
+na worktree ainda não estiver instalada. Use os scripts dessa mesma distribuição.
+
 Trabalhe só dentro de {{project_root}}, com alterações de código exclusivamente na
 worktree {{worktree}}, branch {{branch}}. Não faça merge nem deploy, não ative
 auto-merge e não use chave de API. Use apenas login da conta. Não invente critérios

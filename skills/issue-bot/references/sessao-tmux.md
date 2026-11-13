@@ -26,7 +26,8 @@ bash /caminho/bezalel/scripts/issue_session.sh destroy --session rcastello-122
 ```
 
 Send usa buffer tmux como texto, sem interpolar shell; capture usa capture-pane
--p -J. Logs usam pipe-pane -o com append, em `.bezalel/logs/` do checkout principal,
+-p -J. Logs usam pipe-pane -o com append (só quando não há pipe ativo, sem alternar o
+pipe existente), em `.bezalel/logs/` do checkout principal,
 fora da worktree efêmera. `--log-dir` alternativo deve ficar nesse projeto, sem
 symlink e fora de `.worktrees/`. Arquivos são privados e gitignorados; a captura
 contém a conversa real e não oferece anonimização automática. Nunca imprima
@@ -35,8 +36,8 @@ Status JSON informa janelas, processos e caminhos. Saídas: 0 ok, 1 erro.
 
 ## Flags e limites verificados
 
-Em 13/11/2026, ajuda local: Codex CLI 0.163.0 e Claude Code 2.1.316. Nenhuma sessão
-real foi iniciada como teste. A cada create o script confirma flags/login, sem
+Em 13/11/2026, ajuda local: Codex CLI 0.163.0 e Claude Code 2.1.316. Nenhuma sessão real de Codex/Claude foi iniciada como teste. A fumaça tmux
+usou cat em socket temporário isolado, sem contas e sem infraestrutura. A cada create o script confirma flags/login, sem
 imprimir dados da conta. Codex login status deve indicar ChatGPT; Claude auth
 status --json precisa ter loggedIn=true e authMethod=claude.ai. Sinal diferente
 falha fechado e pede login/verificação da versão, sem fallback para chave.

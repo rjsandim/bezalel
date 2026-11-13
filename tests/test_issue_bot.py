@@ -5,6 +5,7 @@ from copy import deepcopy
 import io
 import json
 import os
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -30,12 +31,13 @@ class IssueBotTests(unittest.TestCase):
         self.config=json.loads((ROOT/'.bezalel/project.example.json').read_text())
         self.config['project']='fixture'
         self.pr={'number':130,'url':'https://github.com/example/fixture/pull/130','state':'OPEN','isDraft':False,
-                 'headRefOid':'abc123def','headRefName':'issue-122','baseRefName':'main','closingIssuesReferences':[{'number':122}]}
+                 'headRefOid':'abc123def','headRefName':'issue-122','baseRefName':'main','closingIssuesReferences':[{'number':122,'url':'https://github.com/example/fixture/issues/122'}]}
         self.args=argparse.Namespace(project=self.project,issue=122,pr=130,round=None,cycle=1,branch=None,
                                      base_ref=None,command='review',dry_run=False,log_dir=None,
                                      timeout_seconds=0,poll_seconds=1,data_mode=None,human_decision_source=None,
                                      prompt_stage=None,output=None)
         self.ci={'status':'passed','sha':'abc123def','pr':130}
+        self.real_resolve_pr=bot.resolve_pr
         self.patchers=[patch.object(bot,'resolve_pr',return_value=self.pr),
                        patch.object(bot.ci_gate,'pr_info',return_value=self.pr),
                        patch.object(bot.ci_gate,'gate',return_value=(0,self.ci))]
@@ -53,6 +55,12 @@ class IssueBotTests(unittest.TestCase):
                     self.assertIn(str(self.project),prompt)
                     self.assertNotIn('{{handoff_path}}',prompt)
                     self.assertNotIn('{{project_root}}',prompt)
+
+    def test_pr_must_link_issue_in_the_same_repository(self):
+        self.real_resolve_pr(self.args)
+        self.pr['closingIssuesReferences'][0]['url']='https://github.com/example/another/issues/122'
+        with self.assertRaisesRegex(ContractError,'deste repositório'):
+            self.real_resolve_pr(self.args)
 
     def test_review_never_sends_when_ci_is_failed_or_pending(self):
         for code in (2,3):
@@ -206,3 +214,59 @@ class ConfigurationTests(unittest.TestCase):
         self.assertEqual(migrated['data'],{'mode':'ask'})
         before=self.path.read_bytes(); installer.migrate_config(self.project)
         self.assertEqual(self.path.read_bytes(),before)
+
+
+class StructuralTests(unittest.TestCase):
+    def test_missing_canonical_skill_or_prompt_is_rejected(self):
+        import check_repository as repository
+        import tempfile
+        with tempfile.TemporaryDirectory() as name:
+            root=Path(name)
+            for directory in ['agents','scripts','skills/issue-bot']:
+                shutil.copytree(ROOT/directory,root/directory)
+            shutil.copy2(ROOT/'README.md',root/'README.md')
+            with patch.object(repository,'ROOT',root):
+                self.assertEqual(repository.validate_issue_bot(),[])
+                for name in ['agents/issue-bot.md','skills/issue-bot/SKILL.md','skills/issue-bot/prompts/revisar.md']:
+                    path=root/name; data=path.read_bytes(); path.unlink()
+                    self.assertTrue(repository.validate_issue_bot())
+                    path.write_bytes(data)
+
+
+class WorktreeTests(unittest.TestCase):
+    def setUp(self):
+        import tempfile
+        self.tmp=tempfile.TemporaryDirectory(prefix='issue-worktree-'); self.addCleanup(self.tmp.cleanup)
+        self.project=Path(self.tmp.name).resolve()
+        self.run_git('init','-b','main')
+        self.run_git('config','core.hooksPath','/dev/null')
+        self.run_git('config','user.name','Fixture'); self.run_git('config','user.email','fixture@example.invalid')
+        (self.project/'candidate.txt').write_text('base')
+        self.run_git('add','candidate.txt'); self.run_git('commit','-m','fixture')
+        self.sha=self.run_git('rev-parse','HEAD').stdout.strip()
+        self.args=argparse.Namespace(project=self.project,issue=122,branch=None,base_ref=None)
+        self.config={'production_branches':{'fixture':'main'}}
+
+    def run_git(self,*args):
+        result=subprocess.run(['git','-c','maintenance.auto=false','-c','gc.auto=0',*args],cwd=self.project,text=True,capture_output=True)
+        self.assertEqual(result.returncode,0,result.stderr)
+        return result
+
+    def test_worktree_has_issue_branch_and_exact_local_candidate(self):
+        path,branch=bot.check_worktree(self.args,create=True,config=self.config)
+        self.assertEqual(branch,'issue-122')
+        pr={'headRefName':branch,'headRefOid':self.sha}
+        self.assertEqual(bot.check_worktree(self.args,pr)[0],path)
+        (path/'candidate.txt').write_text('uncommitted code')
+        with self.assertRaises(ContractError): bot.check_worktree(self.args,pr)
+
+    def test_missing_pr_branch_does_not_fall_back_to_base_or_fetch(self):
+        with self.assertRaisesRegex(ContractError,'ausente localmente'):
+            bot.check_worktree(self.args,{'headRefName':'missing','headRefOid':self.sha},True,self.config)
+        self.assertFalse(bot.worktree_path(self.args).exists())
+        self.assertEqual(self.run_git('branch','--format=%(refname:short)').stdout.strip(),'main')
+
+    def test_worktree_cannot_be_reused_for_another_branch(self):
+        bot.check_worktree(self.args,create=True,config=self.config)
+        self.args.branch='other'
+        with self.assertRaises(ContractError): bot.check_worktree(self.args,create=True,config=self.config)

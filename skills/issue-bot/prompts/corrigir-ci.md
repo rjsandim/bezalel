@@ -5,6 +5,12 @@ Execute verificações obrigatórias pertinentes e atualize a PR. Correções de
 não incrementam a rodada de revisão. Não produza veredito nem finja revisão do
 Claude. Leia o handoff existente se aplicável, sem sobrescrevê-lo para registrar CI.
 
+Pacote Bezalel carregado: {{package_root}}. Leia o AGENTS.md e a configuração
+.bezalel/project.json do projeto, com seus contextos de arquitetura e negócio.
+Carregue as skills necessárias pelos caminhos absolutos em {{package_root}}/skills/
+(por exemplo pr-audit/SKILL.md e security-audit/SKILL.md), mesmo se a descoberta
+na worktree ainda não estiver instalada. Use os scripts dessa mesma distribuição.
+
 Trabalhe só dentro de {{project_root}}, com alterações de código exclusivamente na
 worktree {{worktree}}, branch {{branch}}. Não faça merge nem deploy, não ative
 auto-merge e não use chave de API. Use apenas login da conta. Não invente critérios

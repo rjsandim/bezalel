@@ -10,6 +10,12 @@ papéis nem exija Excel: esse é o modo issue-bot. A revisão independente vem d
 Claude após CI verde. Não produza o handoff do revisor. Não invente um handoff
 de resposta se ainda não houver revisão pedindo ajustes; informe PR e SHA.
 
+Pacote Bezalel carregado: {{package_root}}. Leia o AGENTS.md e a configuração
+.bezalel/project.json do projeto, com seus contextos de arquitetura e negócio.
+Carregue as skills necessárias pelos caminhos absolutos em {{package_root}}/skills/
+(por exemplo pr-audit/SKILL.md e security-audit/SKILL.md), mesmo se a descoberta
+na worktree ainda não estiver instalada. Use os scripts dessa mesma distribuição.
+
 Trabalhe só dentro de {{project_root}}, com alterações de código exclusivamente na
 worktree {{worktree}}, branch {{branch}}. Não faça merge nem deploy, não ative
 auto-merge e não use chave de API. Use apenas login da conta. Não invente critérios

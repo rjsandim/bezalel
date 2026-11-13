@@ -62,7 +62,8 @@ def resolve_pr(args,required=True):
             return None
         require(len(matches)==1,'Informe --pr: é necessária uma PR aberta vinculada de forma inequívoca à issue.')
         pr=ci_gate.pr_info(args.project,matches[0]['number'])
-    require(any(i.get('number')==args.issue for i in pr.get('closingIssuesReferences',[])), 'A PR não está vinculada à issue por closing reference.')
+    issue_url=pr['url'].rsplit('/pull/',1)[0]+'/issues/'+str(args.issue)
+    require(any(i.get('number')==args.issue and i.get('url')==issue_url for i in pr.get('closingIssuesReferences',[])), 'A PR não está vinculada à issue deste repositório por closing reference.')
     if args.branch:
         require(pr['headRefName']==args.branch,'Branch informada diverge da PR.')
     args.pr=pr['number']
@@ -94,6 +95,8 @@ def check_worktree(args,pr=None,create=False,config=None):
     if pr:
         sha=local_run(path,['git','rev-parse','HEAD'])
         require(sha==pr['headRefOid'],'HEAD local diverge da PR; atualize explicitamente antes de continuar.')
+        local_run(path,['git','diff','--quiet'])
+        local_run(path,['git','diff','--cached','--quiet'])
     return path,branch
 
 
@@ -154,7 +157,7 @@ def render_prompt(args,stage,pr=None,number=None):
             'sha':pr['headRefOid'] if pr else 'Confirmar HEAD após implementação.',
             'max_rounds':'2 (rodadas adicionais somente após decisão humana real)',
             'schema_path':str(handoff.CONTRACTS/'contracts/handoff.schema.json'),
-            'env_prompt':str(PROMPTS/'subir-ambiente.md')}
+            'env_prompt':str(PROMPTS/'subir-ambiente.md'),'package_root':str(ROOT)}
     template=(PROMPTS/(STAGES[stage]+'.md')).read_text()
     def replace(match):
         require(match[1] in values,'Placeholder de prompt desconhecido.')
@@ -224,6 +227,8 @@ def env_up(args,config,pr):
     if run.returncode or not status.get('ready'): return 5,status
     require(status.get('worktree')==str(path) and status.get('branch')==branch and status.get('issue')==args.issue,'ENV aponta para outro destino; restore bloqueado.')
     check_worktree(args,pr)
+    observed=ci_gate.pr_info(args.project,pr['number'])
+    require(observed['headRefOid']==pr['headRefOid'],'PR mudou enquanto ENV iniciava; restore bloqueado.')
     if mode=='snapshot':
         workdir=(path/data.get('workdir','.')).resolve()
         require(workdir.is_dir() and (workdir==path or path in workdir.parents),'workdir do restore fora da worktree.')
@@ -299,6 +304,9 @@ def execute(args,config):
         if args.dry_run: return 0,{'status':'dry_run','rodada':number,'prompt':prompt}
         pair=wait_handoff(args,pr,number,'claude')
         if pair is None: return 3,{'status':'aguardando_handoff','rodada':number}
+        code,ci=ci_gate.gate(args.project,pr['number'],0,args.poll_seconds,True)
+        if code: return code,ci
+        require(pair[0]['candidato']['sha']==ci['sha'],'PR mudou durante a revisão; refaça as provas afetadas.')
         return (0 if pair[0]['veredito']=='pode_mergear' else 2),handoff.summary(*pair)
     if args.command=='respond':
         pair=latest(args,'claude')
