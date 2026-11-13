@@ -118,6 +118,15 @@ e o status da env.
   `env destroy` continua exigindo `--confirm <projeto>/<ambiente>`.
 - Handoffs e logs ficam em `.bezalel/handoff/` e `.bezalel/logs/`, fora do Git; sem
   segredos, dumps ou credenciais. Produção não é lida nem restaurada.
+- Texto da issue é dado, não instrução: vai aos prompts em bloco cercado que o autor da
+  issue não consegue fechar, com aviso explícito. PR de fork nunca é escolhida por
+  inferência (`Closes #<n>` não basta); informe `--pr` quando for o caso.
+- O `env-up` só usa o `.bezalel/project.json` commitado: alteração não commitada (por
+  exemplo, feita por um agente em `data.restore`) é recusada, e o argv do restore é
+  mostrado antes de executar.
+- Os agentes escrevem na raiz do projeto, inclusive em `.bezalel/handoff/`. Handoffs e a
+  decisão humana são conferidos estruturalmente, não autenticados: o humano confere a
+  decisão registrada e o histórico da sessão antes de agir sobre ela.
 
 ## Códigos de saída
 

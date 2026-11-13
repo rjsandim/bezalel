@@ -125,10 +125,12 @@ class Context:
             if isinstance(pr, int) and pr > 0:
                 return pr
         try:
-            prs = self.gh_json('pr', 'list', '--state', 'open', '--limit', '100', '--json', 'number,headRefName,closingIssuesReferences')
+            prs = self.gh_json('pr', 'list', '--state', 'open', '--limit', '100', '--json',
+                               'number,headRefName,isCrossRepository,closingIssuesReferences')
         except BotError:
-            prs = self.gh_json('pr', 'list', '--state', 'open', '--limit', '100', '--json', 'number,headRefName')
-        matches = [p['number'] for p in prs if isinstance(p, dict) and (
+            prs = self.gh_json('pr', 'list', '--state', 'open', '--limit', '100', '--json', 'number,headRefName,isCrossRepository')
+        # PR de fork nunca é escolhida por inferência: qualquer um pode escrever "Closes #<n>".
+        matches = [p['number'] for p in prs if isinstance(p, dict) and p.get('isCrossRepository') is False and (
             any(ref.get('number') == self.issue for ref in p.get('closingIssuesReferences') or [])
             or p.get('headRefName') == self.branch)]
         if len(set(matches)) == 1:
@@ -209,12 +211,21 @@ def render(kind, values):
     return PLACEHOLDER.sub(lambda m: str(values[m.group(1)]), template)
 
 
+def fence_for(*texts):
+    """Cerca mais longa que qualquer sequência de crases do conteúdo: a issue não fecha o bloco."""
+    longest = max([len(run) for text in texts for run in re.findall(r'`+', text)] or [0])
+    return '`' * max(4, longest + 1)
+
+
 def base_values(ctx):
     issue = ctx.issue_data()
     body = issue.get('body') or ''
+    title = ' '.join((issue.get('title') or '').split()).replace('`', "'")
+    criteria = acceptance_criteria(body)
     return {
-        'issue': ctx.issue, 'issue_url': issue.get('url') or '', 'issue_title': issue.get('title') or '',
-        'issue_body': body.strip() or '(issue sem descrição)', 'acceptance_criteria': acceptance_criteria(body),
+        'issue': ctx.issue, 'issue_url': issue.get('url') or '', 'issue_title': title,
+        'issue_body': body.strip() or '(issue sem descrição)', 'acceptance_criteria': criteria,
+        'fence': fence_for(body, criteria),
         'project_root': str(ctx.project), 'branch': ctx.branch, 'worktree': '.worktrees/' + ctx.env_name,
         'environment': ctx.env_name, 'session': ctx.session,
         'schema_path': str(SKILL / 'references/handoff.schema.json'),
@@ -408,8 +419,23 @@ def cmd_respond(ctx):
 
 # ─── Ambiente e dados ──────────────────────────────────────────
 
+def committed_config(ctx):
+    """data.restore vira comando executado fora do sandbox dos agentes: só vale a versão commitada."""
+    committed = run(['git', 'show', 'HEAD:.bezalel/project.json'], ctx.project)
+    if committed.returncode != 0:
+        raise BotError('.bezalel/project.json precisa estar commitado para o env-up.', DECISION)
+    path = ctx.project / '.bezalel/project.json'
+    if not path.is_file() or path.read_text(encoding='utf-8') != committed.stdout:
+        raise BotError('.bezalel/project.json tem alterações não commitadas; o env-up só usa a versão '
+                       'commitada (revise e commite a mudança antes).')
+    try:
+        return json.loads(committed.stdout)
+    except ValueError:
+        raise BotError('.bezalel/project.json commitado é ilegível.') from None
+
+
 def data_settings(ctx):
-    config = ctx.config
+    config = committed_config(ctx)
     if not config or config.get('schema_version') != 3 or not isinstance(config.get('data'), dict):
         raise BotError('.bezalel/project.json precisa do schema 3 com data; rode project.py migrate-config.', DECISION)
     data = config['data']
@@ -499,6 +525,8 @@ def restore_snapshot(ctx, data, status):
     if workdir != worktree and worktree not in workdir.parents or not workdir.is_dir():
         raise BotError('data.workdir fora da worktree do ambiente ou inexistente.')
     # Comando do projeto, como lista e sem shell; deve recusar destino de produção por si.
+    print('issue-bot: restore (project.json commitado): ' + json.dumps(data['restore'], ensure_ascii=False)
+          + ' em ' + str(workdir), file=sys.stderr)
     process = subprocess.run(data['restore'], cwd=workdir, stdout=sys.stderr, stderr=sys.stderr)
     entry = {'modo': 'snapshot', 'dataset': data.get('dataset'), 'ambiente': ctx.env_name,
              'workdir': str(workdir), 'codigo_saida': process.returncode,

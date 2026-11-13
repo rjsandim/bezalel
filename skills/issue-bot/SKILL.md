@@ -47,8 +47,9 @@ Todos os comandos: `python3 "$SKILL_DIR/scripts/issue_bot.py" <comando> --projec
    ([exemplo](references/decisao.example.json)).
 6. **Ambiente.** `env-up` exige `pode_mergear` ou `finalizar`; sobe `issue-<n>` pela
    skill env na branch da PR (`--branch`), com `--allow-shared-infra` somente quando o
-   humano autorizar a infra compartilhada nesta execução, e aplica `data`
-   (`snapshot` restaura uma vez; `ask` sai 5).
+   humano autorizar a infra compartilhada nesta execução, e aplica `data` do
+   `project.json` commitado (`snapshot` restaura uma vez; `ask` sai 5; alteração não
+   commitada é recusada).
 7. **Teste humano.** Ajustes de usabilidade voltam ao passo 2 e abrem novo ciclo de
    revisão (`review --cycle <n+1>`, arquivos `<issue>-c<ciclo>-r<n>-…`). Merge só com
    ordem explícita do humano, fora deste CLI.
