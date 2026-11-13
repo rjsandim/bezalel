@@ -20,7 +20,7 @@ class DeliveryContractTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.project = Path(temporary.name).resolve()
-        self.config = delivery.read_json(ROOT / '.bezalel/project.example.json')
+        self.config = delivery.read_json(ROOT / 'agents/templates/project.example.json')
         self.config['production_branches'] = {'principal': 'production'}
         for path in self.config['context'].values():
             self.write(path, 'Contexto sintético; sem serviços conectados.')

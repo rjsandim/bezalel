@@ -73,8 +73,12 @@ ambientes concluídos, com backup e remoção de imagens, ficam com limpar-orbst
 Com `new.sh <nome> --branch X` ou `ctl.sh ensure <nome> --branch X`, use a
 branch/ref de tracking já existente localmente, sem criar outra pela base.
 `--issue N` usa nome padrão issue-N e registra a issue; pode acompanhar --branch.
-O vínculo é preservado e divergências são recusadas. `status <nome> --json`
-informa URLs/portas/branch/worktree/readiness, sem credenciais (5 se não pronto).
+O vínculo é preservado e divergências são recusadas. O metadado local
+`environment-id` identifica a geração do ambiente: start/update preservam seu
+valor, destroy/new gera outro. Ele permite ao issue-bot evitar restores repetidos.
+`status <nome> --json` informa URLs/portas/branch/worktree/readiness e a identidade
+da geração, sem credenciais. Retorna 5 quando não pronto; ambiente ausente também
+retorna JSON com `status: absent`, sem criar estado nem consultar containers.
 
 ## Saídas
 

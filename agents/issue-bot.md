@@ -135,12 +135,17 @@ O CLI não fabrica decisões, não oferece autoaprovação e não altera esses a
 A [ENV](../skills/env/SKILL.md) aceita `--branch` e `--issue` explícitos; o ambiente
 `issue-N` pode usar branch diferente. `env-up` confere identidade, branch, SHA e
 readiness antes do restore e retorna o JSON público da ENV. Infra compartilhada
-exige `ENV_ALLOW_SHARED_INFRA=1` somente na execução previamente autorizada. Sem
-ela, sai 5; não deduz autorização de simples arquivos nem altera o perfil do shell.
+exige `--allow-shared-infra` (ou `ENV_ALLOW_SHARED_INFRA=1` temporário) somente
+quando `ensure` for necessário. A variável é removida de status e restore; um
+ambiente já pronto não exige essa autorização. Sem ela, quando necessária, sai 5.
 
-[project.json](../.bezalel/project.example.json) usa schema 3. Migração explícita:
+[project.json](templates/project.example.json) usa schema 3. Migração explícita:
 `python3 /caminho/bezalel/scripts/project.py migrate-config --project .` preserva
-campos, acrescenta `data.mode=ask` e é idempotente. Schema 2 é recusado no validador.
+campos, acrescenta `data.mode=ask` e é idempotente. Schema 2 é recusado no validador
+vigente. O modelo legado `.bezalel/project.example.json` permanece no schema 2
+para que o checker já instalado aceite a atualização; instalações novas usam o
+modelo schema 3 em `agents/templates/project.example.json` (`contracts/templates/`
+no pacote nativo). Não se executa código do candidato para validá-lo na atualização.
 
 - `ask`: código 5 até decidir; `--data-mode empty` vale só para a invocação.
 - `empty`: boot/migrations da ENV, sem restore.
@@ -151,8 +156,13 @@ campos, acrescenta `data.mode=ask` e é idempotente. Schema 2 é recusado no val
   deve validar o destino isolado, suas conexões e recusar produção. Um comando de
   host não recebe automaticamente as variáveis de um container: declare um wrapper
   seguro do próprio projeto quando necessário. Falha não declara sucesso (código 1,
-  sem imprimir a saída privada). Nova chamada de env-up executa novo restore:
-  confirme que é desejado antes de repetir, pois pode substituir dados de teste.
+  sem imprimir a saída privada). Um recibo privado por `environment_id` impede novo
+  restore em chamadas e ciclos seguintes; start/update preservam essa identidade.
+  Destroy/new cria outra geração. Falha parcial ou alteração do comando bloqueia
+  repetição automática. Repetir exige `--restore-again --human-decision-source`
+  apontando a aprovação humana real do comando exato no project.json. Essa referência
+  não prova identidade nem fabrica autorização. Ambiente antigo sem identidade
+  precisa ter os metadados atualizados antes de usar snapshot.
 
 Instalação e testes do pacote não executam restore, não leem produção nem atualizam
 os sete consumidores. A adoção é separada por projeto após publicar/atualizar o

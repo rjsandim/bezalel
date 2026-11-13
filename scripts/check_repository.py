@@ -155,7 +155,10 @@ def validate_agents():
         require(declared == set((ROOT / "agents/roles").glob("*.md")), "Contrato de agente órfão.")
         require(adapters == set((ROOT / "agents/codex").glob("*.toml")), "Adaptador de agente órfão.")
         require(claude_adapters == set((ROOT / 'agents/claude').glob('*.md')), "Adaptador Claude órfão.")
-        validate_config(read_json(ROOT / ".bezalel/project.example.json"))
+        validate_config(read_json(ROOT / "agents/templates/project.example.json"))
+        legacy = read_json(ROOT / ".bezalel/project.example.json")
+        require(legacy.get('schema_version') == 2 and 'data' not in legacy, 'Preserve o modelo legado para o checker instalado.')
+        validate_config({**legacy, 'schema_version': 3, 'data': {'mode': 'ask'}})
     except ContractError as error:
         return [str(error)]
     except (OSError, UnicodeError, TypeError, ValueError, KeyError, AttributeError):

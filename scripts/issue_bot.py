@@ -3,6 +3,7 @@
 import argparse
 import contextlib
 import fcntl
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -169,7 +170,8 @@ def render_prompt(args,stage,pr=None,number=None):
     role='claude' if stage=='review' else 'codex'
     path=handoff.path_for(args.project,args.issue,number,role,args.cycle)
     previous=handoff.path_for(args.project,args.issue,number-1,'codex',args.cycle) if number>1 else None
-    values={'issue_url':issue['url'],'issue_body':issue['body'],'acceptance_criteria':issue['body'],
+    fence='`'*max(3,1+max((len(m[0]) for m in re.finditer(r'`+',issue['body'])),default=0))
+    values={'data_fence':fence,'issue_url':issue['url'],'issue_body':issue['body'],'acceptance_criteria':issue['body'],
             'pr_url':pr['url'] if pr else 'Ainda não aberta: abrir PR vinculada à issue.',
             'round':str(number),'cycle':str(args.cycle),'handoff_path':str(path),
             'review_handoff_path':str(handoff.path_for(args.project,args.issue,number,'claude',args.cycle)),
@@ -237,30 +239,60 @@ def env_up(args,config,pr):
     mode=args.data_mode or data['mode']
     if mode=='ask': return 5,{'status':'decisao_de_dados_necessaria','issue':args.issue}
     if not (args.project/'.envstack/stack.yaml').is_file(): return 5,{'status':'manifesto_ausente','issue':args.issue}
-    if os.environ.get('ENV_ALLOW_SHARED_INFRA')!='1': return 5,{'status':'autorizacao_de_infra_necessaria','issue':args.issue}
     if args.dry_run: return 0,{'status':'dry_run','branch':pr['headRefName'],'data_mode':mode}
     path,branch=check_worktree(args,pr)
     env_scripts=ROOT/'skills/env/scripts'
-    run=subprocess.run(['bash',str(env_scripts/'ctl.sh'),'ensure',f'issue-{args.issue}','--branch',branch,'--issue',str(args.issue)],cwd=args.project,capture_output=True,text=True)
-    require(run.returncode==0,'ENV não concluiu ensure; dados não foram restaurados (diagnóstico omitido).')
-    run=subprocess.run(['bash',str(env_scripts/'ctl.sh'),'status',f'issue-{args.issue}','--json'],cwd=args.project,capture_output=True,text=True)
-    require(run.returncode in (0,5),'ENV não forneceu status verificável.')
-    status=json.loads(run.stdout)
-    if run.returncode or not status.get('ready'): return 5,status
+    # A autorização compartilhada só alcança ensure. Status e restore não a herdam.
+    clean_env={k:v for k,v in os.environ.items() if k!='ENV_ALLOW_SHARED_INFRA'}
+    def observe_environment():
+        result=subprocess.run(['bash',str(env_scripts/'ctl.sh'),'status',f'issue-{args.issue}','--json'],
+                              cwd=args.project,capture_output=True,text=True,env=clean_env)
+        require(result.returncode in (0,5),'ENV não forneceu status verificável.')
+        return result,json.loads(result.stdout)
+    run,status=observe_environment()
+    if run.returncode or not status.get('ready'):
+        if not (getattr(args,'allow_shared_infra',False) or os.environ.get('ENV_ALLOW_SHARED_INFRA')=='1'):
+            return 5,{'status':'autorizacao_de_infra_necessaria','issue':args.issue}
+        run=subprocess.run(['bash',str(env_scripts/'ctl.sh'),'ensure',f'issue-{args.issue}','--branch',branch,'--issue',str(args.issue)],
+                           cwd=args.project,capture_output=True,text=True,env={**clean_env,'ENV_ALLOW_SHARED_INFRA':'1'})
+        require(run.returncode==0,'ENV não concluiu ensure; dados não foram restaurados (diagnóstico omitido).')
+        run,status=observe_environment()
+        if run.returncode or not status.get('ready'): return 5,status
     require(status.get('worktree')==str(path) and status.get('branch')==branch and status.get('issue')==args.issue,'ENV aponta para outro destino; restore bloqueado.')
     check_worktree(args,pr)
     observed=ci_gate.pr_info(args.project,pr['number'])
     require(observed['headRefOid']==pr['headRefOid'],'PR mudou enquanto ENV iniciava; restore bloqueado.')
+    restore_result='not_applicable'
     if mode=='snapshot':
+        identity=status.get('environment_id')
+        require(isinstance(identity,str) and re.fullmatch(r'[a-zA-Z0-9-]+',identity),
+                'ENV sem identidade de geração; atualize seus metadados antes do snapshot.')
         workdir=(path/data.get('workdir','.')).resolve()
         require(workdir.is_dir() and (workdir==path or path in workdir.parents),'workdir do restore fora da worktree.')
-        # Não propaga env do checkout principal ao destino. Comando explícito do
-        # projeto deve validar seu destino isolado e recusar produção por conta própria.
-        restore=subprocess.run(data['restore'],cwd=workdir,capture_output=True,text=True)
-        require(restore.returncode==0,'Restore falhou; saída privada omitida. Ambiente não declarado pronto para aceite.')
+        receipt=cycle_receipt(args,args.cycle).parent/f'{args.issue}-{identity}-restore.json'
+        require(not receipt.is_symlink(),'Recibo de restore não pode usar symlink.')
+        signature=hashlib.sha256(json.dumps({'restore':data['restore'],'dataset':data['dataset'],'workdir':str(workdir)},sort_keys=True).encode()).hexdigest()
+        previous_restore=read_json(receipt) if receipt.exists() else None
+        repeat=getattr(args,'restore_again',False)
+        if repeat:
+            require(bool(args.human_decision_source and args.human_decision_source.strip()),
+                    'Repetir restore exige --human-decision-source com aprovação humana do comando configurado.')
+        elif previous_restore:
+            require(previous_restore.get('signature')==signature and previous_restore.get('state')=='completed',
+                    'Restore mudou ou ficou incompleto; preserve os dados e solicite --restore-again com aprovação humana.')
+        if previous_restore and not repeat:
+            restore_result='already_completed'
+        else:
+            # Marcar antes: uma falha parcial não autoriza tentar novamente e apagar dados.
+            record={'environment_id':identity,'signature':signature,'state':'started'}
+            atomic_write(receipt,json.dumps(record).encode(),0o600)
+            restore=subprocess.run(data['restore'],cwd=workdir,capture_output=True,text=True,env=clean_env)
+            require(restore.returncode==0,'Restore falhou; saída privada omitida. Ambiente não declarado pronto para aceite.')
+            atomic_write(receipt,json.dumps({**record,'state':'completed'}).encode(),0o600)
+            restore_result='completed'
     atomic_write(cycle_receipt(args,args.cycle),json.dumps({'issue':args.issue,'pr':pr['number'],
                  'ciclo':args.cycle,'sha':pr['headRefOid'],'ready':True}).encode(),0o600)
-    return 0,{**status,'data_mode':mode,'restore':'completed' if mode=='snapshot' else 'not_applicable','merge_autorizado':False}
+    return 0,{**status,'data_mode':mode,'restore':restore_result,'merge_autorizado':False}
 
 
 @contextlib.contextmanager
@@ -378,6 +410,8 @@ def main():
     parser.add_argument('--output',type=Path)
     parser.add_argument('--timeout-seconds',type=float,default=1800)
     parser.add_argument('--poll-seconds',type=float,default=2)
+    parser.add_argument('--allow-shared-infra',action='store_true',help='Autoriza infra apenas no ensure desta chamada.')
+    parser.add_argument('--restore-again',action='store_true',help='Repete snapshot; exige origem da aprovação humana do comando.')
     parser.add_argument('--data-mode',choices=['empty'])
     parser.add_argument('--human-decision-source')
     args=parser.parse_args()

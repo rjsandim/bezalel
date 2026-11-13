@@ -183,6 +183,10 @@ services:
         result = self.command('ctl.sh', 'status', 'issue-122', '--json')
         public = json.loads(result.stdout)
         self.assertTrue(public['ready'])
+        generation=(state/'environment-id').read_text().strip()
+        self.assertEqual(public['environment_id'],generation)
+        self.command('ctl.sh', 'ensure', '--issue', '122')
+        self.assertEqual((state/'environment-id').read_text().strip(),generation)
         self.assertEqual(public['issue'], 122)
         self.assertEqual(public['branch'], 'feature/filter')
         self.assertEqual(public['worktree'], str(worktree.resolve()))
@@ -192,6 +196,15 @@ services:
         self.assertNotIn('secret', result.stdout)
         self.command('ctl.sh', 'stop', 'issue-122')
         self.assertFalse(json.loads(self.command('ctl.sh', 'status', 'issue-122', '--json', expected=5).stdout)['ready'])
+
+    def test_missing_environment_has_read_only_json_status(self):
+        before=self.observed()['calls']
+        result=self.command('ctl.sh','status','issue-999','--json',expected=5)
+        self.assertEqual(json.loads(result.stdout)['status'],'absent')
+        self.assertFalse(json.loads(result.stdout)['ready'])
+        # Validar o contexto é leitura obrigatória; nenhum container é consultado.
+        self.assertEqual(self.observed()['calls'][len(before):],[['context','inspect','fixture']])
+        self.assertFalse((self.skill/'state/fixture/issue-999').exists())
 
     def test_missing_or_divergent_branch_is_not_replaced_or_fetched(self):
         before = self.observed()['calls']

@@ -23,7 +23,7 @@ class SessionTests(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.root=Path(self.tmp.name).resolve()
         self.cwd=self.root/'.worktrees/issue-122'; self.cwd.mkdir(parents=True)
-        self.options={}; self.exists=False; self.calls=[]; self.content={}; self.buffer=''; self.pipes=set()
+        self.processes={}; self.options={}; self.exists=False; self.calls=[]; self.content={}; self.buffer=''; self.pipes=set()
         self.patchers=[patch.object(session,'tmux',side_effect=self.tmux),
                        patch.object(session,'project_paths',return_value=(self.root,self.cwd)),
                        patch.object(session,'cli_commands',return_value={'codex':['codex'],'claude':['claude']}),
@@ -42,7 +42,7 @@ class SessionTests(unittest.TestCase):
             target=args[args.index('-t')+1]; name=target.split(':')[-1]
             if args[-1]=='#{pane_pipe}': out='1' if target in self.pipes else '0'
             else:
-                out=f'0\t{name}\t{self.cwd}'
+                out=f'0\t{self.processes.get(name,name)}\t{self.cwd}'
                 if '#{pane_pipe}' in args[-1]: out+='\t1'
         elif command=='pipe-pane': self.pipes.add(args[args.index('-t')+1])
         elif command=='load-buffer': self.buffer=Path(args[-1]).read_text()
@@ -97,6 +97,19 @@ class SessionTests(unittest.TestCase):
         self.exists=True
         with self.assertRaises(ContractError): session.create(self.args)
 
+    def test_versioned_native_binary_is_alive_but_unrelated_process_is_not(self):
+        session.create(self.args)
+        self.options['@bezalel-executable-claude']='/fixture/versions/2.1.316'
+        self.processes['claude']='2.1.316'
+        self.assertTrue(session.status('projeto-fixture-122')['windows'][1]['alive'])
+        prompt=self.root/'prompt'; prompt.write_text('fixture')
+        self.assertEqual(self.main('send','--session','projeto-fixture-122','--window','claude','--text-file',str(prompt))[0],0)
+        self.processes['claude']='python3'
+        self.assertFalse(session.status('projeto-fixture-122')['windows'][1]['alive'])
+        before=len([c for c in self.calls if c[0]=='load-buffer'])
+        self.assertEqual(self.main('send','--session','projeto-fixture-122','--window','claude','--text-file',str(prompt))[0],1)
+        self.assertEqual(len([c for c in self.calls if c[0]=='load-buffer']),before)
+
     def test_dead_or_shell_pane_does_not_receive_prompt(self):
         session.create(self.args)
         with patch.object(session,'pane',return_value=['0','bash',str(self.cwd),'1']):
@@ -106,10 +119,10 @@ class SessionTests(unittest.TestCase):
 
 
 class AuthenticationTests(unittest.TestCase):
-    def cli(self,api=False):
+    def cli(self,api=False,auto_review=True):
         def result(args,**kw):
             if args==['codex','--help']:
-                out='--sandbox --ask-for-approval --cd --no-alt-screen --no-daemon'
+                out=('--approve-for-me ' if auto_review else '')+'--sandbox --ask-for-approval --cd --no-alt-screen --no-daemon'
             elif args==['claude','--help']:
                 out='--dangerously-skip-permissions --settings --setting-sources --strict-mcp-config --tools'
             elif args[:3]==['codex','login','status']: out='Logged in using API key' if api else 'Logged in using ChatGPT'
@@ -120,12 +133,13 @@ class AuthenticationTests(unittest.TestCase):
 
     def test_account_required_and_no_bypass_of_codex_sandbox(self):
         commands=self.cli()
-        self.assertIn('workspace-write',commands['codex']); self.assertIn('never',commands['codex'])
+        self.assertIn('--approve-for-me',commands['codex']); self.assertNotIn('never',commands['codex'])
         self.assertNotIn('--dangerously-bypass-approvals-and-sandbox',commands['codex'])
         settings=json.loads(commands['claude'][-1])
         self.assertTrue(settings['sandbox']['failIfUnavailable'])
         self.assertFalse(settings['sandbox']['allowUnsandboxedCommands'])
         with self.assertRaises(ContractError): self.cli(True)
+        with self.assertRaises(ContractError): self.cli(auto_review=False)
 
     def test_inherited_api_key_is_rejected_without_reading_login(self):
         with patch.dict(os.environ,{'OPENAI_API_KEY':'fixture-not-a-real-key'}),patch.object(session,'run') as run:
@@ -142,27 +156,35 @@ class TmuxSmokeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix='bezalel-tmux-') as name:
             root=Path(name).resolve(); cwd=root/'.worktrees/issue-122'; cwd.mkdir(parents=True)
             socket=str(root/'tmux.sock')
+            if not shutil.which('cc'): self.skipTest('Compilador nativo ausente; não instalar para o teste.')
+            versioned=root/'versions/2.1.316'; versioned.parent.mkdir()
+            source='#include <stdio.h>\nint main(void) { char line[4096]; while (fgets(line,sizeof(line),stdin)) { fputs(line,stdout); fflush(stdout); } return 0; }'
+            subprocess.run(['cc','-x','c','-o',str(versioned),'-'],input=source,text=True,check=True,capture_output=True)
+            alias=root/'claude'; alias.symlink_to(versioned)
             def tmux(*args,allowed=(0,)):
                 return session.run(['tmux','-f','/dev/null','-S',socket,*args],allowed=allowed)
             args=argparse.Namespace(cwd=cwd,issue=122,project_name='fixture',branch=None,log_dir=None)
             try:
-                with patch.object(session,'tmux',side_effect=tmux),patch.object(session,'project_paths',return_value=(root,cwd)),patch.object(session,'cli_commands',return_value={cli:['/bin/cat'] for cli in ('codex','claude')}),patch.object(session,'CLI_PROCESS_NAMES',{'codex':{'cat'},'claude':{'cat'}}):
+                with patch.object(session,'tmux',side_effect=tmux),patch.object(session,'project_paths',return_value=(root,cwd)),patch.object(session,'cli_commands',return_value={'codex':['/bin/cat'],'claude':[str(alias.resolve())]}):
                     session.create(args)
                     deadline=time.monotonic()+5
                     while not all(w['alive'] for w in session.status('fixture-122')['windows']):
                         self.assertLess(time.monotonic(),deadline); time.sleep(0.05)
+                    self.assertEqual({w['cwd'] for w in session.status('fixture-122')['windows']},{str(cwd)})
                     session.create(args)
+                    self.assertEqual(tmux('display-message','-p','-t','fixture-122:claude','#{pane_current_command}').stdout.strip(),'2.1.316')
                     text=root/'prompt.txt'; text.write_text('fixture literal $(no-shell)')
-                    with patch.object(sys,'argv',['issue_session.py','send','--session','fixture-122','--window','codex','--text-file',str(text)]),contextlib.redirect_stdout(io.StringIO()):
-                        self.assertEqual(session.main(),0)
-                    captured=''
-                    while 'fixture literal $(no-shell)' not in captured:
-                        self.assertLess(time.monotonic(),deadline)
-                        captured=tmux('capture-pane','-p','-J','-t','fixture-122:codex').stdout
-                        time.sleep(0.05)
-                    log=root/'.bezalel/logs/fixture-122-codex.log'
-                    while 'fixture literal' not in log.read_text():
-                        self.assertLess(time.monotonic(),deadline); time.sleep(0.05)
+                    for window in ('codex','claude'):
+                        with patch.object(sys,'argv',['issue_session.py','send','--session','fixture-122','--window',window,'--text-file',str(text)]),contextlib.redirect_stdout(io.StringIO()):
+                            self.assertEqual(session.main(),0)
+                        captured=''
+                        while 'fixture literal $(no-shell)' not in captured:
+                            self.assertLess(time.monotonic(),deadline)
+                            captured=tmux('capture-pane','-p','-J','-t','fixture-122:'+window).stdout
+                            time.sleep(0.05)
+                        log=root/f'.bezalel/logs/fixture-122-{window}.log'
+                        while 'fixture literal' not in log.read_text():
+                            self.assertLess(time.monotonic(),deadline); time.sleep(0.05)
                     tmux('kill-session','-t','=fixture-122')
                     self.assertTrue(log.exists())
                     self.assertIn('fixture literal',log.read_text())

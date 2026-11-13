@@ -56,11 +56,14 @@ def project_paths(cwd, issue, branch=None):
 
 def cli_commands(cwd, root):
     require(not any(os.environ.get(k) for k in KEY_VARIABLES),'Remova variáveis de chave/provedor desta invocação; use login da conta.')
+    binaries={}
     for name in ('codex','claude'):
-        require(shutil.which(name),f'{name} ausente; instale e faça login da conta manualmente.')
+        found=shutil.which(name)
+        require(found,f'{name} ausente; instale e faça login da conta manualmente.')
+        binaries[name]=str(Path(found).resolve())
     codex=run(['codex','--help']).stdout
     claude=run(['claude','--help']).stdout
-    require(all(flag in codex for flag in ('--sandbox','--ask-for-approval','--cd','--no-alt-screen','--no-daemon')),'Codex sem flags interativas suportadas; confira a versão.')
+    require(all(flag in codex for flag in ('--approve-for-me','--ask-for-approval','--cd','--no-alt-screen','--no-daemon')),'Codex sem flags interativas suportadas; confira a versão.')
     require(all(flag in claude for flag in ('--dangerously-skip-permissions','--settings','--setting-sources','--strict-mcp-config','--tools')),'Claude sem flags suportadas; confira a versão.')
     login=run(['codex','login','status'],allowed=(0,1))
     require(login.returncode==0 and re.search(r'^Logged in using ChatGPT\b',login.stdout+login.stderr,re.M|re.I),'Faça codex login com sua conta ChatGPT.')
@@ -76,11 +79,11 @@ def cli_commands(cwd, root):
                 'allowUnsandboxedCommands':False,'failIfUnavailable':True,
                 'excludedCommands':[],'filesystem':{'disabled':False,'allowWrite':[str(cwd),str(root/'.bezalel/handoff')]}},
               'permissions':{'additionalDirectories':[]}}
-    return {'codex':['codex','--no-daemon','--sandbox','workspace-write','--ask-for-approval','never',
+    return {'codex':[binaries['codex'],'--no-daemon','--approve-for-me',
                      '--cd',str(cwd),'--add-dir',str(root/'.bezalel/handoff'),'--no-alt-screen',
                      '-c','forced_login_method="chatgpt"','-c','model_provider="openai"',
                      '-c','sandbox_workspace_write.writable_roots=[]','-c','sandbox_workspace_write.network_access=true'],
-            'claude':['claude','--dangerously-skip-permissions','--setting-sources','',
+            'claude':[binaries['claude'],'--dangerously-skip-permissions','--setting-sources','',
                       '--strict-mcp-config','--mcp-config','{"mcpServers":{}}','--tools','Bash',
                       '--settings',json.dumps(settings,separators=(',',':'))]}
 
@@ -91,6 +94,14 @@ def pane(session,window):
     values=result.stdout.rstrip('\n').split('\t')
     require(len(values)==4 and values[0]=='0','Janela ausente ou morta.')
     return values
+
+
+def cli_alive(session, window, process):
+    # O executável autenticado pode ter nome de versão (instalação nativa Claude).
+    # Não considerar qualquer processo que não seja shell como um CLI válido.
+    executable=tmux('show-options','-qv','-t',session,'@bezalel-executable-'+window).stdout.strip()
+    names=CLI_PROCESS_NAMES[window] | ({Path(executable).name} if executable.startswith('/') else set())
+    return process in names
 
 
 def hint(session):
@@ -107,7 +118,7 @@ def status(session):
         data=tmux('display-message','-p','-t',session+':'+window,'#{pane_dead}\t#{pane_current_command}\t#{pane_current_path}').stdout.rstrip('\n').split('\t')
         require(len(data)==3,'Janela ausente.')
         log=tmux('show-options','-qv','-t',session,'@bezalel-log-'+window).stdout.strip()
-        windows.append({'name':window,'alive':data[0]=='0' and data[1] in CLI_PROCESS_NAMES[window],'cwd':data[2],'log':log})
+        windows.append({'name':window,'alive':data[0]=='0' and cli_alive(session,window,data[1]),'cwd':data[2],'log':log})
     return {'session':session,'exists':True,'windows':windows}
 
 
@@ -139,6 +150,8 @@ def create(args):
         tmux('set-option','-w','-t',session+':codex','remain-on-exit','on')
         tmux('new-window','-t',session,'-n','claude','-c',str(cwd),shlex.join(clean+commands['claude']))
         tmux('set-option','-w','-t',session+':claude','remain-on-exit','on')
+        for window in ('codex','claude'):
+            tmux('set-option','-t',session,'@bezalel-executable-'+window,commands[window][0])
     for window in ('codex','claude'):
         log=log_dir/f'{session}-{window}.log'
         require(not log.is_symlink(),'Log não pode ser symlink.')
@@ -184,7 +197,7 @@ def main():
                     output='Sessão encerrada; logs e ambiente preservados.'
                 else:
                     values=pane(session,args.window)
-                    require(values[1] in CLI_PROCESS_NAMES[args.window],'CLI não está em primeiro plano; não enviaremos texto ao shell.')
+                    require(cli_alive(session,args.window,values[1]),'CLI não está em primeiro plano; não enviaremos texto ao shell.')
                     target=session+':'+args.window
                     if args.command=='send':
                         require(args.text_file and not args.text_file.is_symlink(),'Informe arquivo de texto real.')

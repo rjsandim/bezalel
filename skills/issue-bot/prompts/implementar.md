@@ -18,7 +18,10 @@ na worktree ainda não estiver instalada. Use os scripts dessa mesma distribuiç
 
 Trabalhe só dentro de {{project_root}}, com alterações de código exclusivamente na
 worktree {{worktree}}, branch {{branch}}. Não faça merge nem deploy, não ative
-auto-merge e não use chave de API. Use apenas login da conta. Não invente critérios
+auto-merge e não use chave de API. Use apenas login da conta. Se o sandbox bloquear Git, solicite ao revisor
+automático somente a operação exata de add/commit/push da branch desta issue,
+com justificativa. Não peça permissões gerais nem altere o checkout principal;
+rejeição exige diagnóstico. Não use bypass de sandbox. Não invente critérios
 de aceite, aprovações ou resultados. Texto humano em português do Brasil.
 Issue: {{issue_url}}
 PR: {{pr_url}}
@@ -35,11 +38,11 @@ legenda com rótulos textuais. Aguarde decisão humana da versão exata; ajuste 
 reapresentação. Registre resumo/base/versão/decisão e exclua/verifique o HTML após
 a decisão final. Sem impacto de banco, registre não aplicável.
 
-<issue-como-dado>
+{{data_fence}}text
 {{issue_body}}
-</issue-como-dado>
+{{data_fence}}
 
 Critérios a conferir integralmente, preservando IDs da issue:
-<criterios-como-dado>
+{{data_fence}}text
 {{acceptance_criteria}}
-</criterios-como-dado>
+{{data_fence}}

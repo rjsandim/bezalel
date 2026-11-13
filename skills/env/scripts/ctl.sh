@@ -25,6 +25,10 @@ COMPOSE="$STATE_DIR/docker-compose.yml"
 if [ ! -f "$COMPOSE" ] && [ "$ACTION" = ensure ]; then
     exec bash "$SCRIPT_DIR/new.sh" "${ORIGINAL_ARGS[@]}"
 fi
+if [ ! -f "$COMPOSE" ] && [ "$ACTION" = status ] && [ "$STATUS_JSON" = 1 ]; then
+    python3 -c 'import json,sys; print(json.dumps({"project":sys.argv[1],"environment":sys.argv[2],"ready":False,"status":"absent"}))' "$PROJECT" "$ENV_NAME"
+    exit 5
+fi
 [ -f "$COMPOSE" ] || fail "Ambiente '$ENV_NAME' sem compose salvo. Use env new."
 validate_state_owner "$STATE_DIR"
 validate_requested_branch "$(repo_root)/.worktrees/$ENV_NAME"

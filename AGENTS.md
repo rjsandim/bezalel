@@ -58,8 +58,13 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   humana. Não exige nove papéis/Excel/accept clássico; preserva R6, isolamento e
   merge/deploy manuais. Instalação não inicia o CLI. Scripts/testes novos devem
   funcionar tanto com `agents/` quanto com `contracts/` no pacote nativo.
+  Codex usa revisão automática de permissões por comando para Git; isso não é
+  confinamento absoluto. Não substitua rejeição por bypass ou aprovação inventada.
 - Configuração de projeto usa schema 3 com `data`; migrar schema 2 é explícito via
   project.py migrate-config. Handoffs/logs/estado de issue são locais ignorados.
+  Preserve o modelo legado schema 2 para o checker já instalado; o modelo vigente
+  fica em `agents/templates/`. Snapshot só uma vez por geração do ambiente;
+  repetição exige aprovação humana real. Autorização compartilhada só vai ao ensure.
   ENV aceita vínculo explícito de branch diferente do ambiente no modo issue-bot;
   fora dessa extensão, mantenha a convenção existente. Nunca fetch implícito.
 

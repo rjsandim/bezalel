@@ -43,6 +43,10 @@ DB_ENGINE="$(manifest_get '.database')"
 case "$DB_ENGINE" in mysql) DB_SERVICE="mysql";; *) DB_ENGINE="postgres"; DB_SERVICE="postgres";; esac
 
 mkdir -p "$STATE_DIR"
+# Identidade da geração: estável em start/update, nova após destroy/new.
+if [ ! -f "$STATE_DIR/environment-id" ]; then
+    python3 -c 'import uuid; print(uuid.uuid4())' > "$STATE_DIR/environment-id"
+fi
 printf '%s\n' "$ROOT" > "$STATE_DIR/project-root"
 printf '%s\n' "$DOCKER_CONTEXT" > "$STATE_DIR/docker-context"
 python3 "$SCRIPT_DIR/shared_db.py" prepare "$MANIFEST" "$ROOT" "$PROJECT" "$ENV_NAME" "$DOCKER_CONTEXT" "$STATE_DIR"

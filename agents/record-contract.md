@@ -18,7 +18,7 @@ demanda, não fontes concorrentes. O validador só lê arquivos, não acessa ser
 
 ## Configuração do projeto
 
-O [modelo](../.bezalel/project.example.json) declara `project`, documentos reais
+O [modelo](templates/project.example.json) declara `project`, documentos reais
 em `context.architecture/business`, interfaces, `checks.test/lint/build` como
 listas de argumentos e `production_branches` como mapa repositório → branch real.
 Não presuma main/master. Os nomes de repositórios precisam coincidir com os do

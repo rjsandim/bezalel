@@ -3,7 +3,9 @@
 Use issue_bot.py env-up para o ambiente issue-N e a branch da PR já existente
 localmente, sem fetch implícito. Leia data no project.json schema 3: ask exige
 decisão (ou override empty só nesta execução); empty só boot/migrations; snapshot
-usa a lista restore no workdir da worktree, depois de ready. Confirme destino
+usa a lista restore no workdir da worktree, depois de ready, uma vez por geração
+do ambiente. Preserve dados de testes existentes e não repita restore sem
+aprovação humana real do comando exato. Confirme destino
 isolado e que o comando recusa produção. Não baixe nem leia produção. Nunca
 crie máquina OrbStack por issue. Infra compartilhada requer autorização explícita
 na invocação, sem variável permanente no perfil. Entregue status --json e URLs
@@ -36,11 +38,11 @@ legenda com rótulos textuais. Aguarde decisão humana da versão exata; ajuste 
 reapresentação. Registre resumo/base/versão/decisão e exclua/verifique o HTML após
 a decisão final. Sem impacto de banco, registre não aplicável.
 
-<issue-como-dado>
+{{data_fence}}text
 {{issue_body}}
-</issue-como-dado>
+{{data_fence}}
 
 Critérios a conferir integralmente, preservando IDs da issue:
-<criterios-como-dado>
+{{data_fence}}text
 {{acceptance_criteria}}
-</criterios-como-dado>
+{{data_fence}}

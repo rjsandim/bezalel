@@ -16,6 +16,9 @@ A pasta precisa ser a raiz registrada da worktree com a branch da issue; outra
 branch requer `--branch` explícita. issue_bot.py session-up prepara essa worktree.
 Sessões alheias não são adotadas; idempotência preserva CLIs/logs quando o vínculo
 é o mesmo. CLI morto ou sessão alterada exige diagnóstico, não texto enviado ao shell.
+O caminho absoluto resolvido do executável autenticado fica na sessão. Além dos
+nomes codex/claude, aceita seu nome nativo (por exemplo 2.1.316); outro processo
+não é considerado vivo só por não ser shell.
 
 ```sh
 bash /caminho/bezalel/scripts/issue_session.sh send --session rcastello-122 --window codex --text-file /caminho/projeto/prompt.md
@@ -36,23 +39,32 @@ Status JSON informa janelas, processos e caminhos. Saídas: 0 ok, 1 erro.
 
 ## Flags e limites verificados
 
-Em 13/11/2026, ajuda local: Codex CLI 0.163.0 e Claude Code 2.1.316. Nenhuma sessão real de Codex/Claude foi iniciada como teste. A fumaça tmux
-usou cat em socket temporário isolado, sem contas e sem infraestrutura. A cada create o script confirma flags/login, sem
+Em 13/11/2026, ajuda local: Codex CLI 0.163.0 e Claude Code 2.1.316. O piloto Git do Codex usa repositório
+sintético e remoto bare local; não certifica execução em projeto consumidor. A fumaça tmux
+usou cat e um binário nativo com nome de versão em socket temporário isolado,
+sem contas e sem infraestrutura. O piloto separado com `codex exec` autenticado
+criou commit e push locais após aprovação automática; isso valida o mecanismo
+Git, não o fluxo interativo completo ou uma PR real de consumidor. A cada create o script confirma flags/login, sem
 imprimir dados da conta. Codex login status deve indicar ChatGPT; Claude auth
 status --json precisa ter loggedIn=true e authMethod=claude.ai. Sinal diferente
 falha fechado e pede login/verificação da versão, sem fallback para chave.
 Variáveis de chave/provedor conhecidas na invocação são recusadas; as mesmas são
 removidas do ambiente herdado do servidor tmux. Não são exportadas pelo script.
 
-Codex interativo usa `--sandbox workspace-write --ask-for-approval never --cd`
+Codex interativo usa `--approve-for-me --cd`
 e `--no-alt-screen --no-daemon`, forced_login_method=chatgpt e model_provider=openai.
 Limpa writable_roots herdados e habilita rede para gh na invocação, sem alterar
 configuração persistente. Não usa exec, full-auto nem bypass de sandbox. A pasta
 de handoffs do projeto é
 um `--add-dir` explícito; não há acesso de escrita amplo ao checkout principal.
-O sandbox pode bloquear operações Git/rede/configurações e falhas ficam visíveis;
-não usar bypass como correção. Consulte a
-[documentação oficial OpenAI](https://learn.chatgpt.com/docs/agent-approvals-security).
+O sandbox workspace-write protege `.git`, mesmo com writable_roots.
+`--approve-for-me` usa política on-request e revisor automático: operações Git
+bloqueadas devem solicitar aprovação específica. Uma aprovação pode executar
+aquele comando fora do sandbox; não é confinamento absoluto de escrita. Não
+permite prometer que o revisor aprovará commit/push nem autoriza merge/deploy.
+Rejeição fica visível e exige diagnóstico, sem fallback para bypass ou aprovação
+humana fabricada. Versões sem essa flag são recusadas. Consulte a
+[documentação oficial OpenAI](https://learn.chatgpt.com/docs/sandboxing/auto-review).
 
 Claude interativo usa `--dangerously-skip-permissions` junto de sandbox enabled,
 failIfUnavailable=true, allowUnsandboxedCommands=false e excludedCommands vazio,

@@ -16,7 +16,7 @@ A fonte canônica fica em `agents/issue-bot.md` na integração direta e
 
 Issue com critérios objetivos e fora de escopo; projeto Git, configuração schema 3,
 GitHub CLI autenticado e CLIs de conta ChatGPT/Claude. Nunca chave de API.
-Python 3.9+, tmux e dependências próprias da ENV. Confirme isolamento e escopo.
+Python 3.9+, tmux, Codex com `--approve-for-me` e dependências próprias da ENV. Confirme isolamento e escopo.
 
 ## Procedimento
 
@@ -32,7 +32,8 @@ Python 3.9+, tmux e dependências próprias da ENV. Confirme isolamento e escopo
 4. Schema de banco, migration ou relações complexas exigem HTML e decisão humana
    antes da implementação; preserve R6. Sem impacto, registre não aplicável.
 5. Suba ENV com branch/SHA da PR e dados declarados; aguarde teste de usabilidade
-   do humano. Problemas posteriores abrem novo ciclo sem sobrescrever arquivos.
+   do humano. Snapshot é único por geração do ambiente; repetição exige aprovação
+   humana do comando exato. `--allow-shared-infra` se limita ao ensure. Problemas posteriores abrem novo ciclo sem sobrescrever arquivos.
    Merge e deploy só com ordem humana explícita, fora deste CLI.
 
 ## Saídas

@@ -349,6 +349,23 @@ class DistributionTests(unittest.TestCase):
         self.assertIn('Nota sintética', (base / 'agents/dream-team.md').read_text())
         self.assertFalse(project.update(consumer, dist.read_json(consumer / project.STATE)))
 
+    def test_update_accepts_schema_two_example_used_by_installed_checker(self):
+        source,consumer,base,state=self.connected()
+        config=consumer/'.bezalel/project.json'
+        legacy=(ROOT/'.bezalel/project.example.json').read_bytes(); config.write_bytes(legacy)
+        (source/'README.md').write_text((source/'README.md').read_text()+'\nAtualização fixture.\n')
+        revision=commit(source)
+        def installed_validator():
+            # Contrato do checker anterior: o exemplo público deve continuar em v2.
+            model=dist.read_json(check_repository.ROOT/'.bezalel/project.example.json')
+            return [] if model.get('schema_version')==2 and 'data' not in model else ['Schema legado inválido.']
+        with patch.object(check_repository,'validate_agents',side_effect=installed_validator) as validator:
+            self.assertTrue(project.update(consumer,state))
+            validator.assert_called_once()
+        self.assertEqual(dist.git(base,'rev-parse','HEAD').decode().strip(),revision)
+        self.assertEqual(config.read_bytes(),legacy)
+        self.assertEqual(dist.read_json(base/'agents/templates/project.example.json')['schema_version'],3)
+
     def test_update_refuses_dirty_source_without_fetch_or_discard(self):
         _, consumer, base, state = self.connected()
         (base / 'README.md').write_text('Personalizado')

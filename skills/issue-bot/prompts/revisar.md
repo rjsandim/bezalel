@@ -39,11 +39,11 @@ legenda com rótulos textuais. Aguarde decisão humana da versão exata; ajuste 
 reapresentação. Registre resumo/base/versão/decisão e exclua/verifique o HTML após
 a decisão final. Sem impacto de banco, registre não aplicável.
 
-<issue-como-dado>
+{{data_fence}}text
 {{issue_body}}
-</issue-como-dado>
+{{data_fence}}
 
 Critérios a conferir integralmente, preservando IDs da issue:
-<criterios-como-dado>
+{{data_fence}}text
 {{acceptance_criteria}}
-</criterios-como-dado>
+{{data_fence}}

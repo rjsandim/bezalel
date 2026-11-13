@@ -52,6 +52,7 @@ def status(root,state,name,context):
     issue=(state/'issue').read_text().strip() if (state/'issue').is_file() else None
     branch=(state/'worktree-branch').read_text().strip()
     return {'project':project,'environment':name,'issue':int(issue) if issue else None,
+            'environment_id':(state/'environment-id').read_text().strip() if (state/'environment-id').is_file() else None,
             'branch':branch,'worktree':str(root/'.worktrees'/name),'docker_context':context,
             'ready':bool(required) and all(ready(s) for s in required),'services':services,
             'database':{'engine':engine,'host':'localhost','port':port}}

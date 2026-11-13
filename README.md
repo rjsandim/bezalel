@@ -95,7 +95,12 @@ Configuração de projeto usa schema 3, com `data.mode` (`ask`, `empty`, `snapsh
 Atualize o pacote e execute explicitamente
 `python3 .bezalel/base/scripts/project.py migrate-config --project .` para migrar
 schema 2 preservando campos e acrescentando `ask`. Sem decisão de dados ou
-autorização de infraestrutura compartilhada, env-up sai 5; não restaura produção.
+autorização de infraestrutura compartilhada quando necessária, env-up sai 5.
+`--allow-shared-infra` vale somente para ensure; status e restore não recebem a
+variável. Snapshot é restaurado uma vez por geração do ambiente, preservando
+dados de teste nos ciclos seguintes. O modelo legado schema 2 continua disponível
+para atualizar instalações antigas; o modelo vigente fica em
+[agents/templates/project.example.json](agents/templates/project.example.json).
 O [contrato](agents/issue-bot.md) documenta todos os comandos, handoffs e códigos.
 As atualizações nos projetos consumidores são tarefas separadas; testes do pacote
 não certificam sessões reais, CI remota, infraestrutura ou restore.

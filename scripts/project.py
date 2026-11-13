@@ -589,7 +589,7 @@ def main():
                 state['branch'] = args.branch
                 extra = {}
                 if not context.exists():
-                    extra['.bezalel/project.json'] = {'kind': 'file', 'content': read_text(base / '.bezalel/project.example.json')}
+                    extra['.bezalel/project.json'] = {'kind': 'file', 'content': read_text(base / 'agents/templates/project.example.json')}
                 ignore = inside(project, '.bezalel/.gitignore')
                 rules = read_text(ignore) if ignore.exists() else ''
                 # '/base' também ignora o link criado em worktrees; '/base/' só ignora diretórios.
