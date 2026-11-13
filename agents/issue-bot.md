@@ -106,7 +106,10 @@ Sem `--round`, usa a maior rodada do `--cycle` (default 1). O nome coincide com
 issue/rodada/papel/ciclo. Ciclo 1 aceita também `N-c1-rR-…`, mas recusa colisão com
 o nome simples. Ajuste de usabilidade humano após env-up abre novo ciclo com
 `--cycle 2` e `N-c2-r1-…`; não sobrescrever ciclo 1 nem usar ciclo para contornar
-limite antes do teste humano. O operador registra a origem desse novo pedido.
+limite antes do teste humano. Implement/review/respond de ciclos seguintes exigem
+o recibo local de env-up concluído no ciclo anterior e `--human-decision-source`
+com a origem real desse pedido de usabilidade. Isso exige declaração explícita do
+operador; não autentica a pessoa nem comprova que o teste humano ocorreu.
 
 Depois de duas revisões com ajustes, `respond`/nova `review` saem 4. O humano
 registra `.bezalel/handoff/N-decisao.json` (ciclos seguintes: `N-cC-decisao.json`):

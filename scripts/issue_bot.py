@@ -13,6 +13,7 @@ import tempfile
 import time
 
 from check_delivery import ContractError, ContractParser, read_json, require, validate_config
+from distribution import atomic_write
 import check_handoff as handoff
 import ci_gate
 import issue_session
@@ -40,6 +41,27 @@ def project_root(project):
 
 def worktree_path(args):
     return args.project/'.worktrees'/f'issue-{args.issue}'
+
+
+def cycle_receipt(args,cycle):
+    directory=args.project/'.bezalel/issue-bot'
+    require(not directory.is_symlink() and not directory.parent.is_symlink(),'Estado do ciclo não pode usar symlink.')
+    path=directory/f'{args.issue}-c{cycle}-environment.json'
+    require(not path.is_symlink(),'Recibo do ambiente não pode ser symlink.')
+    return path
+
+
+def verify_cycle(args):
+    if args.cycle==1:
+        return
+    path=cycle_receipt(args,args.cycle-1)
+    require(path.is_file(),'Novo ciclo exige env-up concluído no ciclo anterior.')
+    receipt=read_json(path)
+    require(isinstance(receipt,dict) and receipt.get('issue')==args.issue and receipt.get('ciclo')==args.cycle-1
+            and receipt.get('ready') is True,'Novo ciclo exige env-up concluído no ciclo anterior.')
+    require(args.pr is None or receipt.get('pr')==args.pr,'Novo ciclo pertence à PR do ambiente testado.')
+    require(bool(args.human_decision_source and args.human_decision_source.strip()),
+            'Novo ciclo exige --human-decision-source com a origem real do ajuste de usabilidade humano.')
 
 
 def config_for(project):
@@ -236,6 +258,8 @@ def env_up(args,config,pr):
         # projeto deve validar seu destino isolado e recusar produção por conta própria.
         restore=subprocess.run(data['restore'],cwd=workdir,capture_output=True,text=True)
         require(restore.returncode==0,'Restore falhou; saída privada omitida. Ambiente não declarado pronto para aceite.')
+    atomic_write(cycle_receipt(args,args.cycle),json.dumps({'issue':args.issue,'pr':pr['number'],
+                 'ciclo':args.cycle,'sha':pr['headRefOid'],'ready':True}).encode(),0o600)
     return 0,{**status,'data_mode':mode,'restore':'completed' if mode=='snapshot' else 'not_applicable','merge_autorizado':False}
 
 
@@ -253,6 +277,8 @@ def command_lock(args):
 
 
 def execute(args,config):
+    if args.command in {'review','respond'}:
+        verify_cycle(args)
     session=session_name(config,args.issue)
     if args.command=='session-down':
         if args.dry_run: return 0,{'session':session,'dry_run':True}
@@ -360,6 +386,7 @@ def main():
         args.project=project_root(args.project)
         config=config_for(args.project)
         if args.command=='implement':
+            verify_cycle(args)
             # Ainda não existe PR na primeira implementação.
             pr=resolve_pr(args,required=False)
             with contextlib.nullcontext() if args.dry_run else command_lock(args):

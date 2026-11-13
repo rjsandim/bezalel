@@ -101,6 +101,18 @@ class IssueBotTests(unittest.TestCase):
         self.write(number=4); self.write('codex',number=4)
         self.assertIsNone(bot.target_round(self.args,self.pr))
 
+    def test_new_cycle_requires_previous_environment_and_human_source(self):
+        self.args.cycle=2
+        with self.assertRaises(ContractError): bot.verify_cycle(self.args)
+        receipt=bot.cycle_receipt(self.args,1)
+        receipt.parent.mkdir()
+        receipt.write_text(json.dumps({'issue':122,'pr':130,'ciclo':1,'ready':True}))
+        with self.assertRaisesRegex(ContractError,'usabilidade humano'): bot.verify_cycle(self.args)
+        self.args.human_decision_source='fixture://feedback-humano-nao-real'
+        bot.verify_cycle(self.args)
+        self.args.cycle=3
+        with self.assertRaises(ContractError): bot.verify_cycle(self.args)
+
     def test_ci_corrections_do_not_change_round(self):
         self.write(); self.args.command='ci-gate'
         with patch.object(bot.ci_gate,'gate',return_value=(2,{'status':'failed'})),patch.object(bot,'dispatch') as send:
