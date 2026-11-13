@@ -54,6 +54,8 @@ if command == 'config':
 if command == 'ps':
     if '--services' in rest:
         print('\n'.join(state['running']))
+    elif '--format' in rest and 'json' in rest:
+        print(json.dumps([{'Service': name, 'State': 'running', 'Health': 'healthy'} for name in state['running']]))
     sys.exit(0)
 if command == 'up':
     if os.environ.get('ENV_TEST_FAIL_UP') == '1':
@@ -161,6 +163,76 @@ services:
                     'config', '--format', 'json']).stdout)
                 self.assertEqual(config['name'], 'fixture-' + name)
                 self.assertEqual(config['services']['api']['container_name'], 'fixture-' + name + '-api')
+
+    def test_issue_environment_uses_existing_pr_branch_and_preserves_sha(self):
+        self.run_process(['git', 'checkout', '-b', 'feature/filter'])
+        (self.repo / 'api/sentinel.txt').write_text('PR-specific commit\n')
+        self.run_process(['git', 'add', 'api/sentinel.txt'])
+        self.run_process(['git', '-c', 'user.name=Env Test', '-c', 'user.email=env@example.invalid', 'commit', '-m', 'candidate'])
+        expected = self.run_process(['git', 'rev-parse', 'HEAD']).stdout.strip()
+        self.run_process(['git', 'checkout', 'main'])
+        self.command('new.sh', 'issue-122', '--branch', 'feature/filter', '--issue', '122', extra={'ENV_DRY_RUN': '1'})
+        worktree = self.repo / '.worktrees/issue-122'
+        actual = self.run_process(['git', '-C', str(worktree), 'rev-parse', 'HEAD']).stdout.strip()
+        self.assertEqual(actual, expected)
+        state = self.skill / 'state/fixture/issue-122'
+        self.assertEqual((state / 'source-branch').read_text().strip(), 'feature/filter')
+        self.assertEqual((state / 'issue').read_text().strip(), '122')
+        self.command('ctl.sh', 'ensure', '--issue', '122', '--branch', 'feature/filter')
+        self.command('ctl.sh', 'ensure', '--issue', '122')
+        result = self.command('ctl.sh', 'status', 'issue-122', '--json')
+        public = json.loads(result.stdout)
+        self.assertTrue(public['ready'])
+        generation=(state/'environment-id').read_text().strip()
+        self.assertEqual(public['environment_id'],generation)
+        self.command('ctl.sh', 'ensure', '--issue', '122')
+        self.assertEqual((state/'environment-id').read_text().strip(),generation)
+        self.assertEqual(public['issue'], 122)
+        self.assertEqual(public['branch'], 'feature/filter')
+        self.assertEqual(public['worktree'], str(worktree.resolve()))
+        self.assertEqual(public['services'][0]['url'], 'https://issue-122-api.fixture.local')
+        self.assertIsInstance(public['database']['port'], int)
+        self.assertNotIn('password', result.stdout.lower())
+        self.assertNotIn('secret', result.stdout)
+        self.command('ctl.sh', 'stop', 'issue-122')
+        self.assertFalse(json.loads(self.command('ctl.sh', 'status', 'issue-122', '--json', expected=5).stdout)['ready'])
+
+    def test_missing_environment_has_read_only_json_status(self):
+        before=self.observed()['calls']
+        result=self.command('ctl.sh','status','issue-999','--json',expected=5)
+        self.assertEqual(json.loads(result.stdout)['status'],'absent')
+        self.assertFalse(json.loads(result.stdout)['ready'])
+        # Validar o contexto é leitura obrigatória; nenhum container é consultado.
+        self.assertEqual(self.observed()['calls'][len(before):],[['context','inspect','fixture']])
+        self.assertFalse((self.skill/'state/fixture/issue-999').exists())
+
+    def test_missing_or_divergent_branch_is_not_replaced_or_fetched(self):
+        before = self.observed()['calls']
+        self.command('new.sh', 'issue-122', '--branch', 'missing', extra={'ENV_DRY_RUN': '1'}, expected=1)
+        self.assertFalse((self.repo / '.worktrees/issue-122').exists())
+        self.assertEqual(self.observed()['calls'], before)
+        self.run_process(['git', 'branch', 'issue-122'])
+        self.command('new.sh', '--issue', '122', extra={'ENV_DRY_RUN': '1'})
+        branch_file = self.skill / 'state/fixture/issue-122/worktree-branch'
+        self.assertEqual(branch_file.read_text().strip(), 'issue-122')
+        self.command('new.sh', 'issue-122', '--branch', 'main', extra={'ENV_DRY_RUN': '1'}, expected=1)
+        self.command('ctl.sh', 'ensure', 'issue-122', '--branch', 'main', expected=1)
+        self.assertEqual(branch_file.read_text().strip(), 'issue-122')
+
+    def test_ensure_creates_issue_environment_when_absent(self):
+        self.run_process(['git', 'branch', 'issue-321'])
+        self.command('ctl.sh', 'ensure', '--issue', '321', extra={'ENV_DRY_RUN': '1'})
+        self.assertTrue((self.repo / '.worktrees/issue-321/api/.env').exists())
+        self.assertEqual((self.skill / 'state/fixture/issue-321/issue').read_text().strip(), '321')
+
+    def test_tracking_ref_is_local_and_has_exact_candidate_sha(self):
+        expected = self.run_process(['git', 'rev-parse', 'main']).stdout.strip()
+        self.run_process(['git', 'update-ref', 'refs/remotes/origin/candidate', expected])
+        self.command('new.sh', 'issue-555', '--branch', 'origin/candidate', extra={'ENV_DRY_RUN': '1'})
+        worktree = self.repo / '.worktrees/issue-555'
+        self.assertEqual(self.run_process(['git', '-C', str(worktree), 'rev-parse', 'HEAD']).stdout.strip(), expected)
+        self.assertEqual(self.run_process(['git', '-C', str(worktree), 'branch', '--show-current']).stdout.strip(), 'issue-555')
+        self.command('new.sh', 'issue-555', '--branch', 'origin/candidate', extra={'ENV_DRY_RUN': '1'})
 
     def test_agent_prefix_is_rejected_before_creating_environment(self):
         calls = self.observed()['calls']

@@ -160,3 +160,32 @@ Cert wildcard `*.<projeto>.<tld>` por projeto (mkcert, confiavel pela CA do `mkc
 
 ## Verificação da skill
 - Os testes de manutenção da skill estão em [manutenção](manutencao.md).
+
+## Vínculo explícito de branch e status público
+
+```sh
+bash "$SK/new.sh" issue-122 --branch corrigir-filtro --issue 122
+bash "$SK/ctl.sh" ensure --issue 122 --branch corrigir-filtro
+bash "$SK/ctl.sh" status issue-122 --json
+```
+
+`--branch` exige branch/ref de tracking local existente, sem fetch ou criação a
+partir de base. Tracking (ex.: origin/corrigir-filtro) cria a branch local do
+ambiente exatamente nessa ref. `--issue` sem nome implica issue-N e registra a
+issue; sem --branch preserva a resolução habitual pelo nome/base do ambiente.
+As duas opções podem ser combinadas para registrar o vínculo. Sem essas flags,
+a criação antiga continua usando branch de mesmo nome ou base_ref. Repetir new
+preserva Compose/env/arquivos e retoma serviços; troca de vínculo falha antes de
+iniciar serviços. Branch, origem e issue ficam registrados no estado local.
+
+Status JSON lista serviços, URLs, portas, aliases, branch, worktree, contexto,
+banco sem credenciais e ready. Considera serviços ativos/lembrados ou padrão salvo
+e suas dependências; serviços não selecionados podem estar parados. Health ausente
+exige processo running; health presente precisa ser healthy. Não substitui teste
+funcional humano. Saída 0 pronto, 5 existente mas não pronto, 1 erro.
+
+O restore de dados é opcional pelo env-up do modo issue-bot, após ready, usando
+project.json schema 3. A ENV clássica não passa a executar restore automaticamente.
+Comando do projeto precisa validar destino isolado e recusar produção; cwd não é
+prova da conexão usada pelo comando. Infra compartilhada continua exigindo
+ENV_ALLOW_SHARED_INFRA=1 só na invocação autorizada.

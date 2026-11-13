@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "issue": 122,
+  "pr": 130,
+  "rodada": 1,
+  "candidato": {
+    "base": "main",
+    "head": "issue-122",
+    "sha": "def456abc"
+  },
+  "gerado_em": "2026-11-13T20:15:00-03:00",
+  "papel": "codex",
+  "ajustes": [
+    {
+      "id": "A1",
+      "status": "corrigido",
+      "como": "Fixture: limites validados.",
+      "commit": "def456abc"
+    }
+  ]
+}

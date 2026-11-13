@@ -22,6 +22,10 @@ processos. Cada papel lê estas regras e somente os [processos](#processos) que 
 - **Entrada de retorno:** retomada de um processo já iniciado, com contexto, fase, versão e origem.
 - **R1–R11:** regras comuns abaixo; valem para todos os papéis. Como aplicar skills nas etapas: [relação por etapa](dream-team-skills.md#como-aplicar).
 
+O [modo issue-bot](issue-bot.md) é adicional e tem rito próprio: Codex implementa,
+CI verde antes da revisão Claude, duas rodadas e aceite humano no ambiente local.
+O clássico mantém revisões pré-PR, Excel e as responsabilidades de CI em R2. R6 e merge/deploy manuais são preservados nos dois.
+
 ## Regras comuns
 
 Estas regras são a fonte local comum aos três cenários. O fluxo é mantido neste repositório e não exige envio, sincronização ou aprovação em serviço de modelagem. Cada atividade usa as pré-condições do destino, inclusive nas retomadas. Condições locais complementam, sem substituir, o procedimento e estas regras.

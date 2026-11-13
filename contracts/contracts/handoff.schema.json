@@ -1,0 +1,311 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "claude": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "type": "integer"
+        },
+        "papel": {
+          "const": "claude"
+        },
+        "issue": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pr": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "rodada": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ciclo": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "candidato": {
+          "type": "object",
+          "properties": {
+            "base": {
+              "type": "string",
+              "minLength": 1
+            },
+            "head": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "base",
+            "head",
+            "sha"
+          ],
+          "additionalProperties": false
+        },
+        "gerado_em": {
+          "type": "string",
+          "minLength": 1,
+          "format": "date-time"
+        },
+        "ci": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "const": "passed"
+            },
+            "evidence": {
+              "type": "string",
+              "minLength": 1
+            },
+            "url": {
+              "type": "string",
+              "minLength": 1,
+              "format": "uri"
+            }
+          },
+          "required": [
+            "status",
+            "evidence"
+          ],
+          "additionalProperties": false
+        },
+        "veredito": {
+          "enum": [
+            "pode_mergear",
+            "ajustes"
+          ]
+        },
+        "criterios": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "criterio": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "enum": [
+                  "atendido",
+                  "parcial",
+                  "nao_atendido"
+                ]
+              },
+              "evidencia": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "criterio",
+              "status",
+              "evidencia"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "ajustes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "gravidade": {
+                "enum": [
+                  "bloqueante",
+                  "sugestao"
+                ]
+              },
+              "arquivo": {
+                "type": "string",
+                "minLength": 1
+              },
+              "problema": {
+                "type": "string",
+                "minLength": 1
+              },
+              "porque": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sugestao": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "gravidade",
+              "arquivo",
+              "problema",
+              "porque",
+              "sugestao"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "fora_de_escopo": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "skills_usadas": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 2
+        }
+      },
+      "required": [
+        "schema_version",
+        "papel",
+        "issue",
+        "pr",
+        "rodada",
+        "candidato",
+        "gerado_em",
+        "ci",
+        "veredito",
+        "criterios",
+        "ajustes",
+        "fora_de_escopo",
+        "skills_usadas"
+      ],
+      "additionalProperties": false
+    },
+    "codex": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "type": "integer"
+        },
+        "papel": {
+          "const": "codex"
+        },
+        "issue": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pr": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "rodada": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ciclo": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "candidato": {
+          "type": "object",
+          "properties": {
+            "base": {
+              "type": "string",
+              "minLength": 1
+            },
+            "head": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "base",
+            "head",
+            "sha"
+          ],
+          "additionalProperties": false
+        },
+        "gerado_em": {
+          "type": "string",
+          "minLength": 1,
+          "format": "date-time"
+        },
+        "ajustes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "enum": [
+                  "corrigido",
+                  "nao_corrigido"
+                ]
+              },
+              "como": {
+                "type": "string",
+                "minLength": 1
+              },
+              "commit": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "status",
+              "como",
+              "commit"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "schema_version",
+        "papel",
+        "issue",
+        "pr",
+        "rodada",
+        "candidato",
+        "gerado_em",
+        "ajustes"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/claude"
+    },
+    {
+      "$ref": "#/$defs/codex"
+    }
+  ]
+}

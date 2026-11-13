@@ -1,6 +1,6 @@
 {
   "name": "bezalel",
-  "version": "2.0.0-74c180c09cacf236",
+  "version": "2.0.0-c3459ba7f68e4ca6",
   "description": "Plugin Bezalel com a equipe DreamTeam, fluxo de desenvolvimento e skills.",
   "author": {
     "name": "Bezalel"
@@ -26,6 +26,7 @@
     "./skills/humanizer",
     "./skills/implementar-snapshots",
     "./skills/iss-audit",
+    "./skills/issue-bot",
     "./skills/pr-audit",
     "./skills/proposta-banco",
     "./skills/security-audit",
