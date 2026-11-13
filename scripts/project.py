@@ -169,6 +169,11 @@ def desired(project, base, platforms, automatic, contract_dir='agents'):
         '## Uso do Bezalel neste projeto', '',
         '- Bezalel é o plugin; DreamTeam é a equipe de agentes de desenvolvimento.',
         '- Leia `.bezalel/project.json` e seus documentos de arquitetura e negócio.',
+        '- Se a demanda escolher issue-bot, use `.bezalel/base/agents/issue-bot.md`:',
+        '  Codex implementa, CI verde antecede Claude, handoffs JSON e duas rodadas por ciclo.',
+        '  Não exige nove papéis/Excel/accept clássico; R6 e merge/deploy manuais permanecem.',
+        '  Instalação não inicia esse modo; é necessário chamar a skill/CLI com uma issue.',
+        '  No caminho clássico, siga os contratos e etapas abaixo.',
         '- Use o contrato do papel atribuído, as regras comuns de',
         '  `.bezalel/base/agents/' + catalog['workflow']['source'] + '` e somente os processos do papel',
         '  em `.bezalel/base/agents/processes/`; selecione skills pela relação',
@@ -189,7 +194,8 @@ def desired(project, base, platforms, automatic, contract_dir='agents'):
         '- Para novas branches/worktrees, use uma descrição curta separada por hífens,',
         '  em minúsculas e sem acentos; números só quando significativos. Sem prefixos',
         '  de agente/tipo (codex/, feat/) ou sufixos aleatórios. Branch, pasta e nome',
-        '  do ambiente ENV devem coincidir. Preserve nomes/vínculos preexistentes.',
+        '  do ambiente ENV devem coincidir, salvo vínculo --branch explícito no issue-bot.',
+        '  Preserve nomes/vínculos preexistentes.',
         '- Scripts e referências partem da pasta real da skill carregada.',
         '- Ao mudar comandos, estrutura ou regras do projeto, atualize seu README e',
         '  AGENTS.md/CLAUDE.md. Preserve as instruções próprias fora deste bloco.',
@@ -389,6 +395,15 @@ def reconcile(project, base, state, platforms, automatic, revision, disable=Fals
     entries = {} if disable else desired(project, base, platforms, automatic)
     changes, managed = plan(project, state.get('managed', {}), entries, alternatives)
     changes.update(extra or {})
+    if not disable:
+        ignore = inside(project, '.bezalel/.gitignore')
+        rules = read_text(ignore) if ignore.exists() else ''
+        additions = [rule for rule in ['/handoff/', '/logs/', '/issue-bot/'] if rule not in rules.splitlines()]
+        if additions:
+            # Inclui instalações anteriores sem assumir propriedade de regras próprias.
+            planned = changes.get('.bezalel/.gitignore', {}).get('content', rules)
+            additions = [rule for rule in additions if rule not in planned.splitlines()]
+            changes['.bezalel/.gitignore'] = {'kind': 'file', 'content': append_lines(planned, additions)}
     new = {'schema_version': 1, 'enabled': not disable, 'platforms': platforms,
            'automatic': automatic, 'branch': state.get('branch', 'master'),
            'revision': revision, 'managed': managed}
@@ -508,9 +523,23 @@ def lock(project):
         yield
 
 
+def migrate_config(project):
+    from check_delivery import validate_config, ContractError
+    path = inside(project, '.bezalel/project.json')
+    config = read_json(path)
+    if config.get('schema_version') == 2:
+        config = {**config, 'schema_version': 3, 'data': config.get('data', {'mode': 'ask'})}
+    try:
+        validate_config(config)
+    except ContractError as error:
+        raise DistributionError(str(error)) from None
+    if read_json(path) != config:
+        atomic_write(path, json_bytes(config))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['enable', 'update', 'status', 'disable', 'run', 'link-worktree'])
+    parser.add_argument('action', choices=['enable', 'update', 'status', 'disable', 'run', 'link-worktree', 'migrate-config'])
     parser.add_argument('--project', type=Path, default=Path.cwd())
     parser.add_argument('--platform', choices=['both', 'codex', 'claude', 'grok'], default='both')
     parser.add_argument('--branch', default='master')
@@ -531,6 +560,11 @@ def main():
                 raise DistributionError('Bezalel não está ligado no checkout principal.')
             linked = link_worktree(project, worktree)
             print('Worktree ligada à base do checkout principal.' if linked else 'Worktree já estava ligada.')
+            return 0
+        if args.action == 'migrate-config':
+            with lock(project):
+                migrate_config(project)
+            print('Configuração no schema 3; data.mode=ask exige decisão antes de subir dados.')
             return 0
         state_path = inside(project, STATE)
         with lock(project):
@@ -555,7 +589,7 @@ def main():
                 state['branch'] = args.branch
                 extra = {}
                 if not context.exists():
-                    extra['.bezalel/project.json'] = {'kind': 'file', 'content': read_text(base / '.bezalel/project.example.json')}
+                    extra['.bezalel/project.json'] = {'kind': 'file', 'content': read_text(base / 'agents/templates/project.example.json')}
                 ignore = inside(project, '.bezalel/.gitignore')
                 rules = read_text(ignore) if ignore.exists() else ''
                 # '/base' também ignora o link criado em worktrees; '/base/' só ignora diretórios.

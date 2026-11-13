@@ -155,7 +155,10 @@ def validate_agents():
         require(declared == set((ROOT / "agents/roles").glob("*.md")), "Contrato de agente órfão.")
         require(adapters == set((ROOT / "agents/codex").glob("*.toml")), "Adaptador de agente órfão.")
         require(claude_adapters == set((ROOT / 'agents/claude').glob('*.md')), "Adaptador Claude órfão.")
-        validate_config(read_json(ROOT / ".bezalel/project.example.json"))
+        validate_config(read_json(ROOT / "agents/templates/project.example.json"))
+        legacy = read_json(ROOT / ".bezalel/project.example.json")
+        require(legacy.get('schema_version') == 2 and 'data' not in legacy, 'Preserve o modelo legado para o checker instalado.')
+        validate_config({**legacy, 'schema_version': 3, 'data': {'mode': 'ask'}})
     except ContractError as error:
         return [str(error)]
     except (OSError, UnicodeError, TypeError, ValueError, KeyError, AttributeError):
@@ -197,6 +200,21 @@ def validate_upstream():
     return []
 
 
+def validate_issue_bot():
+    required = ['agents/issue-bot.md', 'agents/contracts/handoff.schema.json',
+                'agents/templates/handoff-claude.example.json', 'agents/templates/handoff-codex.example.json',
+                'skills/issue-bot/SKILL.md', 'skills/issue-bot/references/sessao-tmux.md',
+                'scripts/check_handoff.py', 'scripts/ci_gate.py', 'scripts/issue_bot.py',
+                'scripts/issue_session.sh', 'scripts/issue_session.py']
+    required.extend('skills/issue-bot/prompts/' + stage + '.md' for stage in
+                    ['implementar', 'corrigir-ci', 'revisar', 'responder-handoff', 'subir-ambiente'])
+    errors = ['Issue-bot: arquivo obrigatório ausente: ' + name for name in required if not (ROOT / name).is_file()]
+    for name, link in [('README.md', 'agents/issue-bot.md'), ('agents/README.md', 'issue-bot.md'), ('agents/dream-team.md', 'issue-bot.md')]:
+        if not re.search(r'\]\(' + re.escape(link) + r'\)', (ROOT / name).read_text()):
+            errors.append('Issue-bot: referência canônica ausente em ' + name)
+    return errors
+
+
 def validate_workbook_template(path=None):
     """Check the packaged empty template without requiring a spreadsheet runtime."""
     path = path or ROOT / "skills/development-test-workbook/assets/test-plan-template.xlsx"
@@ -226,7 +244,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.parse_args()
     files = package_files()
-    errors = validate_structure(files) + validate_agents() + validate_generated() + validate_upstream() + validate_workbook_template()
+    errors = validate_structure(files) + validate_agents() + validate_generated() + validate_upstream() + validate_workbook_template() + validate_issue_bot()
     if errors:
         for error in errors:
             print(error, file=sys.stderr)

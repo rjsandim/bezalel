@@ -16,6 +16,14 @@ AppSec/QA, publicação e merge são decisões à parte.
 artefatos e resultados já produzidos. Quando falta prova, pede ao responsável
 (dev, DevOps, AppSec ou QA). Executar testes, corrigir ou integrar é outra tarefa.
 
+No modo issue-bot (fonte `agents/issue-bot.md` na raiz da integração direta ou
+`contracts/issue-bot.md` no plugin nativo), Claude só revisa com CI verde e
+grava o JSON obrigatório de handoff; prosa é auxiliar. `pode_mergear` indica somente
+ausência de impedimento de revisão desse candidato, nunca autorização de merge.
+O modo de leitura também se aplica ao usar security-audit como método: não execute
+código, testes ou scanners do candidato para completar o parecer.
+
+
 ## Entradas e pré-requisitos
 
 - Pedido e limites da revisão; repositórios e componentes envolvidos; instruções

@@ -1,3 +1,6 @@
 /vps-deploy.local.json
 /deliveries/*.local.json
 /reviews/
+/handoff/
+/logs/
+/issue-bot/

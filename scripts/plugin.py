@@ -24,7 +24,8 @@ def build(source, output):
     for directory in ['skills', 'agents']:
         for name, value in files(source / directory).items():
             content[('contracts' if directory == 'agents' else directory) + '/' + name] = value
-    for script in ['distribution.py', 'project.py', 'plugin.py', 'check_delivery.py']:
+    for script in ['distribution.py', 'project.py', 'plugin.py', 'check_delivery.py',
+                   'check_handoff.py', 'ci_gate.py', 'issue_bot.py', 'issue_session.py', 'issue_session.sh']:
         content['scripts/' + script] = ((source / 'scripts' / script).read_bytes(), 0o644)
     for name in ['.bezalel/project.example.json']:
         content[name] = ((source / name).read_bytes(), 0o644)
@@ -85,6 +86,8 @@ def build(source, output):
         'Bezalel é o plugin; DreamTeam é sua equipe de nove agentes de desenvolvimento.',
         'Pacote gerado. Não edite este cache: altere a fonte e publique uma nova revisão.',
         'Os contratos portáteis ficam em [contracts/README.md](contracts/README.md).',
+        'O [modo issue-bot](contracts/issue-bot.md) é adicional: chame a skill ou scripts/issue_bot.py',
+        'com uma issue concreta; instalação não inicia sessões. Merge e deploy continuam manuais.',
         'As skills originais são preservadas. Os agentes nativos carregam seus contratos.',
         '', '## Como adotar o Bezalel em um projeto', '',
         'Depois de instalar, conecte o projeto com:', '',
@@ -144,10 +147,10 @@ def bind(project, root, state, clients, automatic, client=None):
     changes[STATE] = {'kind': 'file', 'content': json_bytes(new).decode('utf-8')}
     context = inside(project, '.bezalel/project.json')
     if not context.exists():
-        changes['.bezalel/project.json'] = {'kind': 'file', 'content': read_text(root / '.bezalel/project.example.json')}
+        changes['.bezalel/project.json'] = {'kind': 'file', 'content': read_text(root / 'contracts/templates/project.example.json')}
     ignore = inside(project, '.bezalel/.gitignore')
     text = read_text(ignore) if ignore.exists() else ''
-    extra = [p for p in ['/base', '/plugin.local.json', '/update.lock', '/vps-deploy.local.json', '/deliveries/*.local.json', '/reviews/'] if p not in text.splitlines()]
+    extra = [p for p in ['/base', '/plugin.local.json', '/update.lock', '/vps-deploy.local.json', '/deliveries/*.local.json', '/reviews/', '/handoff/', '/logs/', '/issue-bot/'] if p not in text.splitlines()]
     if extra:
         changes['.bezalel/.gitignore'] = {'kind': 'file', 'content': append_lines(text, extra)}
     apply(project, changes)

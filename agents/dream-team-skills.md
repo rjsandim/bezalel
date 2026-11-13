@@ -48,3 +48,6 @@ catálogo e regenere o índice; o checker confere a cobertura por processo, não
 qualidade semântica da seleção.
 
 O processo **Conferir merge e encerrar a tarefa** não executa uma skill própria: TL consulta PRs e issues e passa ao DevOps a limpeza pelo processo de ambiente. O HTML de banco é temporário; a decisão e o resumo sobrevivem à exclusão.
+
+O [modo issue-bot](issue-bot.md) tem seleção própria de métodos e etapas, sem
+substituir os requisitos clássicos desta relação.

@@ -146,3 +146,11 @@ A [relação por processo e etapa](dream-team-skills.md) registra as 13 skills
 indicadas em 24 etapas de 16 processos. O fluxo atual tem 21 processos e 63 etapas, incluindo a conferência pós-merge. Os [contratos e adaptadores](README.md) usam essa
 seleção; as skills não foram alteradas na conversão. Não houve execução de produto,
 produção, publicação ou infraestrutura para validar o pacote.
+
+## Caminho adicional por issue
+
+[issue-bot](../skills/issue-bot/SKILL.md) acrescenta um modo próprio com Codex, CI
+verde, revisão Claude e aceite humano local. Não altera a seleção de skills por
+processo clássico nem importa/adapta novas cópias do upstream. Seu contrato está
+em [agents/issue-bot.md](issue-bot.md); security-audit original permanece intacta,
+e as restrições de revisão sem execução são aplicadas pelo prompt desse modo.

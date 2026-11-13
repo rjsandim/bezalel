@@ -6,10 +6,13 @@ source "$SCRIPT_DIR/lib.sh"
 source "$SCRIPT_DIR/services.sh"
 require_tools git yq docker python3
 
-ACTION="${1:-}"; ENV_NAME="${2:-}"
+ACTION="${1:-}"
 case "$ACTION" in start|ensure|stop|restart|status) ;; *) fail "Acao invalida: '$ACTION'." ;; esac
-validate_env_name "$ENV_NAME"
-shift 2
+shift
+ORIGINAL_ARGS=("$@")
+parse_environment_args "$@"
+set -- ${SERVICE_ARGS[@]+"${SERVICE_ARGS[@]}"}
+[ "$STATUS_JSON" = 0 ] || [ "$ACTION" = status ] || fail "--json so se aplica ao status."
 case "$ACTION" in
     start|ensure) ;;
     *) [ "$#" -eq 0 ] || fail "$ACTION opera no ambiente; selecao de servicos e aceita por start/ensure." ;;
@@ -19,8 +22,16 @@ PROJECT="$(project_name)"
 apply_docker_engine
 STATE_DIR="$SKILL_DIR/state/$PROJECT/$ENV_NAME"
 COMPOSE="$STATE_DIR/docker-compose.yml"
+if [ ! -f "$COMPOSE" ] && [ "$ACTION" = ensure ]; then
+    exec bash "$SCRIPT_DIR/new.sh" "${ORIGINAL_ARGS[@]}"
+fi
+if [ ! -f "$COMPOSE" ] && [ "$ACTION" = status ] && [ "$STATUS_JSON" = 1 ]; then
+    python3 -c 'import json,sys; print(json.dumps({"project":sys.argv[1],"environment":sys.argv[2],"ready":False,"status":"absent"}))' "$PROJECT" "$ENV_NAME"
+    exit 5
+fi
 [ -f "$COMPOSE" ] || fail "Ambiente '$ENV_NAME' sem compose salvo. Use env new."
 validate_state_owner "$STATE_DIR"
+validate_requested_branch "$(repo_root)/.worktrees/$ENV_NAME"
 
 case "$ACTION" in
     start|ensure)
@@ -38,5 +49,8 @@ case "$ACTION" in
         select_services
         dc restart --timeout 60 "${SELECTED_SERVICES[@]}"
         start_services start "${SELECTED_SERVICES[@]}" ;;
-    status) dc ps --all ;;
+    status)
+        if [ "$STATUS_JSON" = 1 ]; then
+            python3 "$SCRIPT_DIR/status.py" "$(repo_root)" "$STATE_DIR" "$ENV_NAME" "$DOCKER_CONTEXT"
+        else dc ps --all; fi ;;
 esac
