@@ -29,16 +29,27 @@ require_tools() {
 }
 
 # ─── Contexto do projeto ───────────────────────────────────────
-# SEMPRE o repo principal, mesmo se chamado de dentro de uma worktree linkada
-# (`--show-toplevel` retornaria a worktree, quebrando project_name/state/destroy).
-# git-common-dir aponta para o .git compartilhado; seu pai e o repo principal.
+# Arquivos e identidade do ambiente pertencem à raiz da worktree atual.
+# Não redirecionar manifesto, init ou geração para o checkout principal.
 repo_root() {
-    local cdir
-    cdir="$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
-    if [ -n "$cdir" ]; then dirname "$cdir"
-    else git rev-parse --show-toplevel 2>/dev/null || fail "Nao esta dentro de um repositorio git."; fi
+    git rev-parse --show-toplevel 2>/dev/null || fail "Nao esta dentro de um repositorio git."
 }
 manifest_path(){ echo "$(repo_root)/.envstack/stack.yaml"; }
+
+# Uma worktree já gerenciada não pode virar raiz de outro ambiente/identidade.
+# Consulta somente os vínculos da skill, sem ler arquivos do checkout criador.
+validate_operation_root() {
+    local root record owner directory name
+    root="$(repo_root)"
+    for record in "$SKILL_DIR"/state/*/*/project-root; do
+        [ -f "$record" ] || continue
+        owner="$(cat "$record")"
+        directory="${record%/project-root}"
+        name="${directory##*/}"
+        [ "$root" != "$owner/.worktrees/$name" ] || \
+            fail "Esta worktree pertence a um ambiente existente; opere a partir da raiz registrada em project-root."
+    done
+}
 
 # Le um campo do manifesto via yq. Uso: manifest_get '.project'
 manifest_get() {
@@ -124,7 +135,7 @@ base_ref() {
 validate_state_owner() {
     local state="$1"
     [ -f "$state/project-root" ] && [ -f "$state/docker-context" ] || fail "Estado legado sem vinculo de projeto/contexto. Audite sua origem antes de operar."
-    [ "$(cat "$state/project-root")" = "$(repo_root)" ] || fail "Estado pertence a outro repositorio."
+    [ "$(cat "$state/project-root")" = "$(repo_root)" ] || fail "Ambiente vinculado a outra raiz; opere a partir do checkout que o criou."
     [ "$(cat "$state/docker-context")" = "$DOCKER_CONTEXT" ] || fail "Contexto diverge do registrado no ambiente."
 }
 

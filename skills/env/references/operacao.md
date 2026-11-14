@@ -7,6 +7,60 @@ Dois momentos distintos:
 
 `<projeto>` = nome da pasta raiz do repo git (ou `.project` do manifesto). Nada de hardcode.
 
+## Manifesto e raiz por worktree
+
+Todos os comandos usam `git rev-parse --show-toplevel` da worktree atual,
+mesmo quando chamados de uma subpasta. `detect`/`init` gravam `.envstack/` e
+`.gitignore` somente nessa raiz; não consultam nem alteram os arquivos do checkout
+principal. Versione a configuração desejada na branch antes de criar ambientes.
+
+`new`/`ensure` criam `.worktrees/<nome>/` sob essa raiz e usam seus templates de
+`.env` e Dockerfiles. `update`, IDE e status seguem a mesma raiz. O fallback do
+nome do projeto é o nome dessa pasta; declare `project` para manter o nome estável
+entre worktrees. Estado continua em `$SKILL_DIR/state/<projeto>/<nome>/`, com
+`project-root` apontando para a raiz que criou o ambiente. Opere um ambiente a
+partir dessa raiz; colisão com estado de outra raiz é recusada, sem reescrever ou
+adotar seu vínculo. Ambientes existentes criados no checkout principal continuam
+operando a partir dele. Não copie nem edite o estado para contornar a recusa.
+
+`new`, `ctl`, `update` e `destroy` recusam a execução dentro de uma worktree já
+vinculada a um ambiente no estado da skill (inclusive em subpastas). Isso evita
+criar estado/Compose e worktree aninhada para uma identidade duplicada, mesmo sem
+`project` no manifesto. A mensagem orienta a operar a partir da raiz registrada
+em `project-root`; a verificação não lê os arquivos de trabalho dessa raiz.
+`detect`/`init` continuam tratando os artefatos da worktree atual.
+
+Pools, alocações e infraestrutura compartilhada continuam no estado global da
+skill, fora dos checkouts. A identidade dos databases/usuários inclui a raiz
+proprietária, preservando a separação entre ambientes. Regras de Git (base e
+registro de worktrees) consultam os metadados compartilhados, sem ler arquivos de
+trabalho do checkout principal e sem fetch automático.
+
+## Imagem PostgreSQL
+
+No modo exclusivo (`database_mode` ausente ou `isolated`):
+
+```yaml
+database: postgres
+database_image: pgvector/pgvector:pg17
+```
+
+`database_image` é opcional, com padrão `postgres:17`. A allowlist aceita apenas
+`postgres:<versão>[-alpine]` (ex.: `17`, `16.4`) e `pgvector/pgvector:pg<major>`
+(ex.: `pg17`), com versão numérica explícita. pgvector não aceita minor/patch,
+como `pg17.2`; não aceita `latest`, registros alternativos ou
+outros sufixos. A mesma validação é usada em `database_shared.image` para pools
+PostgreSQL; nesse modo, `database_image` não se aplica e gera aviso apontando para
+`database_shared.image`. O campo também gera aviso em MySQL, cuja imagem permanece
+inalterada.
+PostgreSQL 18+ monta o volume em `/var/lib/postgresql`; versões anteriores usam
+`/var/lib/postgresql/data`, também para pgvector.
+
+A imagem disponibiliza a extensão; este procedimento não cria `CREATE EXTENSION`
+nem altera o schema da aplicação. Troca de imagem/major em dados existentes exige
+planejamento e migração explícitos; `update` não migra dados. Pools recusam mudança
+de imagem/configuração e containers com imagem divergente; escolha outro pool.
+
 ## Arquitetura (importante para manutencao)
 
 - **Nada de gerar arquivos com `echo` no script.** Tudo sai de **templates** em `templates/*.tpl`, renderizados com `envsubst` (so as `${VARS}` listadas em `RENDER_VARS`). Para mudar o formato de um Dockerfile/compose, edite o `.tpl`.

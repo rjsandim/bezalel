@@ -10,6 +10,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib.sh"
 source "$SCRIPT_DIR/services.sh"
 require_tools git yq jq envsubst docker python3
+validate_operation_root
 
 ORIGINAL_ARGS=("$@")
 parse_environment_args "$@"
@@ -41,6 +42,18 @@ COUNT="$(yq -r '.services | length' "$MANIFEST")"
 # Engine de banco do stack (manifesto .database). Default: postgres.
 DB_ENGINE="$(manifest_get '.database')"
 case "$DB_ENGINE" in mysql) DB_SERVICE="mysql";; *) DB_ENGINE="postgres"; DB_SERVICE="postgres";; esac
+
+# O pool usa database_shared.image; a imagem exclusiva só se aplica fora dele.
+DB_IMAGE="postgres:17"
+PG_DATA_DIR="/var/lib/postgresql/data"
+if [ "$DB_ENGINE" = postgres ] && [ "$(manifest_get '.database_mode')" != shared ]; then
+    DB_IMAGE="$(manifest_get '.database_image')"
+    DB_IMAGE="${DB_IMAGE:-postgres:17}"
+    PG_MAJOR="$(python3 "$SCRIPT_DIR/shared_db.py" postgres-major "$DB_IMAGE")"
+    [ "$PG_MAJOR" -lt 18 ] || PG_DATA_DIR="/var/lib/postgresql"
+elif [ "$(yq -r 'has("database_image")' "$MANIFEST")" = true ]; then
+    warn "database_image ignorado: aplica-se somente a PostgreSQL exclusivo; para um pool PostgreSQL, use database_shared.image."
+fi
 
 mkdir -p "$STATE_DIR"
 # Identidade da geração: estável em start/update, nova após destroy/new.
@@ -111,8 +124,8 @@ DB_HOST_PORT="$(db_host_port "$ENV_NAME")"
 if [ -f "$ES_SHARED_DB_FILE" ]; then
     DB_HOST_PORT="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["pool"]["port"])' "$ES_SHARED_DB_FILE")"
 fi   # porta do banco no host (IDE conecta por aqui)
-export PROJECT ENV_NAME PG_USER PG_PASS PROXY_NET STATE_DIR WORKTREE_DIR ROOT DB_SERVICE DB_HOST_PORT
-COMMON_VARS='${PROJECT} ${ENV_NAME} ${PG_USER} ${PG_PASS} ${PROXY_NET} ${STATE_DIR} ${WORKTREE_DIR} ${ROOT} ${DB_HOST_PORT}'
+export PROJECT ENV_NAME PG_USER PG_PASS PROXY_NET STATE_DIR WORKTREE_DIR ROOT DB_SERVICE DB_HOST_PORT DB_IMAGE PG_DATA_DIR
+COMMON_VARS='${PROJECT} ${ENV_NAME} ${PG_USER} ${PG_PASS} ${PROXY_NET} ${STATE_DIR} ${WORKTREE_DIR} ${ROOT} ${DB_HOST_PORT} ${DB_IMAGE} ${PG_DATA_DIR}'
 export STARTUP_SERVICES="$(yq -o=json -I=0 '.startup.services // []' "$MANIFEST")"
 COMMON_VARS+=' ${STARTUP_SERVICES}'
 
