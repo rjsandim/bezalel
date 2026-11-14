@@ -10,6 +10,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib.sh"
 source "$SCRIPT_DIR/services.sh"
 require_tools git yq jq envsubst docker python3
+validate_operation_root
 
 ORIGINAL_ARGS=("$@")
 parse_environment_args "$@"
@@ -50,6 +51,8 @@ if [ "$DB_ENGINE" = postgres ] && [ "$(manifest_get '.database_mode')" != shared
     DB_IMAGE="${DB_IMAGE:-postgres:17}"
     PG_MAJOR="$(python3 "$SCRIPT_DIR/shared_db.py" postgres-major "$DB_IMAGE")"
     [ "$PG_MAJOR" -lt 18 ] || PG_DATA_DIR="/var/lib/postgresql"
+elif [ "$(yq -r 'has("database_image")' "$MANIFEST")" = true ]; then
+    warn "database_image ignorado: aplica-se somente a PostgreSQL exclusivo; para um pool PostgreSQL, use database_shared.image."
 fi
 
 mkdir -p "$STATE_DIR"

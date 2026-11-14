@@ -16,7 +16,7 @@ class PostgresImageTests(unittest.TestCase):
     def test_allowlist_and_major_for_both_formats(self):
         for image, major in [("postgres:17", 17), ("postgres:16.4-alpine", 16),
                              ("postgres:18.1", 18), ("pgvector/pgvector:pg17", 17),
-                             ("pgvector/pgvector:pg18.1", 18)]:
+                             ("pgvector/pgvector:pg18", 18)]:
             with self.subTest(image=image):
                 self.assertEqual(shared.postgres_major(image), major)
                 pool = shared.pool_spec(dict(database="postgres", database_shared=dict(
@@ -26,7 +26,7 @@ class PostgresImageTests(unittest.TestCase):
     def test_images_outside_allowlist_are_rejected(self):
         for image in ["postgres", "postgres:latest", "pgvector/pgvector:latest",
                       "pgvector/pgvector:pg", "pgvector/pgvector:17", "other/postgres:17",
-                      "postgres:17-bookworm", "pgvector/pgvector:pg17-alpine",
+                      "postgres:17-bookworm", "pgvector/pgvector:pg17-alpine", "pgvector/pgvector:pg17.2",
                       "mysql:8.4", "postgres:17@sha256:abc", "postgres:17\n"]:
             with self.subTest(image=image), self.assertRaises(shared.SharedDatabaseError):
                 shared.pool_spec(dict(database="postgres", database_shared=dict(
@@ -87,6 +87,63 @@ class PostgresGenerationTests(unittest.TestCase):
                 self.assertFalse((self.repo / ".worktrees/invalid").exists())
                 self.assertFalse((self.skill / "state/fixture/invalid").exists())
 
+    def test_database_image_warns_for_mysql_and_shared_postgres(self):
+        configurations = [
+            ("mysql-image", self.original.replace("database: postgres", "database: mysql"), "mysql", "mysql:8.4"),
+            ("pool-image", self.original + "\ndatabase_mode: shared\ndatabase_shared:\n"
+             "  pool: official\n  image: postgres:17\n  port: 35432\n", "postgres", "postgres:17"),
+        ]
+        for name, manifest, engine, image in configurations:
+            with self.subTest(name=name):
+                self.manifest.write_text(manifest + "\ndatabase_image: pgvector/pgvector:pg17\n")
+                result = self.command("new.sh", name, extra={"ENV_DRY_RUN": "1"})
+                self.assertIn("database_image ignorado", result.stdout)
+                self.assertIn("database_shared.image", result.stdout)
+                compose = (self.skill / "state/_databases/fixture/official/compose.json" if name == "pool-image"
+                           else self.skill / f"state/fixture/{name}/docker-compose.yml")
+                result = self.run_process([lifecycle.DOCKER, "compose", "-f", str(compose), "config", "--format", "json"])
+                self.assertEqual(json.loads(result.stdout)["services"][engine]["image"], image)
+
+
+class ManagedWorktreeTests(unittest.TestCase):
+    run_process = lifecycle.LifecycleTests.run_process
+    command = lifecycle.LifecycleTests.command
+    observed = lifecycle.LifecycleTests.observed
+
+    def setUp(self):
+        lifecycle.LifecycleTests.setUp(self)
+        self.main = self.repo
+
+    def snapshot(self, root):
+        return {str(p.relative_to(root)): (p.read_bytes(), p.stat().st_mtime_ns)
+                for p in root.rglob("*") if p.is_file() and p.relative_to(root).parts[0] != ".git"}
+
+    def check_managed_worktree_refused(self):
+        before = self.snapshot(self.main)
+        state = self.snapshot(self.skill / "state")
+        docker = self.observed()
+        registered = self.run_process(["git", "worktree", "list", "--porcelain"]).stdout
+        self.repo = self.worktree / "api"
+        commands = [("new.sh", "check"), ("new.sh", "another"), ("ctl.sh", "ensure", "check"),
+                    ("ctl.sh", "status", "check", "--json"), ("update.sh", "check"),
+                    ("destroy.sh", "check", "--confirm", "fixture/check", "--keep-worktree")]
+        for script, *args in commands:
+            with self.subTest(script=script, args=args):
+                result = self.command(script, *args, extra={"ENV_DRY_RUN": "1"}, expected=1)
+                self.assertIn("opere a partir da raiz registrada em project-root", result.stderr)
+                self.assertEqual(self.snapshot(self.main), before)
+                self.assertEqual(self.snapshot(self.skill / "state"), state)
+                self.assertEqual(self.observed(), docker)
+                self.assertEqual(self.run_process(["git", "worktree", "list", "--porcelain"]).stdout, registered)
+
+    def test_managed_worktree_with_declared_project_refuses_without_changes(self):
+        self.check_managed_worktree_refused()
+
+    def test_managed_worktree_without_project_refuses_without_duplicate_identity(self):
+        manifest = self.worktree / ".envstack/stack.yaml"
+        manifest.write_text(manifest.read_text().replace("project: fixture\n", ""))
+        self.check_managed_worktree_refused()
+
 
 class WorktreeManifestTests(unittest.TestCase):
     run_process = lifecycle.LifecycleTests.run_process
@@ -134,7 +191,8 @@ class WorktreeManifestTests(unittest.TestCase):
 
     def test_existing_state_from_other_root_is_not_adopted(self):
         before = {p.name: p.read_bytes() for p in self.compose.parent.iterdir() if p.is_file()}
-        self.command("new.sh", "check", extra={"ENV_DRY_RUN": "1"}, expected=1)
+        result = self.command("new.sh", "check", extra={"ENV_DRY_RUN": "1"}, expected=1)
+        self.assertIn("Ambiente vinculado a outra raiz; opere a partir do checkout que o criou", result.stderr)
         self.assertEqual(before, {p.name: p.read_bytes() for p in self.compose.parent.iterdir() if p.is_file()})
         self.assertEqual(self.main_snapshot(), self.before)
 

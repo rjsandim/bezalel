@@ -23,6 +23,13 @@ partir dessa raiz; colisão com estado de outra raiz é recusada, sem reescrever
 adotar seu vínculo. Ambientes existentes criados no checkout principal continuam
 operando a partir dele. Não copie nem edite o estado para contornar a recusa.
 
+`new`, `ctl`, `update` e `destroy` recusam a execução dentro de uma worktree já
+vinculada a um ambiente no estado da skill (inclusive em subpastas). Isso evita
+criar estado/Compose e worktree aninhada para uma identidade duplicada, mesmo sem
+`project` no manifesto. A mensagem orienta a operar a partir da raiz registrada
+em `project-root`; a verificação não lê os arquivos de trabalho dessa raiz.
+`detect`/`init` continuam tratando os artefatos da worktree atual.
+
 Pools, alocações e infraestrutura compartilhada continuam no estado global da
 skill, fora dos checkouts. A identidade dos databases/usuários inclui a raiz
 proprietária, preservando a separação entre ambientes. Regras de Git (base e
@@ -39,10 +46,13 @@ database_image: pgvector/pgvector:pg17
 ```
 
 `database_image` é opcional, com padrão `postgres:17`. A allowlist aceita apenas
-`postgres:<versão>[-alpine]` e `pgvector/pgvector:pg<versão>`, com versão numérica
-explícita (ex.: `17`, `16.4`); não aceita `latest`, registros alternativos ou
+`postgres:<versão>[-alpine]` (ex.: `17`, `16.4`) e `pgvector/pgvector:pg<major>`
+(ex.: `pg17`), com versão numérica explícita. pgvector não aceita minor/patch,
+como `pg17.2`; não aceita `latest`, registros alternativos ou
 outros sufixos. A mesma validação é usada em `database_shared.image` para pools
-PostgreSQL; nesse modo, `database_image` não se aplica. MySQL permanece inalterado.
+PostgreSQL; nesse modo, `database_image` não se aplica e gera aviso apontando para
+`database_shared.image`. O campo também gera aviso em MySQL, cuja imagem permanece
+inalterada.
 PostgreSQL 18+ monta o volume em `/var/lib/postgresql`; versões anteriores usam
 `/var/lib/postgresql/data`, também para pgvector.
 

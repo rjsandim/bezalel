@@ -13,6 +13,9 @@ geração, ativação aditiva, retomada, preservação, destroy e pools comparti
 Incluem allowlist/major PostgreSQL e pgvector, imagem divergente do pool e
 init/ensure/update em worktree com manifesto próprio, verificando bytes e mtime
 dos arquivos do checkout principal e recusa de estado vinculado a outra raiz.
+Também cobrem comandos dentro de worktree gerenciada com/sem `project`, sem
+duplicar estado/worktrees nem chamar Docker, avisos para `database_image` em
+MySQL/pool e recusa de minor em tags pgvector.
 
 Mudanças nos scripts shell também pedem `bash -n` em cada script alterado.
 

@@ -4,6 +4,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib.sh"
 require_tools git yq docker python3
+validate_operation_root
 ENV_NAME="${1:-}"; validate_env_name "$ENV_NAME"
 shift
 KEEP_WT=false

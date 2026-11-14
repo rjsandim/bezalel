@@ -75,7 +75,7 @@ def identity(*parts):
 
 def postgres_major(image):
     """Valida a allowlist PostgreSQL e retorna a major sem depender do prefixo."""
-    match = re.fullmatch(r"(?:postgres:([0-9]+)(?:\.[0-9]+)*(?:-alpine)?|pgvector/pgvector:pg([0-9]+)(?:\.[0-9]+)*)", image)
+    match = re.fullmatch(r"(?:postgres:([0-9]+)(?:\.[0-9]+)*(?:-alpine)?|pgvector/pgvector:pg([0-9]+))", image)
     if not match:
         raise SharedDatabaseError("Use postgres:<versão>[-alpine] ou pgvector/pgvector:pg<versão>, com versão explícita.")
     return int(match[1] or match[2])

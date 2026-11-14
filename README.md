@@ -570,10 +570,13 @@ Ele é lido/gravado na worktree atual (`git rev-parse --show-toplevel`), inclusi
 no `init`. Artefatos e `.worktrees/<nome>` ficam sob essa raiz; ambientes existentes
 devem ser operados a partir da raiz registrada em seu estado. Pools permanecem
 globais na skill. Veja [raiz e imagens](skills/env/references/operacao.md).
+Executar `new`/`ctl`/`update`/`destroy` dentro de uma worktree já gerenciada é
+recusado antes de criar outra identidade; use a raiz proprietária registrada.
 
 - `database_image`: imagem PostgreSQL exclusiva, padrão `postgres:17`. Aceita
-  `postgres:<versão>[-alpine]` e `pgvector/pgvector:pg<versão>`, com versão explícita,
-  sem `latest`. Pools usam `database_shared.image`, com a mesma allowlist PostgreSQL.
+  `postgres:<versão>[-alpine]` e `pgvector/pgvector:pg<major>`, com versão explícita,
+  sem `latest` ou minor no pgvector. Pools usam `database_shared.image`, com a mesma
+  allowlist PostgreSQL. `database_image` em MySQL ou pool gera aviso.
 - `base_ref`: referência local usada para criar branches. Sem ela, usa-se o
   `origin/HEAD` já disponível, ou a única branch existente entre `main` e `master`.
   Ambiguidade ou ausência falha; nenhum fetch é feito automaticamente.

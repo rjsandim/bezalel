@@ -31,8 +31,10 @@ usuário, prefixo e bancos lógicos por serviço. Para configurar ou migrar, lei
 - Manifesto e artefatos são lidos/gravados na raiz da worktree atual
   (`git rev-parse --show-toplevel`), inclusive em `detect`/`init`. PostgreSQL
   exclusivo aceita `database_image` (padrão `postgres:17`):
-  `postgres:<versão>[-alpine]` ou `pgvector/pgvector:pg<versão>`, sem `latest`.
-  Pools usam `database_shared.image`; veja o [guia](references/operacao.md).
+  `postgres:<versão>[-alpine]` ou `pgvector/pgvector:pg<major>`, sem `latest`.
+  Pools usam `database_shared.image`; o campo exclusivo fora desse modo gera aviso.
+  Comandos de ciclo de vida recusam execução dentro de uma worktree já gerenciada;
+  opere pela raiz proprietária registrada. Veja o [guia](references/operacao.md).
 - Bash, Python 3.9+, Git com `--path-format`/`--end-of-options`, `yq` (Mike Farah
   v4), `jq`, `envsubst`, Docker/Compose com `--wait --wait-timeout`. Operação
   completa testada em macOS com Homebrew, mkcert, dnsmasq e Traefik.
