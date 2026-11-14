@@ -5,6 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib.sh"
 source "$SCRIPT_DIR/services.sh"
 require_tools git yq docker python3
+validate_operation_root
 
 ACTION="${1:-}"
 case "$ACTION" in start|ensure|stop|restart|status) ;; *) fail "Acao invalida: '$ACTION'." ;; esac

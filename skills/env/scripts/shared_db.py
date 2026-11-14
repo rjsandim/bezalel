@@ -73,6 +73,14 @@ def identity(*parts):
     return hashlib.sha256(json.dumps(parts).encode()).hexdigest()
 
 
+def postgres_major(image):
+    """Valida a allowlist PostgreSQL e retorna a major sem depender do prefixo."""
+    match = re.fullmatch(r"(?:postgres:([0-9]+)(?:\.[0-9]+)*(?:-alpine)?|pgvector/pgvector:pg([0-9]+))", image)
+    if not match:
+        raise SharedDatabaseError("Use postgres:<versão>[-alpine] ou pgvector/pgvector:pg<versão>, com versão explícita.")
+    return int(match[1] or match[2])
+
+
 def pool_spec(manifest, context):
     engine = manifest.get("database")
     shared = manifest.get("database_shared", {})
@@ -83,7 +91,9 @@ def pool_spec(manifest, context):
         raise SharedDatabaseError("Banco compartilhado exige database: mysql ou postgres.")
     if not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,39}", pool):
         raise SharedDatabaseError("database_shared.pool inválido.")
-    if not re.fullmatch(engine + r":[0-9]+(?:\.[0-9]+)*(?:-alpine)?", image):
+    if engine == "postgres":
+        postgres_major(image)
+    elif not re.fullmatch(engine + r":[0-9]+(?:\.[0-9]+)*(?:-alpine)?", image):
         raise SharedDatabaseError("Use imagem oficial com versão explícita e compatível com database.")
     if isinstance(port, bool) or not isinstance(port, int) or not 1024 <= port <= 65535:
         raise SharedDatabaseError("database_shared.port deve ser uma porta local explícita entre 1024 e 65535.")
@@ -118,7 +128,7 @@ def save_pool(spec):
     write_private(record, spec)
     values = dict(spec, admin_file=str(directory / "admin.env"),
                   port_mapping=f"127.0.0.1:{spec['port']}:{3306 if spec['engine'] == 'mysql' else 5432}")
-    major = int(spec["image"].split(":")[1].split(".")[0].split("-")[0])
+    major = postgres_major(spec["image"]) if spec["engine"] == "postgres" else 0
     values["data_mount"] = "data:/var/lib/postgresql" if major >= 18 else "data:/var/lib/postgresql/data"
     template = (SKILL / "templates" / f"shared.{spec['engine']}.json.tpl").read_text()
     # Apenas os placeholders do template são substituídos; $$ do Compose fica intacto.
@@ -349,10 +359,14 @@ def ensure(state, compose, selected):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["prepare", "configure", "ensure"])
+    parser.add_argument("action", choices=["prepare", "configure", "ensure", "postgres-major"])
     parser.add_argument("arguments", nargs="*")
     args = parser.parse_args()
-    if args.action == "prepare":
+    if args.action == "postgres-major":
+        if len(args.arguments) != 1:
+            parser.error("postgres-major exige uma imagem.")
+        print(postgres_major(args.arguments[0]))
+    elif args.action == "prepare":
         prepare(*args.arguments)
     elif args.action == "configure":
         configure(*args.arguments)
