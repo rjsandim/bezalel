@@ -36,6 +36,7 @@ validate_requested_branch "$(repo_root)/.worktrees/$ENV_NAME"
 
 case "$ACTION" in
     start|ensure)
+        [ ! -f "$STATE_DIR/tailnet-needs-update" ] || fail "Geração anterior falhou; use env update para reconciliar Compose e reservas."
         select_services "$@"
         require_shared_infra_authorization
         if [ "$(manifest_get '.access')" != tailnet ]; then

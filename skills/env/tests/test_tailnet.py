@@ -10,6 +10,7 @@ import socket
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from unittest.mock import patch
 
@@ -23,6 +24,7 @@ from pathlib import Path
 path=Path(os.environ['TAILNET_FIXTURE'])
 d=json.loads(path.read_text())
 a=sys.argv[1:]
+if os.environ.get('TAILNET_FAKE_FAIL')=='1': sys.exit(8)
 d['calls'].append(a)
 if a==['status','--json']:
     print(json.dumps({'BackendState':'Running','Self':{'DNSName':'fixture.ts.net.'}}))
@@ -45,6 +47,14 @@ path.write_text(json.dumps(d))
 
 def worker(root, project, name, service):
     tailnet.allocate(root, project, name, service)
+
+
+def mutation_worker(root, name):
+    tailnet.allocate(root, 'fixture', name, 'api')
+    tailnet.mutate(root, 'fixture', name, 'api', 'publish')
+    tailnet.mutate(root, 'fixture', 'other-owner', 'api', 'release')
+    tailnet.mutate(root, 'fixture', name, 'api', 'release')
+
 
 
 class TailnetTests(unittest.TestCase):
@@ -139,7 +149,7 @@ class TailnetTests(unittest.TestCase):
         import importlib.util
         spec=importlib.util.spec_from_file_location('env_status_fixture',SCRIPTS/'status.py')
         status_module=importlib.util.module_from_spec(spec);spec.loader.exec_module(status_module)
-        entry={**self.allocate(),'container_port':8000};self.operate()
+        entry={**self.allocate(),'container_port':8000,'probe_path':'/health','probe_statuses':[200,401,404]};self.operate()
         state=self.root/'status';state.mkdir()
         (state/'worktree-branch').write_text('issue-21')
         tailnet.atomic_json(state/'tailnet.json',{'host':entry['host'],'primary':'api','services':[entry]})
@@ -153,6 +163,11 @@ class TailnetTests(unittest.TestCase):
             self.assertEqual(result['iphone_url'],entry['url']);self.assertTrue(result['ready'])
             self.assertEqual(result['services'][0]['url'],entry['url'])
             self.assertEqual(result['tailnet']['services'][0]['http_code'],200)
+            for code in (401,404):
+                with patch.object(tailnet,'request',return_value=(code,[],'')) as request:
+                    result=status_module.status(self.root,state,'issue-21','fixture')
+                    self.assertTrue(result['ready'])
+                    self.assertTrue(request.call_args.args[0].endswith('/health'))
             self.operate('release')
             result=status_module.status(self.root,state,'issue-21','fixture')
             self.assertFalse(result['ready'])
@@ -229,6 +244,110 @@ class TailnetTests(unittest.TestCase):
             result=tailnet.report(self.root,state,'issue-21')
             self.assertFalse(result['services'][0]['serve_ok']);request.assert_not_called()
 
+    def test_multiprocess_publish_release_preserves_foreign_and_primary(self):
+        foreign=self.allocate('foreign');self.operate(service='foreign')
+        context=multiprocessing.get_context('fork')
+        processes=[context.Process(target=mutation_worker,args=(self.root,f'parallel-{i}')) for i in range(12)]
+        for process in processes:process.start()
+        for process in processes:
+            process.join(30);self.assertEqual(process.exitcode,0)
+        self.assertEqual(tailnet.entries(),[foreign])
+        config=self.data()['serve']
+        self.assertEqual(config['TCP']['443'],self.protected['TCP']['443'])
+        self.assertEqual(config['Web']['fixture.ts.net:443'],self.protected['Web']['fixture.ts.net:443'])
+        self.assertTrue(tailnet.own_mapping(config,foreign['host'],foreign['port']))
+
+    def test_local_scan_adversarial_megabyte_is_bounded(self):
+        adversarial='a.'*(1024*512)
+        started=time.monotonic()
+        self.assertIsNone(tailnet.LOCAL.search(adversarial))
+        self.assertIsNotNone(tailnet.LOCAL.search(adversarial+'local/'))
+        self.assertLess(time.monotonic()-started,2.0)
+
+    def test_internal_hosts_do_not_break_public_url_check(self):
+        entry=self.allocate();directory=self.root/'api';directory.mkdir()
+        (directory/'.env').write_text('DB_HOST=localhost\nREDIS_HOST=127.0.0.1\nMAIL_HOST=localhost\nSMTP_HOST=localhost\nDB_URL=mysql://localhost/database\nAPP_HOST=localhost\nAPP_URL=http://localhost\nNEXT_PUBLIC_API_URL=https://api.fixture.local\n')
+        self.assertEqual([w['variable'] for w in tailnet.env_warnings(self.root,[entry])],['APP_HOST','APP_URL','NEXT_PUBLIC_API_URL'])
+
+    def test_probe_path_statuses_and_short_transport_retry(self):
+        entry={**self.allocate(),'probe_path':'/health','probe_statuses':[200,401,403,404]}
+        for code in (401,403,404):
+            with patch.object(tailnet,'request',return_value=(code,[],'')) as request:
+                self.assertTrue(tailnet.page_probe(entry)['ok'])
+                self.assertTrue(request.call_args.args[0].endswith('/health'))
+        with patch.object(tailnet,'request',side_effect=[OSError(),(401,[], '')]) as request:
+            self.assertTrue(tailnet.page_probe(entry)['ok']);self.assertEqual(request.call_count,2)
+        with patch.object(tailnet,'request',return_value=(500,[],'')) as request:
+            self.assertFalse(tailnet.page_probe(entry)['ok']);self.assertEqual(request.call_count,1)
+
+    def test_prune_requires_absent_worktree_state_and_docker(self):
+        state=self.root/'skill/state/fixture/issue-21';state.mkdir(parents=True)
+        with patch.dict(os.environ,DOCKER_CONTEXT='fixture'):
+            entry=self.allocate(owner=state)
+        self.operate()
+        original=self.data()['serve']
+        with patch.object(tailnet.subprocess,'run') as command:
+            result=tailnet.prune(self.root,'fixture','issue-21')
+            self.assertEqual(result['released'],[]);command.assert_not_called()
+        state.rmdir()
+        worktree=self.root/'.worktrees/issue-21';worktree.mkdir(parents=True)
+        with patch.object(tailnet.subprocess,'run') as command:
+            self.assertEqual(tailnet.prune(self.root,'fixture','issue-21')['released'],[]);command.assert_not_called()
+        worktree.rmdir()
+        real_run=tailnet.subprocess.run
+        def query(args,**kwargs):
+            if args[0]=='docker':
+                self.assertIn('--context',args);self.assertIn('com.docker.compose.project=fixture-issue-21',args[-1])
+                return subprocess.CompletedProcess(args,0,'some-container','')
+            return real_run(args,**kwargs)
+        with patch.object(tailnet.subprocess,'run',side_effect=query):
+            self.assertEqual(tailnet.prune(self.root,'fixture','issue-21')['released'],[])
+        self.assertEqual(self.data()['serve'],original)
+        def absent(args,**kwargs):
+            return subprocess.CompletedProcess(args,0,'','') if args[0]=='docker' else real_run(args,**kwargs)
+        with patch.object(tailnet.subprocess,'run',side_effect=absent):
+            self.assertEqual(tailnet.prune(self.root,'fixture','issue-21')['released'],['api'])
+            self.assertEqual(tailnet.prune(self.root,'fixture','issue-21')['released'],[])
+        self.assertEqual(self.data()['serve'],self.protected)
+
+    def test_prune_preserves_unknown_provenance_foreign_mapping_and_failed_docker(self):
+        self.allocate()
+        with patch.object(tailnet.subprocess,'run') as run:
+            self.assertEqual(tailnet.prune(self.root,'fixture','issue-21')['released'],[]);run.assert_not_called()
+        self.operate('release')
+        state=self.root/'skill/state/fixture/issue-21';state.mkdir(parents=True);state.rmdir()
+        with patch.dict(os.environ,DOCKER_CONTEXT='fixture'):entry=self.allocate(owner=state)
+        with patch.object(tailnet.subprocess,'run',return_value=subprocess.CompletedProcess([],1,'','')):
+            with self.assertRaises(tailnet.TailnetError):tailnet.prune(self.root,'fixture','issue-21')
+        data=self.data();data['serve']['TCP'][str(entry['port'])]={'TCPForward':'foreign:80'};self.fixture.write_text(json.dumps(data))
+        real_run=tailnet.subprocess.run
+        def absent(args,**kwargs):
+            return subprocess.CompletedProcess(args,0,'','') if args[0]=='docker' else real_run(args,**kwargs)
+        with patch.object(tailnet.subprocess,'run',side_effect=absent):
+            self.assertEqual(tailnet.prune(self.root,'fixture','issue-21')['released'],[])
+        self.assertEqual(len(tailnet.entries()),1);self.assertEqual(self.data()['serve'],data['serve'])
+
+    def test_missing_proof_preserves_inaccessible_paths(self):
+        with patch.object(Path,'lstat',side_effect=PermissionError()):
+            self.assertFalse(tailnet.confirmed_missing(self.root/'unknown'))
+        with patch.object(Path,'lstat',side_effect=FileNotFoundError()):
+            self.assertTrue(tailnet.confirmed_missing(self.root/'absent'))
+
+    def test_completed_attempt_cannot_rollback_an_adopted_reservation(self):
+        state=self.root/'attempt-state';state.mkdir()
+        receipt=state/'attempt.json'
+        config={'project':'fixture','access':'tailnet','tailnet':{'primary':'api'},'services':[{'folder':'api','port':8000,'tailnet':{'probe_path':'/health','probe_statuses':[200,401,404]}}]}
+        with patch.dict(os.environ,DOCKER_CONTEXT='fixture'),patch.object(tailnet,'manifest',return_value=config):
+            tailnet.prepare(self.root,state,'issue-21',receipt)
+        saved=json.loads((state/'tailnet.json').read_text())
+        self.assertEqual(saved['services'][0]['probe_path'],'/health')
+        self.assertEqual(saved['services'][0]['probe_statuses'],[200,401,404])
+        tailnet.complete_attempt(state,receipt)
+        self.assertNotIn('attempt_id',tailnet.entries()[0])
+        tailnet.rollback(state,receipt)
+        self.assertEqual(len(tailnet.entries()),1)
+        self.assertEqual(json.loads((state/'tailnet.json').read_text()),saved)
+
     def test_corrupt_registry_and_symlinks_fail_closed(self):
         self.allocate();path=self.root/'global/registry.json'
         before=self.data()['serve'];path.write_text('{}')
@@ -303,10 +422,35 @@ tailnet:
         fixture.write_text(json.dumps(data))
         self.command('ctl.sh','start','check',expected=1)
         self.command('destroy.sh','check','--keep-worktree',expected=1)
-        self.command('destroy.sh','check','--confirm','fixture/check','--keep-worktree',expected=1)
-        self.assertTrue(self.compose.exists())
-        self.assertFalse(any('down' in c for c in self.observed()['calls']))
+        result=self.command('destroy.sh','check','--confirm','fixture/check','--keep-worktree')
+        self.assertFalse(self.compose.exists())
+        self.assertTrue(any('down' in c for c in self.observed()['calls']))
+        self.assertIn('reserva Tailnet preservada',result.stderr)
+        self.assertTrue(json.loads((self.base/'global-tailnet/registry.json').read_text())['entries'])
         self.assertEqual(json.loads(fixture.read_text())['serve'],data['serve'])
+
+    def test_failed_new_releases_only_new_reservations_and_can_retry(self):
+        fixture=self.configure_tailnet()
+        # Usa new real com Docker simulado; falha antes do up, após alocar.
+        (self.repo/'.envstack/api.env.example').write_text('APP_URL=${env:public.url.docs}\n')
+        self.command('new.sh','broken',extra={'ENV_DRY_RUN':'1'},expected=1)
+        registry=self.base/'global-tailnet/registry.json'
+        self.assertEqual(json.loads(registry.read_text())['entries'],{})
+        self.assertFalse((self.skill/'state/fixture/broken/tailnet.json').exists())
+        self.assertEqual(json.loads(fixture.read_text())['serve']['TCP'],{'443':{'HTTPS':True}})
+        (self.repo/'.envstack/api.env.example').write_text('APP_URL=${env:public.url.self}\n')
+        self.command('new.sh','broken',extra={'ENV_DRY_RUN':'1'})
+        self.assertEqual(len(json.loads(registry.read_text())['entries']),2)
+        # Falha posterior não devolve reservas preexistentes desta geração.
+        self.command('update.sh','broken',extra={'ENV_TEST_FAIL_UP':'1'},expected=7)
+        self.assertEqual(len(json.loads(registry.read_text())['entries']),2)
+
+    def test_destroy_with_unavailable_tailscale_still_runs_down(self):
+        self.configure_tailnet();self.command('update.sh','check',extra={'ENV_DRY_RUN':'1'})
+        result=self.command('destroy.sh','check','--confirm','fixture/check','--keep-worktree',extra={'TAILNET_FAKE_FAIL':'1'})
+        self.assertIn('release --root',result.stderr)
+        self.assertTrue(any('down' in c for c in self.observed()['calls']))
+        self.assertTrue(json.loads((self.base/'global-tailnet/registry.json').read_text())['entries'])
 
 
 if __name__=='__main__':unittest.main()

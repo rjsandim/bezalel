@@ -12,6 +12,8 @@ import re
 import shutil
 import socket
 import subprocess
+import sys
+import uuid
 import tempfile
 from urllib.parse import urlsplit, urljoin
 
@@ -45,7 +47,7 @@ def ts(*args):
     binary = os.environ.get('ENV_TAILSCALE_BIN') or shutil.which('tailscale')
     if not binary:
         raise TailnetError('Tailscale ausente; configure ENV_TAILSCALE_BIN.')
-    result = subprocess.run([binary, *args], capture_output=True, text=True, timeout=30)
+    result = subprocess.run([binary, *args], capture_output=True, text=True, timeout=10)
     if result.returncode:
         raise TailnetError('Tailscale falhou; confira login, HTTPS e permissões (saída privada omitida).')
     return result.stdout
@@ -140,7 +142,7 @@ def identity(root, project, environment, folder):
     return json.dumps([str(Path(root).resolve()), project, environment, folder], separators=(',', ':'))
 
 
-def allocate(root, project, environment, folder, start=41000, end=41999):
+def allocate(root, project, environment, folder, start=41000, end=41999, owner=None, attempt=None):
     start, end = safe_port(start), safe_port(end)
     if start > end:
         raise TailnetError('Faixa Tailnet inválida.')
@@ -161,6 +163,10 @@ def allocate(root, project, environment, folder, start=41000, end=41999):
             if port not in used and not listening(port):
                 entry = {'root': str(Path(root).resolve()), 'project': project, 'environment': environment,
                          'folder': folder, 'port': port, 'host': host, 'url': f'https://{host}:{port}/'}
+                if owner:
+                    entry.update(owner_state=str(Path(owner).resolve()), docker_context=os.environ['DOCKER_CONTEXT'])
+                if attempt:
+                    entry['attempt_id'] = attempt
                 data['entries'][key] = entry
                 atomic_json(state_dir()/'registry.json', data)
                 return entry
@@ -170,37 +176,41 @@ def allocate(root, project, environment, folder, start=41000, end=41999):
 def mutate(root, project, environment, folder, action):
     key = identity(root, project, environment, folder)
     with registry() as data:
-        entry = data['entries'].get(key)
-        if entry is None:
-            if action == 'release':
-                return None
-            raise TailnetError('Serviço sem alocação Tailnet.')
-        port = safe_port(entry['port'])
-        host = hostname()
-        if host != entry['host']:
-            raise TailnetError('Hostname divergente; Serve preservado.')
-        config = serve_status()
-        exists = port in occupied(config)
-        owned = own_mapping(config, host, port)
-        if exists and not owned:
-            raise TailnetError('Porta ocupada por configuração alheia; Serve e registro preservados.')
-        if action == 'publish':
-            if os.environ.get('ENV_ALLOW_SHARED_INFRA') != '1':
-                raise TailnetError('Publish exige ENV_ALLOW_SHARED_INFRA=1 nesta execução.')
-            if not owned:
-                ts('serve', '--bg', '--yes', f'--https={port}', f'http://127.0.0.1:{port}')
-                if not own_mapping(serve_status(), host, port):
-                    raise TailnetError('Serve não confirmou a publicação; registro preservado.')
-        elif action == 'release':
-            if owned:
-                ts('serve', '--bg', '--yes', f'--https={port}', 'off')
-                if port in occupied(serve_status()):
-                    raise TailnetError('Serve não confirmou a liberação; registro preservado.')
-            del data['entries'][key]
-            atomic_json(state_dir()/'registry.json', data)
-        else:
-            raise TailnetError('Operação inválida.')
-        return entry
+        return mutate_locked(data, key, action)
+
+
+def mutate_locked(data, key, action):
+    entry = data['entries'].get(key)
+    if entry is None:
+        if action == 'release':
+            return None
+        raise TailnetError('Serviço sem alocação Tailnet.')
+    port = safe_port(entry['port'])
+    host = hostname()
+    if host != entry['host']:
+        raise TailnetError('Hostname divergente; Serve preservado.')
+    config = serve_status()
+    exists = port in occupied(config)
+    owned = own_mapping(config, host, port)
+    if exists and not owned:
+        raise TailnetError('Porta ocupada por configuração alheia; Serve e registro preservados.')
+    if action == 'publish':
+        if os.environ.get('ENV_ALLOW_SHARED_INFRA') != '1':
+            raise TailnetError('Publish exige ENV_ALLOW_SHARED_INFRA=1 nesta execução.')
+        if not owned:
+            ts('serve', '--bg', '--yes', f'--https={port}', f'http://127.0.0.1:{port}')
+            if not own_mapping(serve_status(), host, port):
+                raise TailnetError('Serve não confirmou a publicação; registro preservado.')
+    elif action == 'release':
+        if owned:
+            ts('serve', '--bg', '--yes', f'--https={port}', 'off')
+            if port in occupied(serve_status()):
+                raise TailnetError('Serve não confirmou a liberação; registro preservado.')
+        del data['entries'][key]
+        atomic_json(state_dir()/'registry.json', data)
+    else:
+        raise TailnetError('Operação inválida.')
+    return entry
 
 
 def entries():
@@ -239,7 +249,7 @@ def selection(config, name):
     return options, selected
 
 
-def prepare(root, state, name):
+def prepare(root, state, name, attempt_path=None):
     config = manifest(root/'.envstack/stack.yaml')
     options, selected = selection(config, name)
     saved = state/'tailnet.json'
@@ -248,18 +258,37 @@ def prepare(root, state, name):
         raise TailnetError('Seleção Tailnet mudou; libere os vínculos antigos explicitamente antes de regenerar.')
     if not selected:
         return
-    result = {'host': None, 'primary': options.get('primary', selected[0]['folder']), 'services': []}
+    attempt = str(uuid.uuid4()) if attempt_path else None
+    if attempt_path:
+        atomic_json(attempt_path, {'id': attempt, 'root': str(root.resolve()), 'previous': previous})
+    result = {'access': config.get('access', 'local'), 'attempt_id': attempt, 'host': None, 'primary': options.get('primary', selected[0]['folder']), 'services': []}
     for service in selected:
         entry = allocate(root, config['project'], name, service['folder'],
-                         options.get('port_start', 41000), options.get('port_end', 41999))
+                         options.get('port_start', 41000), options.get('port_end', 41999),
+                         owner=state, attempt=attempt)
         result['host'] = entry['host']
-        result['services'].append({**entry, 'container_port': int(service['port']),
+        service_options = service.get('tailnet') if isinstance(service.get('tailnet'), dict) else {}
+        probe_path = service_options.get('probe_path', '/')
+        validate_probe_path(entry['url'], probe_path)
+        statuses = service_options.get('probe_statuses')
+        if statuses is not None and (not isinstance(statuses, list) or not statuses or
+                any(type(code) is not int or not 200 <= code < 500 for code in statuses)):
+            raise TailnetError('probe_statuses exige lista de códigos HTTP entre 200 e 499.')
+        result['services'].append({**entry, 'probe_path': probe_path, 'probe_statuses': statuses, 'container_port': int(service['port']),
                                    'checks': (service.get('tailnet') or {}).get('checks', {})
                                    if isinstance(service.get('tailnet'), dict) else {}})
     atomic_json(saved, result)
 
 
-LOCAL = re.compile(r'(?i)(?<![a-z0-9_-])(?:localhost|127\.0\.0\.1|(?:[a-z0-9-]+\.)+local)(?=[:/\s\"\x27,;]|$)')
+LOCAL = re.compile(r'(?i)(?:(?<![a-z0-9_-])(?:localhost|127\.0\.0\.1)|\.local)(?=[:/\s\"\x27,;?&#)]|$)')
+
+def public_variable(name):
+    name = name.upper()
+    # HOST de DB/cache/mail é conexão interna, não origem do navegador.
+    if re.match(r'^(?:DB|DATABASE|REDIS|CACHE|MAIL|SMTP|MEMCACHED)(?:_|$)', name):
+        return False
+    return bool(re.search(r'URL|ORIGIN|CORS|CALLBACK', name) or
+                name in {'APP_HOST','PUBLIC_HOST','FRONTEND_HOST','VITE_HOST','NEXT_PUBLIC_HOST','HOST'})
 
 
 def env_warnings(worktree, services):
@@ -270,7 +299,7 @@ def env_warnings(worktree, services):
             continue
         for line in path.read_text().splitlines():
             match = re.match(r'^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=(.*)', line)
-            if match and re.search(r'URL|ORIGIN|CORS|HOST|CALLBACK', match[1], re.I) and LOCAL.search(match[2]):
+            if match and public_variable(match[1]) and LOCAL.search(match[2]):
                 warnings.append({'folder': entry['folder'], 'variable': match[1],
                                  'message': 'Revise .envstack/*.env.example com ${env:public.url.*}; .env existente é preservado.'})
     return warnings
@@ -280,7 +309,7 @@ def request(url, websocket=False):
     parsed = urlsplit(url)
     if parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password:
         raise TailnetError('Check exige HTTPS sem credenciais.')
-    conn = http.client.HTTPSConnection(parsed.hostname, parsed.port or 443, timeout=4)
+    conn = http.client.HTTPSConnection(parsed.hostname, parsed.port or 443, timeout=2)
     headers = {}
     if websocket:
         headers = {'Connection': 'Upgrade', 'Upgrade': 'websocket', 'Sec-WebSocket-Version': '13',
@@ -295,11 +324,18 @@ def request(url, websocket=False):
         conn.close()
 
 
-def probe(entry, kind, path):
-    base = entry['url']
-    target = urljoin(base, path)
-    if urlsplit(target).netloc != urlsplit(base).netloc or not path.startswith('/') or path.startswith('//'):
+def validate_probe_path(base, path):
+    if not isinstance(path, str) or not path.startswith('/') or path.startswith('//'):
         raise TailnetError('Caminho de check precisa ser relativo à origem Tailnet.')
+    target = urljoin(base, path)
+    if urlsplit(target).netloc != urlsplit(base).netloc or urlsplit(target).scheme != 'https':
+        raise TailnetError('Caminho de check precisa ser relativo à origem Tailnet.')
+    return target
+
+
+def probe(entry, kind, path):
+    target = validate_probe_path(entry['url'], path)
+    base = entry['url']
     try:
         code, headers, body = request(target, websocket=kind == 'websocket')
         problems = []
@@ -320,10 +356,19 @@ def probe(entry, kind, path):
                     problems.append('Cookie sem Secure; confira autenticação no Safari.')
         valid = (code == 101 and any(k.lower() == 'upgrade' and v.lower() == 'websocket' for k,v in headers)
                  if kind == 'websocket' else (300 <= code < 400 and bool(locations))
-                 if kind == 'redirect' else 200 <= code < 400)
+                 if kind == 'redirect' else code in entry['probe_statuses']
+                 if kind == 'page' and entry.get('probe_statuses') is not None else 200 <= code < 400)
         return {'kind': kind, 'path': path, 'http_code': code, 'ok': valid and not problems, 'warnings': problems}
     except (OSError, http.client.HTTPException, ValueError):
         return {'kind': kind, 'path': path, 'http_code': None, 'ok': False, 'warnings': ['Requisição HTTPS falhou.']}
+
+
+def page_probe(entry):
+    result = probe(entry, 'page', entry.get('probe_path', '/'))
+    # Uma repetição curta apenas para falha de transporte; não mascara HTTP ruim.
+    if result['http_code'] is None:
+        result = probe(entry, 'page', entry.get('probe_path', '/'))
+    return result
 
 
 def report(root, state, name, full=False):
@@ -337,9 +382,10 @@ def report(root, state, name, full=False):
     results = []
     for entry in data['services']:
         key = identity(root, entry['project'], name, entry['folder'])
-        owned = registered.get(key) == {k:entry[k] for k in ('root','project','environment','folder','port','host','url')}
+        registered_entry = registered.get(key, {})
+        owned = all(registered_entry.get(k) == entry[k] for k in ('root','project','environment','folder','port','host','url'))
         ok = owned and host == entry['host'] and own_mapping(config, host, entry['port'])
-        checks = [probe(entry, 'page', '/')] if ok else [{'kind': 'page', 'path': '/', 'http_code': None, 'ok': False, 'warnings': ['Vínculo Serve não confirmado; HTTP não consultado.']}]
+        checks = [page_probe(entry)] if ok else [{'kind': 'page', 'path': '/', 'http_code': None, 'ok': False, 'warnings': ['Vínculo Serve não confirmado; HTTP não consultado.']}]
         if full and ok:
             for kind in ('static', 'redirect', 'api', 'health', 'websocket', 'login'):
                 paths = entry.get('checks', {}).get(kind, [])
@@ -348,7 +394,7 @@ def report(root, state, name, full=False):
                 if not paths:
                     checks.append({'kind': kind, 'status': 'not_configured', 'ok': None})
         results.append({k:entry[k] for k in ('folder','url','port')} | {
-            'serve_ok': ok, 'http_code': checks[0]['http_code'] if checks else None,
+            'serve_ok': ok, 'probe_ok': checks[0]['ok'], 'probe_path': entry.get('probe_path', '/'), 'http_code': checks[0]['http_code'] if checks else None,
             'checks': checks})
     return {'host': data['host'], 'services': results, 'primary': data['primary'],
             'warnings': env_warnings(root/'.worktrees'/name, data['services'])}
@@ -416,9 +462,96 @@ def lifecycle(state, action, folders):
         mutate(entry['root'], entry['project'], entry['environment'], entry['folder'], action)
 
 
+def complete_attempt(state, attempt_path):
+    if not attempt_path.is_file() or not attempt_path.read_text().strip():
+        return
+    attempt = json.loads(attempt_path.read_text())
+    saved = json.loads((state/'tailnet.json').read_text())
+    if saved.get('attempt_id') != attempt['id']:
+        raise TailnetError('Tentativa superada; preserve os recibos e reconcilie o ambiente.')
+    with registry() as data:
+        keys = [identity(entry['root'], entry['project'], entry['environment'], entry['folder']) for entry in saved['services']]
+        if any(key not in data['entries'] for key in keys):
+            raise TailnetError('Reserva mudou antes de concluir a geração.')
+        atomic_json(attempt_path, {**attempt, 'completed': True})
+        for key in keys:
+            data['entries'][key].pop('attempt_id', None)
+        atomic_json(state_dir()/'registry.json', data)
+
+
+def rollback(state, attempt_path):
+    if not attempt_path.is_file() or not attempt_path.read_text().strip():
+        return
+    attempt = json.loads(attempt_path.read_text())
+    if attempt.get('completed'):
+        return
+    failures = []
+    with registry() as data:
+        for key, entry in list(data['entries'].items()):
+            if entry.get('attempt_id') != attempt['id'] or entry['root'] != attempt['root']:
+                continue
+            try:
+                mutate_locked(data, key, 'release')
+            except (OSError, ValueError, subprocess.SubprocessError):
+                failures.append(entry['folder'])
+    if failures:
+        raise TailnetError('Rollback Tailnet incompleto; preserve o recibo e repita rollback após diagnosticar o Serve.')
+    saved = state/'tailnet.json'
+    if saved.is_file() and json.loads(saved.read_text()).get('attempt_id') == attempt['id']:
+        if attempt['previous'] is None:
+            saved.unlink()
+        else:
+            atomic_json(saved, attempt['previous'])
+
+
+def confirmed_missing(path):
+    try:
+        path.lstat()
+    except FileNotFoundError:
+        return True
+    except OSError:
+        return False
+    return False
+
+
+def environment_absent(entry):
+    state = Path(entry.get('owner_state', ''))
+    root = Path(entry['root'])
+    context = entry.get('docker_context')
+    if not context or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]*', context) or not entry.get('owner_state'):
+        return False
+    # Ausência em disco desconectado, link ou origem legada não é prova.
+    if (not root.is_dir() or not state.is_absolute() or not state.parent.parent.is_dir()
+            or not confirmed_missing(state) or not confirmed_missing(root/'.worktrees'/entry['environment'])):
+        return False
+    result = subprocess.run(['docker', '--context', context, 'ps', '-aq', '--filter',
+                             f'label=com.docker.compose.project={entry["project"]}-{entry["environment"]}'],
+                            capture_output=True, text=True, timeout=10)
+    if result.returncode:
+        raise TailnetError('Docker não confirmou ausência do ambiente; reserva preservada.')
+    return not result.stdout.strip()
+
+
+def prune(root, project, environment):
+    result = {'released': [], 'preserved': []}
+    with registry() as data:
+        for key, entry in list(data['entries'].items()):
+            if (entry['root'], entry['project'], entry['environment']) != (str(root.resolve()), project, environment):
+                continue
+            if not environment_absent(entry):
+                result['preserved'].append({'folder': entry['folder'], 'reason': 'ausencia_nao_comprovada'})
+                continue
+            try:
+                mutate_locked(data, key, 'release')
+                result['released'].append(entry['folder'])
+            except TailnetError:
+                result['preserved'].append({'folder': entry['folder'], 'reason': 'serve_divergente_ou_indisponivel'})
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', choices=['allocate','publish','check','release','list','prepare','publish-state','release-state','configure'])
+    parser.add_argument('command', choices=['allocate','publish','check','release','list','prepare','publish-state','release-state','configure','rollback','complete-attempt','prune'])
     parser.add_argument('--root', type=Path)
     parser.add_argument('--state', type=Path)
     parser.add_argument('--environment')
@@ -427,18 +560,23 @@ def main():
     parser.add_argument('--start', type=int, default=41000)
     parser.add_argument('--end', type=int, default=41999)
     parser.add_argument('--compose', type=Path)
+    parser.add_argument('--attempt', type=Path)
     parser.add_argument('folders', nargs='*')
     args = parser.parse_args()
     required = {'list': [], 'configure': ['root','compose'],
                 'prepare': ['root','state','environment'], 'check': ['root','state','environment'],
-                'publish-state': ['state'], 'release-state': ['state']}.get(
+                'publish-state': ['state'], 'release-state': ['state'],
+                'rollback': ['state','attempt'], 'complete-attempt': ['state','attempt'], 'prune': ['root','project','environment']}.get(
                     args.command, ['root','project','environment','service'])
     for field in required:
         if getattr(args, field) is None:
             parser.error(f'Informe --{field}.')
     try:
         if args.command == 'list': result = entries()
-        elif args.command == 'prepare': result = prepare(args.root, args.state, args.environment)
+        elif args.command == 'prepare': result = prepare(args.root, args.state, args.environment, args.attempt)
+        elif args.command == 'complete-attempt': result = complete_attempt(args.state, args.attempt)
+        elif args.command == 'rollback': result = rollback(args.state, args.attempt)
+        elif args.command == 'prune': result = prune(args.root, args.project, args.environment)
         elif args.command == 'configure': result = configure(args.root, args.compose)
         elif args.command in ('publish-state','release-state'):
             result = lifecycle(args.state, args.command.split('-')[0], args.folders)
@@ -453,12 +591,10 @@ def main():
             return 0 if result['services'] and not result['warnings'] and all(s['serve_ok'] and all(c['ok'] is not False for c in s['checks']) for s in result['services']) else 5
         return 0
     except TailnetError as error:
-        import sys
         print(str(error), file=sys.stderr)
         return 1
-    except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError):
+    except (OSError, ValueError, KeyError, TypeError, AttributeError, subprocess.SubprocessError):
         # Nunca ecoa saída de ferramentas, envs ou corpos HTTP privados.
-        import sys
         print('Tailnet falhou; confira registro, configuração e disponibilidade (dados privados omitidos).', file=sys.stderr)
         return 1
 

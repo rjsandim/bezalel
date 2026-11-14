@@ -267,6 +267,8 @@ services:
     port: 8000
     database: true
     tailnet:
+      probe_path: /health
+      probe_statuses: [200, 401, 403]
       checks:
         api: /api/health
         health: /health
@@ -306,7 +308,13 @@ A autorização temporária continua necessária para publicação/infra compart
 Não exporte permanentemente a variável. `new/update` reservam uma porta por
 serviço e publicam após up; `start/ensure` recuperam a publicação dos serviços
 ativos. `stop` preserva reserva e Serve; `destroy --confirm projeto/ambiente`
-libera só os vínculos exatos, depois do preflight. Alteração de seleção com
+tenta liberar só os vínculos exatos, depois do preflight. Se Tailscale estiver
+indisponível, hostname mudar ou houver alvo alheio, avisa em stderr e continua
+com `docker compose down -v`; a reserva fica no registro global. Depois de
+reconectar/diagnosticar, consulte `tailnet.py list` e `tailscale serve status --json`
+(somente leitura) e execute `tailnet.py release --root <raiz> --project <projeto>
+--environment <nome> --service <pasta>` para cada serviço. Divergências continuam
+recusadas; nunca desligue outro alvo nem edite Serve manualmente. Alteração de seleção com
 vínculos existentes é recusada: preserve dados e use destroy confirmado com
 `--keep-worktree` antes de regenerar a seleção. Isso remove volumes exclusivos;
 faça backup e obtenha a autorização concreta antes dessa operação. Não edite o
@@ -333,7 +341,9 @@ opt-in, mas não publica Serve nem inicia containers.
 
 Use `${env:public.url.self}` e `${env:public.url.api}` em APP_URL, frontend,
 origens CORS e callbacks. Eles escolhem a URL Tailnet do serviço exposto, ou a
-URL .local nos demais. `${env:public.host.self}` devolve somente o hostname;
+URL .local nos demais quando o acesso local está habilitado. Em
+`access: tailnet`, referenciar `public.url.*` de serviço não exposto gera erro
+claro antes de escrever o `.env`; exponha o serviço ou corrija o template. `${env:public.host.self}` devolve somente o hostname;
 `${env:tailnet.host}`, `${env:tailnet.url.self}` e `${env:tailnet.url.<pasta>}`
 são os valores Tailnet (vazios quando desativados). Os placeholders `url.*`
 legados continuam .local. Os templates novos usam `public.url.self`,
@@ -346,7 +356,9 @@ segredos no frontend nem nas propostas.
 revise `.envstack/<pasta>.env.example`, remova **somente o .env daquele serviço**
 e rode update no ambiente autorizado; confira/restaure os valores privados da
 cópia sem versioná-la. O status/check avisa nomes de variáveis URL/ORIGIN/CORS/
-HOST/CALLBACK com localhost, 127.0.0.1 ou .local, sem exibir valores.
+CALLBACK e hosts públicos (APP_HOST, PUBLIC_HOST e equivalentes). Conexões
+internas DB/DATABASE/REDIS/CACHE/MAIL/SMTP/MEMCACHED não geram esses avisos, mesmo
+com localhost; isso não atesta sua conectividade. Os avisos identificam localhost, 127.0.0.1 ou .local sem exibir valores.
 
 `status --json` acrescenta `tailnet: {host, services: [{folder,url,port,serve_ok,
 http_code,checks}], warnings}` e `iphone_url`. Readiness exige também Serve e HTTP
@@ -383,3 +395,49 @@ macOS para Python http.server em **127.0.0.1:8000** servindo a pasta de previews
 Apenas `plan` é leitura. A instalação é uma operação separada autorizada; não
 execute para validar o pacote nem substitua o servidor já em execução. Este
 recurso foi preparado/testado com mocks; não foi instalado nesta implementação.
+
+### Recuperação de reservas e readiness
+
+Uma falha de new/update aciona rollback somente das reservas criadas na tentativa;
+as reservas preexistentes, arquivos, worktree e containers são preservados. Não
+é limpeza de containers parcialmente iniciados. O recibo privado
+`tailnet-attempt.*` é mantido se a liberação falhar, com comando de recuperação
+em stderr. Repita `tailnet.py rollback --state <estado-ENV> --attempt <recibo>`
+após diagnosticar o Serve. Uma tentativa concluída retira as marcas transitórias
+do registro para impedir que um recibo antigo libere reservas já adotadas.
+Após falha com Tailnet, `start/ensure` exigem `env update` para reconciliar o
+Compose salvo; `new` também reconcilia, em vez de retomar silenciosamente.
+
+Para órfãos removidos fora do destroy, o comando é delimitado e idempotente:
+
+```sh
+python3 "$SKILL_DIR/scripts/tailnet.py" prune --root <raiz-proprietaria> --project <projeto> --environment <nome>
+```
+
+Ele mantém o lock e só libera uma entrada com proveniência registrada cuja raiz
+continua acessível, diretório de estado e worktree não existem nem são links e
+Docker confirma zero containers daquele projeto Compose no contexto registrado.
+Estado legado sem proveniência, worktree preservada, container parado, falha de
+consulta, diretório inacessível ou mapeamento Serve alheio preservam a reserva.
+A saída distingue `released` de `preserved`; zero itens removidos não comprova
+que todos eram órfãos. Não usa contexto ativo, prefixos, força, 443 ou reset.
+Quando o destroy preserva a worktree, use a liberação explícita por serviço;
+prune continua conservador. Esta regra também vale na revisão de limpar-orbstack.
+
+Cada serviço pode declarar `tailnet.probe_path` (padrão `/`) e
+`tailnet.probe_statuses` (lista de códigos HTTP 200–499; padrão 200–399).
+Os valores são persistidos em tailnet.json e usados pelo status/ready e check.
+Por exemplo, API com `/health` retornando 401 pode declarar `[200,401,403]`;
+404 somente é aceito se explicitamente configurado. 5xx, erro de transporte e
+avisos de origem/cookie continuam falhas. Uma falha de transporte da página tem
+uma repetição curta (timeout de 2 segundos por tentativa); HTTP ruim não recebe
+retry. Chamadas Tailscale têm prazo de 10 segundos cada. O lock permanece durante
+as consultas/mutações para impedir troca de alvo entre conferência e release.
+A varredura local usa padrões sem repetição aninhada e tem teste adversário de
+1 MiB; hosts internos não mascaram a sinalização das URLs públicas.
+
+Publish de previews exige HTML/HTM regular dentro do projeto/worktree explicitado
+em `--project`, permitindo `.bezalel/reviews` e recusando dotfiles, nomes de
+segredos, origem externa e links abaixo dessa raiz. A raiz de previews configurada
+é resolvida antes da checagem (aceita ancestrais vinculados como /tmp e /var no
+macOS), mas links nos componentes projeto/issue abaixo dela são recusados.

@@ -60,7 +60,7 @@ def status(root,state,name,context):
         for service in services:
             service['url'] = next((s['url'] for s in network['services'] if s['folder']==service['folder']),None)
             service['aliases'] = []
-    network_ready = all(s['serve_ok'] and s['http_code'] is not None and 200 <= s['http_code'] < 400
+    network_ready = all(s['serve_ok'] and s['probe_ok']
                         for s in network['services'] if s['folder'] in required)
     return {'tailnet': network, 'iphone_url': primary, 'project':project,'environment':name,'issue':int(issue) if issue else None,
             'environment_id':(state/'environment-id').read_text().strip() if (state/'environment-id').is_file() else None,

@@ -31,3 +31,9 @@ preservação de `.env`, stop/ensure/destroy e respostas HTTP/101 simuladas.
 Nenhum teste modifica o Serve real, instala LaunchAgent ou usa o daemon Docker.
 Os testes de previews/LaunchAgent ficam em `tests/test_preview.py` na raiz do
 pacote, inclusive na suíte de distribuição. Piloto real e iPhone são separados.
+
+Rodada 1 inclui regressões de publish/release multiprocesso, regex adversária de
+1 MiB, hosts internos sem falso positivo, probe_path/statuses com 401/404, retry
+limitado de transporte, rollback de new e preservação de reservas preexistentes,
+prune conservador com falha/ausência/proveniência e destroy que continua com down
+quando release falha. Todos usam Docker/Tailscale simulados e temporários.

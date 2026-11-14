@@ -120,7 +120,9 @@ Confira o resultado de cada comando antes de relatá-lo:
   testes funcionais da tarefa.
 - **Dry-run:** o Compose e os `.env` foram gerados no estado e na worktree.
 - **stop/restart:** `status` mostra o estado esperado e os volumes continuam presentes.
-- **destroy:** `status` deixa de encontrar o ambiente, os volumes exclusivos
+- **destroy:** falha de release Tailnet gera aviso e orientação em stderr;
+  down continua e a reserva fica preservada para recuperação explícita.
+  `status` deixa de encontrar o ambiente, os volumes exclusivos
   sumiram e worktree/branch existem ou não conforme `--keep-worktree`; pools e
   infraestrutura compartilhada continuam de pé.
 

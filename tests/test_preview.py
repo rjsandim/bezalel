@@ -1,5 +1,7 @@
 """Publicação e LaunchAgent com arquivos temporários e comandos simulados."""
 from concurrent.futures import ThreadPoolExecutor
+import contextlib
+import io
 import json
 import os
 from pathlib import Path
@@ -74,16 +76,106 @@ class PreviewTests(unittest.TestCase):
             with self.assertRaises(preview.PreviewError):
                 preview.publish(self.project, 21, self.source)
 
-    def test_symlink_destination_or_source_is_not_followed(self):
+    def test_configured_previews_root_can_use_symlink(self):
         other = self.root / 'other'; other.mkdir()
         self.output.symlink_to(other, target_is_directory=True)
-        with self.assertRaises(preview.PreviewError):
-            preview.publish(self.project, 21, self.source)
-        self.assertEqual(list(other.iterdir()), [])
-        self.output.unlink()
+        result = preview.publish(self.project, 21, self.source)
+        self.assertEqual(Path(result['file']), other / 'projeto/issue-21' / self.source.name)
+        self.assertEqual(Path(result['file']).read_bytes(), self.source.read_bytes())
+
+    def test_symlink_source_is_not_followed(self):
         linked = self.project / 'link.html'; linked.symlink_to(self.source)
         with self.assertRaises(preview.PreviewError):
             preview.publish(self.project, 21, linked)
+
+    def test_destination_project_and_issue_symlinks_are_rejected(self):
+        other = self.root / 'other'; other.mkdir()
+        self.output.mkdir()
+        project_link = self.output / 'projeto'; project_link.symlink_to(other, target_is_directory=True)
+        with self.assertRaisesRegex(preview.PreviewError, 'Link simbólico no destino'):
+            preview.publish(self.project, 21, self.source)
+        project_link.unlink(); project_link.mkdir()
+        (project_link / 'issue-21').symlink_to(other, target_is_directory=True)
+        with self.assertRaisesRegex(preview.PreviewError, 'Link simbólico no destino'):
+            preview.publish(self.project, 21, self.source)
+        self.assertEqual(list(other.iterdir()), [])
+
+    def test_cli_distinguishes_destination_link_from_version_conflict(self):
+        arguments = ['preview.py', 'publish', '--project', str(self.project), '--issue', '21', str(self.source)]
+        preview.publish(self.project, 21, self.source)
+        self.source.write_text('<html>outra versao</html>')
+        conflict = io.StringIO()
+        with patch.object(sys, 'argv', arguments), contextlib.redirect_stderr(conflict):
+            self.assertEqual(preview.main(), 1)
+        self.assertIn('conteúdo diferente', conflict.getvalue())
+        project_link = self.output / 'outro'; project_link.symlink_to(self.root, target_is_directory=True)
+        (self.project / '.bezalel').mkdir()
+        (self.project / '.bezalel/project.json').write_text('{"project":"outro"}')
+        linked = io.StringIO()
+        with patch.object(sys, 'argv', arguments), contextlib.redirect_stderr(linked):
+            self.assertEqual(preview.main(), 1)
+        self.assertIn('Link simbólico no destino', linked.getvalue())
+
+    def test_linked_ancestor_like_macos_tmp_or_var_is_accepted(self):
+        physical = self.root / 'private-var'; physical.mkdir()
+        linked = self.root / 'var'; linked.symlink_to(physical, target_is_directory=True)
+        with patch.dict(os.environ, BEZALEL_PREVIEWS_DIR=str(linked / 'nested/previews')):
+            result = preview.publish(self.project, 21, self.source)
+        expected = physical / 'nested/previews/projeto/issue-21' / self.source.name
+        self.assertEqual(Path(result['file']), expected)
+        self.assertEqual(expected.read_bytes(), self.source.read_bytes())
+
+    def test_html_in_reviews_and_htm_are_allowed(self):
+        directory = self.project / '.bezalel/reviews'; directory.mkdir(parents=True)
+        for filename in ['database-v1.html', 'database-v2.htm']:
+            source = directory / filename; source.write_text('<html>proposta</html>')
+            result = preview.publish(self.project, 21, source)
+            self.assertEqual(Path(result['file']).read_bytes(), source.read_bytes())
+
+    def test_source_must_be_in_explicit_project_or_worktree(self):
+        outside = self.root / 'external.html'; outside.write_text('private')
+        worktree = self.project / '.worktrees/issue-21'; worktree.mkdir(parents=True)
+        source = worktree / 'preview.html'; source.write_text('<html>worktree</html>')
+        result = preview.publish(worktree, 21, source)
+        self.assertEqual(Path(result['file']).read_bytes(), source.read_bytes())
+        for candidate in [outside, self.source, worktree / '../../proposta v1.html']:
+            with self.assertRaisesRegex(preview.PreviewError, 'dentro do projeto'):
+                preview.publish(worktree, 21, candidate)
+
+    def test_non_html_dotfiles_and_secret_names_are_rejected(self):
+        for filename in ['.env', '.env.html', 'database.sql', 'private.pem', 'private.key', 'credentials.html', 'secrets.htm', 'id_rsa.html']:
+            with self.subTest(filename=filename):
+                candidate = self.project / filename; candidate.write_text('private')
+                with self.assertRaises(preview.PreviewError):
+                    preview.publish(self.project, 21, candidate)
+        for directory in ['.git', '.ssh', '.bezalel/private', '.bezalel/reviews/.private', 'secrets']:
+            with self.subTest(directory=directory):
+                parent = self.project / directory; parent.mkdir(parents=True, exist_ok=True)
+                candidate = parent / 'preview.html'; candidate.write_text('private')
+                with self.assertRaises(preview.PreviewError):
+                    preview.publish(self.project, 21, candidate)
+        self.assertFalse(self.output.exists())
+
+    def test_source_directory_symlink_cannot_escape_project(self):
+        other = self.root / 'other'; other.mkdir()
+        (other / 'external.html').write_text('private')
+        linked = self.project / 'linked'; linked.symlink_to(other, target_is_directory=True)
+        with self.assertRaisesRegex(preview.PreviewError, 'link simbólico'):
+            preview.publish(self.project, 21, linked / 'external.html')
+        self.assertFalse(self.output.exists())
+
+    def test_directory_and_fifo_named_html_are_not_regular_previews(self):
+        directory = self.project / 'directory.html'; directory.mkdir()
+        fifo = self.project / 'fifo.html'; os.mkfifo(fifo)
+        for candidate in [directory, fifo]:
+            with self.assertRaisesRegex(preview.PreviewError, 'arquivo regular'):
+                preview.publish(self.project, 21, candidate)
+        self.assertFalse(self.output.exists())
+
+    def test_project_root_can_have_linked_ancestor(self):
+        alias = self.root / 'alias'; alias.symlink_to(self.root, target_is_directory=True)
+        result = preview.publish(alias / self.project.name, 21, alias / self.project.name / self.source.name)
+        self.assertEqual(Path(result['file']).read_bytes(), self.source.read_bytes())
 
     def test_conflicting_destination_symlink_is_not_replaced(self):
         directory = self.output / 'projeto/issue-21'; directory.mkdir(parents=True)
@@ -174,6 +266,13 @@ class LaunchAgentTests(unittest.TestCase):
             content, _ = launchagent.configuration()
             self.assertIn(str(self.root / 'a&b'), plistlib.loads(content)['ProgramArguments'])
             self.assertIn(b'a&amp;b', content)
+
+    def test_ensure_directory_accepts_linked_configured_ancestor(self):
+        real = self.root / 'private'; real.mkdir()
+        alias = self.root / 'var'; alias.symlink_to(real, target_is_directory=True)
+        result = preview.ensure_directory(alias / 'logs')
+        self.assertEqual(result, real / 'logs')
+        self.assertTrue(result.is_dir())
 
     def test_bootstrap_failure_is_not_success_and_plist_remains(self):
         def fail_bootstrap(args, **kwargs):

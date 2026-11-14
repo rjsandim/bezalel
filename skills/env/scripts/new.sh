@@ -31,7 +31,7 @@ COMPOSE="$STATE_DIR/docker-compose.yml"
 validate_requested_branch "$WORKTREE_DIR"
 
 # Repetir new e aditivo, sem reescrever configuracoes de um ambiente existente.
-if [ -f "$COMPOSE" ] && [ "${ENVSTACK_UPDATE:-0}" != '1' ]; then
+if [ -f "$COMPOSE" ] && [ ! -f "$STATE_DIR/tailnet-needs-update" ] && [ "${ENVSTACK_UPDATE:-0}" != '1' ]; then
     [ "${ENV_DRY_RUN:-0}" != '1' ] || { info "Compose existente preservado: $COMPOSE"; exit 0; }
     exec bash "$SCRIPT_DIR/ctl.sh" start "${ORIGINAL_ARGS[@]}"
 fi
@@ -113,7 +113,26 @@ else
     ensure_traefik
 fi
 
-python3 "$SCRIPT_DIR/tailnet.py" prepare --root "$ROOT" --state "$STATE_DIR" --environment "$ENV_NAME"
+TAILNET_ATTEMPT="$(mktemp "$STATE_DIR/tailnet-attempt.XXXXXX")"
+cleanup_new() {
+    local result=$? rollback_failed=0
+    trap - EXIT
+    if [ "$result" -ne 0 ]; then
+        python3 "$SCRIPT_DIR/tailnet.py" rollback --state "$STATE_DIR" --attempt "$TAILNET_ATTEMPT" || rollback_failed=1
+        if [ -s "$TAILNET_ATTEMPT" ]; then
+            touch "$STATE_DIR/tailnet-needs-update"
+        fi
+        if [ "$rollback_failed" = 1 ]; then
+            echo "Reserva Tailnet preservada: repita python3 \"$SCRIPT_DIR/tailnet.py\" rollback --state \"$STATE_DIR\" --attempt \"$TAILNET_ATTEMPT\" após diagnosticar o Serve." >&2
+        fi
+    fi
+    [ "${COMPOSE:-}" = "${COMPOSE_DEST:-$COMPOSE}" ] || rm -f "$COMPOSE"
+    [ -z "${INITDB_PENDING:-}" ] || rm -f "$INITDB_PENDING"
+    [ "$rollback_failed" = 1 ] || rm -f "$TAILNET_ATTEMPT"
+    exit "$result"
+}
+trap cleanup_new EXIT
+python3 "$SCRIPT_DIR/tailnet.py" prepare --root "$ROOT" --state "$STATE_DIR" --environment "$ENV_NAME" --attempt "$TAILNET_ATTEMPT"
 export ES_TAILNET_FILE="$STATE_DIR/tailnet.json"
 
 # ─── 3. Compose efemero (concatena templates renderizados) ─────
@@ -124,7 +143,7 @@ printf '%s\n' "$DOCKER_CONTEXT" > "$STATE_DIR/docker-context"
 COMPOSE_DEST="$COMPOSE"
 COMPOSE="$(mktemp "$STATE_DIR/compose.pending.XXXXXX")"
 INITDB_PENDING="$(mktemp "$STATE_DIR/initdb.pending.XXXXXX")"
-trap 'rm -f "$COMPOSE" "$INITDB_PENDING"' EXIT
+
 DB_HOST_PORT="$(db_host_port "$ENV_NAME")"
 if [ -f "$ES_SHARED_DB_FILE" ]; then
     DB_HOST_PORT="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["pool"]["port"])' "$ES_SHARED_DB_FILE")"
@@ -224,9 +243,8 @@ mv "$COMPOSE" "$COMPOSE_DEST"
 mv "$INITDB_PENDING" "$STATE_DIR/initdb.sql"
 printf '%s\n' "$ROOT" > "$STATE_DIR/project-root"
 printf '%s\n' "$DOCKER_CONTEXT" > "$STATE_DIR/docker-context"
-trap - EXIT
 COMPOSE="$COMPOSE_DEST"
-if [ "${ENV_DRY_RUN:-0}" = "1" ]; then warn "DRY-RUN: nao subindo containers. Compose em $COMPOSE"; exit 0; fi
+if [ "${ENV_DRY_RUN:-0}" = "1" ]; then python3 "$SCRIPT_DIR/tailnet.py" complete-attempt --state "$STATE_DIR" --attempt "$TAILNET_ATTEMPT"; rm -f "$STATE_DIR/tailnet-needs-update"; warn "DRY-RUN: nao subindo containers. Compose em $COMPOSE"; exit 0; fi
 start_services update "$@"
 
 echo ""
@@ -250,3 +268,6 @@ echo ""
 if [ -f "$STATE_DIR/tailnet.json" ]; then
     python3 "$SCRIPT_DIR/status.py" "$ROOT" "$STATE_DIR" "$ENV_NAME" "$DOCKER_CONTEXT"
 fi
+
+python3 "$SCRIPT_DIR/tailnet.py" complete-attempt --state "$STATE_DIR" --attempt "$TAILNET_ATTEMPT"
+rm -f "$STATE_DIR/tailnet-needs-update"

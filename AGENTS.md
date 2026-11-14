@@ -197,7 +197,15 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   Leia a seção Tailnet em `skills/env/references/operacao.md`; nunca edite Serve
   manualmente, use Funnel, reset global ou altere 443 e o `/` principal. Registro
   global por máquina com lock; testes só usam Tailscale/Docker simulados.
-  `scripts/preview.py publish` guarda cópias persistentes em previews; a regra
+  Falha de release avisa em stderr e não impede o down no destroy confirmado;
+  reserva divergente permanece. New falho devolve só reservas da tentativa atual.
+  Prune é explícito por projeto/ambiente e exige ausência comprovada de estado,
+  worktree e containers no contexto registrado; nunca inferir ausência de erro.
+  No modo só-tailnet, URL pública de serviço não exposto é erro. Configure
+  probe_path/probe_statuses por serviço quando a raiz não comprovar prontidão.
+  `scripts/preview.py publish` aceita somente HTML/HTM do projeto/worktree
+  explícito, inclusive `.bezalel/reviews`, recusando dotfiles/segredos e links.
+  Guarda cópias persistentes em previews; a regra
   de exclusão de propostas aplica-se só aos originais em `.bezalel/reviews/`.
   LaunchAgent é preparado separadamente; instalar exige pedido explícito.
 - ENV usa `.envstack/stack.yaml`, contexto Docker explícito e base local verificável.
