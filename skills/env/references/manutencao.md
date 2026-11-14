@@ -23,3 +23,11 @@ O roteiro `tests/integration_lifecycle.py` usa containers reais e fica fora da
 suíte padrão: rode-o somente com autorização específica, em máquina e dados
 descartáveis (iniciar mínimo, acrescentar serviços, parar/retomar e conferir
 dados e arquivos).
+
+`test_tailnet.py` simula o Tailscale e usa temporários para o registro global;
+cobre concorrência entre processos, idempotência entre cópias, listener/Serve
+alheio, conflito, 443 e `/` preservados, geração só-tailnet, placeholders,
+preservação de `.env`, stop/ensure/destroy e respostas HTTP/101 simuladas.
+Nenhum teste modifica o Serve real, instala LaunchAgent ou usa o daemon Docker.
+Os testes de previews/LaunchAgent ficam em `tests/test_preview.py` na raiz do
+pacote, inclusive na suíte de distribuição. Piloto real e iPhone são separados.

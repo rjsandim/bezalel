@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Uso: ctl.sh <start|ensure|stop|restart|status> <nome> [servico...|--all]
+# Uso: ctl.sh <start|ensure|stop|restart|status|check> <nome> [servico...|--all]
 # start/ensure acrescentam servicos; stop/restart operam no ambiente ativo.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib.sh"
@@ -8,12 +8,12 @@ require_tools git yq docker python3
 validate_operation_root
 
 ACTION="${1:-}"
-case "$ACTION" in start|ensure|stop|restart|status) ;; *) fail "Acao invalida: '$ACTION'." ;; esac
+case "$ACTION" in start|ensure|stop|restart|status|check) ;; *) fail "Acao invalida: '$ACTION'." ;; esac
 shift
 ORIGINAL_ARGS=("$@")
 parse_environment_args "$@"
 set -- ${SERVICE_ARGS[@]+"${SERVICE_ARGS[@]}"}
-[ "$STATUS_JSON" = 0 ] || [ "$ACTION" = status ] || fail "--json so se aplica ao status."
+[ "$STATUS_JSON" = 0 ] || { [ "$ACTION" = status ] || [ "$ACTION" = check ]; } || fail "--json so se aplica ao status."
 case "$ACTION" in
     start|ensure) ;;
     *) [ "$#" -eq 0 ] || fail "$ACTION opera no ambiente; selecao de servicos e aceita por start/ensure." ;;
@@ -38,7 +38,9 @@ case "$ACTION" in
     start|ensure)
         select_services "$@"
         require_shared_infra_authorization
-        docker start "$ENVSTACK_TRAEFIK" >/dev/null
+        if [ "$(manifest_get '.access')" != tailnet ]; then
+            docker start "$ENVSTACK_TRAEFIK" >/dev/null
+        fi
         start_services start "${SELECTED_SERVICES[@]}" ;;
     stop)
         remember_services
@@ -50,6 +52,8 @@ case "$ACTION" in
         select_services
         dc restart --timeout 60 "${SELECTED_SERVICES[@]}"
         start_services start "${SELECTED_SERVICES[@]}" ;;
+    check)
+        python3 "$SCRIPT_DIR/tailnet.py" check --root "$(repo_root)" --state "$STATE_DIR" --environment "$ENV_NAME" ;;
     status)
         if [ "$STATUS_JSON" = 1 ]; then
             python3 "$SCRIPT_DIR/status.py" "$(repo_root)" "$STATE_DIR" "$ENV_NAME" "$DOCKER_CONTEXT"

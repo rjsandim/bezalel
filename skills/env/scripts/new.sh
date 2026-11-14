@@ -101,7 +101,9 @@ git -C "$WORKTREE_DIR" symbolic-ref --quiet --short HEAD > "$STATE_DIR/worktree-
 # ─── 2. Infra ──────────────────────────────────────────────────
 # DNS + certificado do projeto sao criados no `init`. Aqui so garantimos o
 # Traefik global de pe. Fallback: se a infra do projeto faltar, configura agora.
-if [ "${ENV_DRY_RUN:-0}" = "1" ]; then
+if [ "$(manifest_get '.access')" = tailnet ]; then
+    info "Acesso só-tailnet: sem DNS, certificado local ou proxy compartilhado"
+elif [ "${ENV_DRY_RUN:-0}" = "1" ]; then
     warn "DRY-RUN: pulando infra"
 else
     if [ ! -f "$TRAEFIK_STATE/certs/${PROJECT}.pem" ]; then
@@ -110,6 +112,9 @@ else
     fi
     ensure_traefik
 fi
+
+python3 "$SCRIPT_DIR/tailnet.py" prepare --root "$ROOT" --state "$STATE_DIR" --environment "$ENV_NAME"
+export ES_TAILNET_FILE="$STATE_DIR/tailnet.json"
 
 # ─── 3. Compose efemero (concatena templates renderizados) ─────
 step "Montando stack"
@@ -150,8 +155,19 @@ for i in $(seq 0 $((COUNT - 1))); do
         SVC_RULE="${SVC_RULE} || Host(\`${ENV_NAME}-${folder}-${a}.${PROJECT}.${TLD}\`)"
     done
 
+    TAILNET_PORTS="$(python3 - "$STATE_DIR/tailnet.json" "$folder" <<'PYPORT'
+import json, sys
+from pathlib import Path
+path = Path(sys.argv[1])
+data = json.loads(path.read_text()) if path.exists() else {'services': []}
+entry = next((s for s in data['services'] if s['folder'] == sys.argv[2]), None)
+if entry:
+    print(f'    ports: ["127.0.0.1:{entry["port"]}:{entry["container_port"]}"]')
+PYPORT
+)"
+    export TAILNET_PORTS
     export FOLDER="$folder" PORT="$port" SVC_HOST="$SVC_HOST" SVC_RULE="$SVC_RULE"
-    RENDER_VARS="${COMMON_VARS} \${FOLDER} \${PORT} \${SVC_HOST} \${SVC_RULE} \${DB_SERVICE}" \
+    RENDER_VARS="${COMMON_VARS} \${FOLDER} \${PORT} \${SVC_HOST} \${SVC_RULE} \${DB_SERVICE} \${TAILNET_PORTS}" \
         render_template compose.service.tpl /dev/stdout >> "$COMPOSE"
 
     # Override explicito; ausencia preserva DB + Redis dos manifestos antigos.
@@ -174,6 +190,7 @@ done
 RENDER_VARS="$COMMON_VARS" render_template compose.tail.tpl /dev/stdout >> "$COMPOSE"
 python3 "$SCRIPT_DIR/shared_db.py" configure "$COMPOSE" "$STATE_DIR"
 python3 "$SCRIPT_DIR/shared_redis.py" configure "$COMPOSE" "$STATE_DIR"
+python3 "$SCRIPT_DIR/tailnet.py" configure --root "$ROOT" --compose "$COMPOSE"
 ok "Compose preparado para validacao"
 
 # ─── 4. Resolver .env de cada pasta ────────────────────────────
@@ -216,9 +233,12 @@ echo ""
 echo -e "${GREEN}━━━ Ambiente '${ENV_NAME}': URLs disponiveis ao iniciar cada servico ━━━${NC}"
 for i in $(seq 0 $((COUNT - 1))); do
     folder="$(yq -r ".services[$i].folder" "$MANIFEST")"
-    echo -e "  ${BLUE}${folder}:${NC} https://${ENV_NAME}-${folder}.${PROJECT}.${TLD}"
+    if [ "$(manifest_get '.access')" != tailnet ]; then
+        echo -e "  ${BLUE}${folder}:${NC} https://${ENV_NAME}-${folder}.${PROJECT}.${TLD}"
+    fi
     aliases="$(yq -r ".services[$i].aliases // [] | join(\" \")" "$MANIFEST")"
     for a in $aliases; do
+        [ "$(manifest_get '.access')" != tailnet ] || continue
         echo -e "      ${BLUE}↳ ${a}:${NC} https://${ENV_NAME}-${folder}-${a}.${PROJECT}.${TLD}"
     done
 done
@@ -226,3 +246,7 @@ echo -e "  ${BLUE}${DB_SERVICE}:${NC} localhost:${DB_HOST_PORT} — conexao da I
 echo -e "  ${YELLOW}Ligar todos:${NC} /env start ${ENV_NAME} --all"
 echo -e "  ${YELLOW}Parar preservando trabalho:${NC} /env stop ${ENV_NAME}"
 echo ""
+
+if [ -f "$STATE_DIR/tailnet.json" ]; then
+    python3 "$SCRIPT_DIR/status.py" "$ROOT" "$STATE_DIR" "$ENV_NAME" "$DOCKER_CONTEXT"
+fi

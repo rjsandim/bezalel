@@ -383,10 +383,21 @@ _engine = "mysql" if engine == "mysql" else "postgres"
 flat["db.connection"] = "mysql" if _engine == "mysql" else "pgsql"
 for k in ("host", "port", "db", "user", "password", "url"):
     flat[f"db.{k}"] = flat[f"{_engine}.{k}"]
+tailnet_file = os.environ.get("ES_TAILNET_FILE", "")
+tailnet = json.load(open(tailnet_file)) if tailnet_file and os.path.isfile(tailnet_file) else {"host": "", "services": []}
+tailnet_urls = {entry["folder"]: entry["url"].rstrip("/") for entry in tailnet["services"]}
+flat["tailnet.host"] = tailnet["host"]
+for s in services:
+    flat[f"tailnet.url.{s}"] = tailnet_urls.get(s, "")
+    flat[f"public.url.{s}"] = tailnet_urls.get(s, url(s))
+flat["tailnet.url.self"] = tailnet_urls.get(folder, "")
+flat["public.url.self"] = tailnet_urls.get(folder, url(folder))
+flat["public.host.self"] = tailnet["host"] if folder in tailnet_urls else host(folder)
 for s in services:
     flat[f"url.{s}"] = url(s); flat[f"host.{s}"] = host(s); flat[f"internal.{s}"] = s
 # backend = 1o servico php (aponta o frontend p/ a API sem hardcode da pasta).
 if backend:
+    flat["public.url.backend"] = tailnet_urls.get(backend, url(backend))
     flat["url.backend"] = url(backend); flat["host.backend"] = host(backend); flat["internal.backend"] = backend
 # aliases deste servico: dominios extras roteando p/ o mesmo container.
 for a in aliases:

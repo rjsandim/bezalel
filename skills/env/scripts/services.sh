@@ -73,6 +73,13 @@ start_services() {
         dc up -d --no-recreate --wait --wait-timeout 420 "${SELECTED_SERVICES[@]}"
     fi
     remember_services
+    local active_tailnet=()
+    while IFS= read -r service; do
+        [ -z "$service" ] || active_tailnet+=("$service")
+    done <<< "$(running_services)"
+    if [ "${#active_tailnet[@]}" -gt 0 ]; then
+        python3 "$SKILL_DIR/scripts/tailnet.py" publish-state --state "$STATE_DIR" "${active_tailnet[@]}"
+    fi
     ok "Servicos solicitados e dependencias prontos"
     dc ps
 }

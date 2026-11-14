@@ -9,7 +9,16 @@ aprovação humana real do comando exato. Confirme destino
 isolado e que o comando recusa produção. Não baixe nem leia produção. Nunca
 crie máquina OrbStack por issue. Infra compartilhada requer autorização explícita
 na invocação, sem variável permanente no perfil. Entregue status --json e URLs
-para navegação/teste de usabilidade humano. Accept/accepted e Excel do caminho
+para navegação/teste de usabilidade humano. Entregue explicitamente iphone_url
+(link exato do iPhone) e tailnet retornados pelo status, sem inventar endereço.
+Use o check da ENV para página, estáticos, Location, API/health e upgrade WebSocket
+101 nos caminhos declarados; informe cada teste executado, não configurado ou
+falho. Login, cookies e navegação no Safari/4G/5G dependem do Rafael quando não
+validados; HTTP isolado não comprova sessão funcional. Nunca edite tailscale serve
+à mão, use Funnel ou altere a porta 443 e o / principal. Publique HTML com
+`python3 "{{package_root}}/scripts/preview.py" publish --project . --issue N <arquivo>`;
+a cópia em previews é permanente, somente o original em .bezalel/reviews é
+excluído após a decisão. Não instale LaunchAgent por inferência. Accept/accepted e Excel do caminho
 clássico não são pré-requisitos aqui. Falha de restore não é sucesso.
 Não fabrique handoff de revisão/resposta nesta etapa: leia os handoffs aplicáveis.
 

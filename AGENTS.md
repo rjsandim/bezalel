@@ -191,6 +191,15 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   Não acrescente prefixos de agente/tipo (`codex/`, `feat/`) nem sufixos aleatórios.
   Use o mesmo nome na branch, em `.worktrees/<nome>` e no ambiente ENV.
   Preserve nomes e vínculos de ambientes existentes; não renomeie recursos por inferência.
+- Acesso privado de ENV: opt-in `tailnet`, com `access: tailnet` para dispensar
+  DNS/mkcert/sudo/Traefik. Inicie com `ENV_ALLOW_SHARED_INFRA=1` temporário,
+  consulte `ctl.sh status <nome> --json` para `iphone_url` e rode `ctl.sh check`.
+  Leia a seção Tailnet em `skills/env/references/operacao.md`; nunca edite Serve
+  manualmente, use Funnel, reset global ou altere 443 e o `/` principal. Registro
+  global por máquina com lock; testes só usam Tailscale/Docker simulados.
+  `scripts/preview.py publish` guarda cópias persistentes em previews; a regra
+  de exclusão de propostas aplica-se só aos originais em `.bezalel/reviews/`.
+  LaunchAgent é preparado separadamente; instalar exige pedido explícito.
 - ENV usa `.envstack/stack.yaml`, contexto Docker explícito e base local verificável.
   Não acrescente fallback para contexto ativo, remoção por prefixo ou força.
   Manifesto/artefatos pertencem à worktree atual (`--show-toplevel`); preserve o

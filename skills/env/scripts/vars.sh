@@ -129,3 +129,12 @@ for i in $(seq 0 $((COUNT - 1))); do
     done
 done
 echo ""
+
+echo -e "\n${BOLD}URL pública e Tailnet${NC}"
+p '${env:tailnet.host}' '<Self.DNSName sem ponto final; vazio quando desativado>'
+p '${env:tailnet.url.<pasta>}' 'https://<host-tailnet>:<porta> (vazio quando desativado)'
+p '${env:tailnet.url.self}' 'URL Tailnet deste serviço'
+p '${env:public.url.<pasta>}' 'URL Tailnet se exposto; senão URL .local'
+p '${env:public.url.backend}' 'URL pública do primeiro serviço PHP'
+p '${env:public.url.self}' 'URL pública deste serviço'
+p '${env:public.host.self}' 'Hostname Tailnet se exposto; senão hostname .local'

@@ -243,3 +243,143 @@ project.json schema 3. A ENV clássica não passa a executar restore automaticam
 Comando do projeto precisa validar destino isolado e recusar produção; cwd não é
 prova da conexão usada pelo comando. Infra compartilhada continua exigindo
 ENV_ALLOW_SHARED_INFRA=1 só na invocação autorizada.
+
+## Tailnet: acesso privado no iPhone
+
+Opte por serviço ou ambiente no `.envstack/stack.yaml`. Exemplo (mantenha também
+project, base_ref, docker_context, banco e demais campos próprios):
+
+```yaml
+startup:
+  services: [api, web]
+access: tailnet  # só-tailnet; omita para continuar também com .local/Traefik
+tailnet:
+  primary: web
+  services: [api, web]
+  port_start: 41000
+  port_end: 41999
+  environments:
+    corrigir-login:
+      primary: web
+services:
+  - folder: api
+    type: php
+    port: 8000
+    database: true
+    tailnet:
+      checks:
+        api: /api/health
+        health: /health
+        redirect: /private
+        login: /login
+  - folder: web
+    type: node
+    port: 5173
+    database: false
+    tailnet:
+      checks:
+        static: /src/main.js
+        websocket: /ws
+```
+
+`services[].tailnet: true` também expõe o serviço; um mapa permite declarar
+checks. `tailnet.primary` escolhe `iphone_url`; sem primary, vale o primeiro
+serviço exposto na ordem do manifesto. `tailnet.environments.<nome>` sobrescreve
+as opções desse ambiente. `access: tailnet` exige seleção explícita e elimina
+rede/labels do proxy, DNS dnsmasq/resolver, certificado mkcert e sudo. Não
+inicializa nem reinicia Traefik; bindings de bancos exclusivos ficam em loopback.
+Pools continuam com seus próprios limites.
+Tailscale deve estar conectado por conta, com HTTPS disponível. O binário vem de
+`ENV_TAILSCALE_BIN` ou PATH (`command -v tailscale`); wrappers do app macOS são
+aceitos. Nunca use chave de API ou Funnel.
+
+A partir da raiz proprietária do ambiente e da pasta real da skill carregada:
+
+```sh
+ENV_ALLOW_SHARED_INFRA=1 bash "$SKILL_DIR/scripts/new.sh" corrigir-login
+ENV_ALLOW_SHARED_INFRA=1 bash "$SKILL_DIR/scripts/ctl.sh" ensure corrigir-login
+bash "$SKILL_DIR/scripts/ctl.sh" status corrigir-login --json
+bash "$SKILL_DIR/scripts/ctl.sh" check corrigir-login
+```
+
+A autorização temporária continua necessária para publicação/infra compartilhada.
+Não exporte permanentemente a variável. `new/update` reservam uma porta por
+serviço e publicam após up; `start/ensure` recuperam a publicação dos serviços
+ativos. `stop` preserva reserva e Serve; `destroy --confirm projeto/ambiente`
+libera só os vínculos exatos, depois do preflight. Alteração de seleção com
+vínculos existentes é recusada: preserve dados e use destroy confirmado com
+`--keep-worktree` antes de regenerar a seleção. Isso remove volumes exclusivos;
+faça backup e obtenha a autorização concreta antes dessa operação. Não edite o
+registro para contornar divergências. Falha mantém o estado para diagnóstico.
+
+Cada URL é `https://<Self.DNSName>:<P>/`, encaminhada pelo Serve diretamente ao
+binding Compose `127.0.0.1:P:<porta-container>`. O registro global fica em
+`${ENV_TAILNET_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/envstack/tailnet}/registry.json`,
+com lock exclusivo `flock`, escrita atômica e modo 0600. A identidade inclui raiz,
+projeto, ambiente e serviço. Hash determinístico e sondagem linear pulam reservas,
+Serve e listeners locais. Cópias diferentes da skill compartilham esse registro.
+Não troque o diretório global entre bots da mesma máquina.
+
+`tailnet.py allocate|publish|release` recebe `--root`, `--project`,
+`--environment` e `--service`; `allocate` aceita `--start/--end`.
+`tailnet.py list` só lê. `check` recebe `--root`, `--state <estado-da-ENV>` e
+`--environment`. Nenhum comando altera a porta 443 nem o `/` principal;
+release usa somente `--https=P off` quando o alvo é exatamente
+`http://127.0.0.1:P` e o registro pertence ao ambiente. Alvo diferente, handler
+adicional, Funnel ou host divergente bloqueiam sem alterar o vínculo.
+Nunca edite `tailscale serve` à mão; não use reset ou set-config global.
+`ENV_DRY_RUN=1` gera artefatos e reservas, consultando o Tailscale quando há
+opt-in, mas não publica Serve nem inicia containers.
+
+Use `${env:public.url.self}` e `${env:public.url.api}` em APP_URL, frontend,
+origens CORS e callbacks. Eles escolhem a URL Tailnet do serviço exposto, ou a
+URL .local nos demais. `${env:public.host.self}` devolve somente o hostname;
+`${env:tailnet.host}`, `${env:tailnet.url.self}` e `${env:tailnet.url.<pasta>}`
+são os valores Tailnet (vazios quando desativados). Os placeholders `url.*`
+legados continuam .local. Os templates novos usam `public.url.self`,
+`public.url.backend` (primeiro PHP) e `public.host.self`. Em modo só-tailnet, exponha todos os serviços chamados
+pelo navegador. Portas distintas são origens diferentes: configure CORS com a URL
+completa, cookies Secure/SameSite e proxy confiável no projeto. Não publique
+segredos no frontend nem nas propostas.
+
+`.env` existente é preservado. Para regenerar, faça uma cópia privada dele,
+revise `.envstack/<pasta>.env.example`, remova **somente o .env daquele serviço**
+e rode update no ambiente autorizado; confira/restaure os valores privados da
+cópia sem versioná-la. O status/check avisa nomes de variáveis URL/ORIGIN/CORS/
+HOST/CALLBACK com localhost, 127.0.0.1 ou .local, sem exibir valores.
+
+`status --json` acrescenta `tailnet: {host, services: [{folder,url,port,serve_ok,
+http_code,checks}], warnings}` e `iphone_url`. Readiness exige também Serve e HTTP
+dos serviços expostos necessários; falha não vira zero nem sucesso. `check`
+consulta página `/`, caminhos estáticos, redirects (Location sem seguir origens
+externas), API/health, login e upgrade WebSocket (101 com Upgrade). Varre respostas
+por dependências locais e examina domínio/Secure de cookies. Declare os caminhos
+reais em `services[].tailnet.checks` como no exemplo (string ou lista).
+Casos não declarados aparecem como `not_configured`, nunca como testados.
+Check sai 5 com falhas/avisos e 1 com erro de coleta. Não segue scripts ou executa
+JavaScript; não prova login autenticado, atributos completos de cookies, CORS no
+browser, navegação ou WebSocket da aplicação. Relate essas lacunas e peça ao
+Rafael testar o link exato no Safari com Tailscale, inclusive 4G/5G.
+
+### Previews persistentes
+
+Resolva `BEZALEL_ROOT` como a raiz da distribuição carregada (`../..` desta skill):
+
+```sh
+python3 "$BEZALEL_ROOT/scripts/preview.py" publish --project . --issue 21 .bezalel/reviews/database-21-v1.html
+python3 "$BEZALEL_ROOT/scripts/preview_launchagent.py" plan
+```
+
+Publish copia atomicamente para `${BEZALEL_PREVIEWS_DIR:-$HOME/previews}/<projeto>/issue-21/`
+e devolve `https://<host>/<projeto>/issue-21/<arquivo>`. Mesmo nome/mesmos bytes
+é idempotente; conteúdo diferente exige nome v2. Originais são preservados.
+Após decisão de banco, exclua/verifique somente os originais temporários em
+`.bezalel/reviews/`; as cópias publicadas ficam guardadas. Nenhum script configura
+o Serve principal: ele deve já apontar para o servidor de previews.
+
+O comando `preview_launchagent.py install` instala explicitamente um LaunchAgent
+macOS para Python http.server em **127.0.0.1:8000** servindo a pasta de previews.
+É idempotente, recusa plist divergente ou porta ocupada e nunca encerra processos.
+Apenas `plan` é leitura. A instalação é uma operação separada autorizada; não
+execute para validar o pacote nem substitua o servidor já em execução. Este
+recurso foi preparado/testado com mocks; não foi instalado nesta implementação.

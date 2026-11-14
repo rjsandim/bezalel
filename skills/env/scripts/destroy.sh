@@ -39,6 +39,8 @@ fi
 docker compose -f "$COMPOSE" config --quiet
 python3 "$SCRIPT_DIR/check_destroy.py" "$COMPOSE" "$PROJECT-$ENV_NAME"
 step "Removendo ambiente confirmado: $PROJECT/$ENV_NAME"
+# Libera somente mapeamentos exatos deste ambiente, após confirmação e preflight.
+python3 "$SCRIPT_DIR/tailnet.py" release-state --state "$STATE_DIR"
 docker compose -f "$COMPOSE" down -v
 if [ "$KEEP_WT" = false ]; then
     git -C "$ROOT" worktree remove "$WORKTREE_DIR"
