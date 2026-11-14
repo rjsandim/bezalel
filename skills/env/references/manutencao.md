@@ -10,6 +10,9 @@ python3 -B -m unittest discover -s "$SKILL_DIR/tests" -v
 Os testes criam repositórios descartáveis e simulam Docker e comandos de sistema;
 só a validação estática de Compose usa o CLI real, sem daemon. Eles cobrem
 geração, ativação aditiva, retomada, preservação, destroy e pools compartilhados.
+Incluem allowlist/major PostgreSQL e pgvector, imagem divergente do pool e
+init/ensure/update em worktree com manifesto próprio, verificando bytes e mtime
+dos arquivos do checkout principal e recusa de estado vinculado a outra raiz.
 
 Mudanças nos scripts shell também pedem `bash -n` em cada script alterado.
 

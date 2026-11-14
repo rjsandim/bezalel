@@ -193,6 +193,9 @@ das instalações existentes. O validador e o instalador usam os caminhos do cat
   Preserve nomes e vínculos de ambientes existentes; não renomeie recursos por inferência.
 - ENV usa `.envstack/stack.yaml`, contexto Docker explícito e base local verificável.
   Não acrescente fallback para contexto ativo, remoção por prefixo ou força.
+  Manifesto/artefatos pertencem à worktree atual (`--show-toplevel`); preserve o
+  vínculo de raiz dos estados existentes e o estado global dos pools na skill.
+  Imagens PostgreSQL seguem a allowlist descrita no guia de operação da ENV.
 - Não altere DNS, CA, proxy, containers, volumes, imagens, cofres ou credenciais
   para validar mudanças. Não rode limpeza real, deploy ou integração real sem
   autorização específica. Use fixtures, temporários e mocks de comandos mutáveis.

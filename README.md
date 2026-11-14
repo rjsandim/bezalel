@@ -566,7 +566,14 @@ existentes exigem migração explícita. Veja [configuração e limites](skills/
 
 O manifesto por projeto continua em `.envstack/stack.yaml`; não foi migrado para
 `.bezalel` porque cumpre um contrato existente de geração de ambientes.
+Ele é lido/gravado na worktree atual (`git rev-parse --show-toplevel`), inclusive
+no `init`. Artefatos e `.worktrees/<nome>` ficam sob essa raiz; ambientes existentes
+devem ser operados a partir da raiz registrada em seu estado. Pools permanecem
+globais na skill. Veja [raiz e imagens](skills/env/references/operacao.md).
 
+- `database_image`: imagem PostgreSQL exclusiva, padrão `postgres:17`. Aceita
+  `postgres:<versão>[-alpine]` e `pgvector/pgvector:pg<versão>`, com versão explícita,
+  sem `latest`. Pools usam `database_shared.image`, com a mesma allowlist PostgreSQL.
 - `base_ref`: referência local usada para criar branches. Sem ela, usa-se o
   `origin/HEAD` já disponível, ou a única branch existente entre `main` e `master`.
   Ambiguidade ou ausência falha; nenhum fetch é feito automaticamente.

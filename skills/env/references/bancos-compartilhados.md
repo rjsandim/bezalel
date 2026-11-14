@@ -18,7 +18,10 @@ database_shared:
 ```
 
 Para PostgreSQL, use `database: postgres`, outro pool, `image: postgres:17` e outra
-porta, por exemplo `35432`. Imagens oficiais exigem versão explícita. Mudanças de
+porta, por exemplo `35432`. Também é aceito `image: pgvector/pgvector:pg17`.
+A allowlist PostgreSQL é `postgres:<versão>[-alpine]` ou
+`pgvector/pgvector:pg<versão>`, sempre com versão explícita, sem `latest`.
+O campo `database_image` do modo exclusivo não configura o pool. Mudanças de
 imagem/porta de um pool existente são recusadas: escolha outro pool. Não há upgrade
 automático nem tuning de memória. PostgreSQL 18+ usa o novo ponto de montagem da
 imagem oficial.

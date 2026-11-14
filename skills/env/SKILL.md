@@ -28,6 +28,11 @@ usuário, prefixo e bancos lógicos por serviço. Para configurar ou migrar, lei
 - `.envstack/stack.yaml` com serviços, banco, `base_ref`, `engine` e
   `docker_context`. `database_mode: shared` usa um pool configurado; sem ele, o
   modo é exclusivo. Converter um ambiente existente exige migrar seus dados.
+- Manifesto e artefatos são lidos/gravados na raiz da worktree atual
+  (`git rev-parse --show-toplevel`), inclusive em `detect`/`init`. PostgreSQL
+  exclusivo aceita `database_image` (padrão `postgres:17`):
+  `postgres:<versão>[-alpine]` ou `pgvector/pgvector:pg<versão>`, sem `latest`.
+  Pools usam `database_shared.image`; veja o [guia](references/operacao.md).
 - Bash, Python 3.9+, Git com `--path-format`/`--end-of-options`, `yq` (Mike Farah
   v4), `jq`, `envsubst`, Docker/Compose com `--wait --wait-timeout`. Operação
   completa testada em macOS com Homebrew, mkcert, dnsmasq e Traefik.
