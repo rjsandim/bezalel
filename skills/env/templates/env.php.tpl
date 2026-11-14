@@ -4,7 +4,7 @@ APP_NAME=${env:project}
 APP_ENV=local
 APP_KEY=
 APP_DEBUG=true
-APP_URL=${env:url.self}
+APP_URL=${env:public.url.self}
 
 DB_CONNECTION=${env:db.connection}
 DB_HOST=${env:db.host}

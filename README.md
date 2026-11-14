@@ -714,3 +714,52 @@ Referências bibliográficas foram mantidas; nenhuma nova licença foi atribuíd
 
 Para contribuir, siga [AGENTS.md](AGENTS.md). A única publicação automática é a
 da branch `bezalel-plugins` após integração na `master`; merge e deploy são manuais.
+
+## Abrir ambientes e previews no iPhone
+
+A ENV aceita Tailscale Serve privado por serviço. Configure `tailnet.primary` e
+`tailnet.services` em `.envstack/stack.yaml` (ou `services[].tailnet: true`).
+`access: tailnet` sobe sem DNS local, mkcert, sudo ou Traefik. Na raiz proprietária,
+resolva `SKILL_DIR` como a pasta da skill ENV carregada e execute, na invocação
+autorizada:
+
+```sh
+ENV_ALLOW_SHARED_INFRA=1 bash "$SKILL_DIR/scripts/ctl.sh" ensure <nome>
+bash "$SKILL_DIR/scripts/ctl.sh" status <nome> --json
+bash "$SKILL_DIR/scripts/ctl.sh" check <nome>
+```
+
+Abra o `iphone_url` retornado no Safari com Tailscale conectado. Cada serviço tem
+uma porta própria entre 41000–41999, configurável, publicada em loopback pelo
+container. O registro global com lock evita colisões entre bots/cópias da skill.
+Nunca configure Serve manualmente, use Funnel ou altere 443 e o `/` principal.
+`stop` preserva portas; destroy confirmado tenta liberar somente vínculos exatos.
+Se a liberação falhar, avisa em stderr e continua com down, preservando a reserva
+para recuperação. New falho devolve apenas reservas novas da tentativa; prune
+explícito exige ausência comprovada de estado, worktree e containers no contexto
+registrado. URLs públicas de serviços não expostos falham em `access: tailnet`.
+Configure `services[].tailnet.probe_path` e `probe_statuses` para APIs autenticadas
+ou com raiz 404; códigos 401/403/404 só contam como prontos quando declarados.
+Use `${env:public.url.self}`/`${env:public.url.api}` nos exemplos `.envstack`;
+`.env` existentes são preservados e precisam de regeneração explícita.
+O [guia Tailnet](skills/env/references/operacao.md#tailnet-acesso-privado-no-iphone)
+explica manifesto, registro, placeholders, regeneração e checks de estáticos,
+redirects, API/health e WebSocket. Checks não configurados e login/cookies no
+Safari continuam lacunas declaradas; fixtures não comprovam aceite no iPhone.
+
+Para previews, resolva `BEZALEL_ROOT` como a raiz do pacote carregado:
+
+```sh
+python3 "$BEZALEL_ROOT/scripts/preview.py" publish --project . --issue N <arquivo>
+python3 "$BEZALEL_ROOT/scripts/preview_launchagent.py" plan
+```
+
+Somente HTML/HTM regular dentro do projeto/worktree explícito é aceito;
+dotfiles, segredos e links são recusados, com exceção do caminho `.bezalel/reviews`.
+O HTML é **copiado**, com URL privada, para
+`${BEZALEL_PREVIEWS_DIR:-$HOME/previews}/<projeto>/issue-N/`, sem substituir outra
+versão. Essas cópias ficam guardadas; só o original temporário em
+`.bezalel/reviews/` é removido após a decisão humana. O comando separado
+`preview_launchagent.py install` instala o servidor loopback na porta 8000,
+recusando processo/configuração preexistente; não faz parte dos testes nem é
+instalado automaticamente. O Serve principal existente é preservado.

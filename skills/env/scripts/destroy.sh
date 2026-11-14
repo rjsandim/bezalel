@@ -39,6 +39,10 @@ fi
 docker compose -f "$COMPOSE" config --quiet
 python3 "$SCRIPT_DIR/check_destroy.py" "$COMPOSE" "$PROJECT-$ENV_NAME"
 step "Removendo ambiente confirmado: $PROJECT/$ENV_NAME"
+# Libera somente mapeamentos exatos deste ambiente, após confirmação e preflight.
+if ! python3 "$SCRIPT_DIR/tailnet.py" release-state --state "$STATE_DIR"; then
+    echo "Aviso: reserva Tailnet preservada; o destroy continuará com down. Após reconectar/diagnosticar o Tailscale, use tailnet.py list e libere cada serviço com python3 \"$SCRIPT_DIR/tailnet.py\" release --root \"$ROOT\" --project \"$PROJECT\" --environment \"$ENV_NAME\" --service <pasta>. Nunca edite Serve manualmente." >&2
+fi
 docker compose -f "$COMPOSE" down -v
 if [ "$KEEP_WT" = false ]; then
     git -C "$ROOT" worktree remove "$WORKTREE_DIR"

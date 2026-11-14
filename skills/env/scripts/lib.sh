@@ -383,10 +383,25 @@ _engine = "mysql" if engine == "mysql" else "postgres"
 flat["db.connection"] = "mysql" if _engine == "mysql" else "pgsql"
 for k in ("host", "port", "db", "user", "password", "url"):
     flat[f"db.{k}"] = flat[f"{_engine}.{k}"]
+tailnet_file = os.environ.get("ES_TAILNET_FILE", "")
+tailnet = json.load(open(tailnet_file)) if tailnet_file and os.path.isfile(tailnet_file) else {"host": "", "services": []}
+tailnet_urls = {entry["folder"]: entry["url"].rstrip("/") for entry in tailnet["services"]}
+def public_url(service):
+    if tailnet.get("access") == "tailnet" and service not in tailnet_urls:
+        return None
+    return tailnet_urls.get(service, url(service))
+flat["tailnet.host"] = tailnet["host"]
+for s in services:
+    flat[f"tailnet.url.{s}"] = tailnet_urls.get(s, "")
+    flat[f"public.url.{s}"] = public_url(s)
+flat["tailnet.url.self"] = tailnet_urls.get(folder, "")
+flat["public.url.self"] = public_url(folder)
+flat["public.host.self"] = tailnet["host"] if folder in tailnet_urls else host(folder)
 for s in services:
     flat[f"url.{s}"] = url(s); flat[f"host.{s}"] = host(s); flat[f"internal.{s}"] = s
 # backend = 1o servico php (aponta o frontend p/ a API sem hardcode da pasta).
 if backend:
+    flat["public.url.backend"] = public_url(backend)
     flat["url.backend"] = url(backend); flat["host.backend"] = host(backend); flat["internal.backend"] = backend
 # aliases deste servico: dominios extras roteando p/ o mesmo container.
 for a in aliases:
@@ -395,7 +410,11 @@ for a in aliases:
     flat[f"alias.{a}.url"]  = f"https://{ah}"
 def repl(m):
     k = m.group(1).strip()
-    if k in flat: return flat[k]
+    if k in flat:
+        if flat[k] is None:
+            sys.stderr.write(f"[FAIL] ${{env:{k}}} referencia serviço não exposto em access: tailnet; inclua-o em tailnet.services.\n")
+            raise SystemExit(1)
+        return flat[k]
     sys.stderr.write(f"[WARN] placeholder desconhecido: ${{env:{k}}} (mantido)\n"); return m.group(0)
 text = re.sub(r"\$\{env:([^}]+)\}", repl, open(os.environ["ES_SRC"]).read())
 # Somente arquivos NOVOS chegam ao resolver. Conexões compartilhadas sempre

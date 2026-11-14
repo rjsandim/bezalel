@@ -3,6 +3,7 @@
       context: ${ROOT}/.envstack
       dockerfile: ${FOLDER}.Dockerfile
     container_name: ${PROJECT}-${ENV_NAME}-${FOLDER}
+${TAILNET_PORTS}
     restart: unless-stopped
     env_file:
       - ${WORKTREE_DIR}/${FOLDER}/.env

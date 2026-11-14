@@ -158,7 +158,7 @@ class IssueBotTests(unittest.TestCase):
         self.assertEqual(len(calls),1); self.assertIn('status',calls[0][0])
 
     def env_process(self,ready=True,restore_exit=0):
-        status={'worktree':str(bot.worktree_path(self.args)),'issue':122,'branch':'issue-122','ready':ready,'environment_id':'fixture-generation-1'}
+        status={'worktree':str(bot.worktree_path(self.args)),'issue':122,'branch':'issue-122','ready':ready,'environment_id':'fixture-generation-1','iphone_url':'https://fixture.ts.net:41021/','tailnet':{'host':'fixture.ts.net','services':[{'folder':'api','url':'https://fixture.ts.net:41021/','port':41021,'serve_ok':True,'http_code':200}]}}
         calls=[]
         def run(args,**kw):
             calls.append((args,kw))
@@ -173,6 +173,8 @@ class IssueBotTests(unittest.TestCase):
             code,result=bot.env_up(self.args,self.config,self.pr)
         self.assertEqual(code,0); self.assertEqual(len(calls),1)
         self.assertEqual(result['restore'],'not_applicable')
+        self.assertEqual(result['iphone_url'],'https://fixture.ts.net:41021/')
+        self.assertEqual(result['tailnet']['services'][0]['port'],41021)
 
     def test_snapshot_runs_exact_argv_in_worktree_after_readiness(self):
         worktree=self.setup_env('snapshot'); (worktree/'api').mkdir()

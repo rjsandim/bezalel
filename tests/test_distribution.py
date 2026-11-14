@@ -718,9 +718,13 @@ class DistributionTests(unittest.TestCase):
         self.assertIn('contracts/processes/qa.md', (package / 'contracts/codex/dream-team-qa.toml').read_text())
         self.assertTrue((package / 'contracts/processes/qa.md').is_file())
         self.assertFalse((package / 'agents').exists())
-        for script in ['issue_bot.py', 'check_handoff.py', 'ci_gate.py']:
+        for script in ['issue_bot.py', 'check_handoff.py', 'ci_gate.py', 'preview.py', 'preview_launchagent.py']:
             result = subprocess.run([sys.executable, '-B', str(package / 'scripts' / script), '--help'], capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
+        preview_plan = subprocess.run([sys.executable, '-B', str(package / 'scripts/preview_launchagent.py'), 'plan'], capture_output=True, text=True)
+        self.assertEqual(preview_plan.returncode, 0, preview_plan.stderr)
+        self.assertEqual(json.loads(preview_plan.stdout)['listen'], '127.0.0.1:8000')
+        self.assertTrue((package / 'skills/env/scripts/tailnet.py').is_file())
         self.assertTrue((package / 'contracts/contracts/handoff.schema.json').is_file())
         self.assertIn('./skills/issue-bot', claude['skills'])
         with (source / 'agents/dream-team.md').open('a') as stream:

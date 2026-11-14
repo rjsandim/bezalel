@@ -34,6 +34,9 @@ Python 3.9+, tmux, Codex com `--approve-for-me` e dependências próprias da ENV
 5. Suba ENV com branch/SHA da PR e dados declarados; aguarde teste de usabilidade
    do humano. Snapshot é único por geração do ambiente; repetição exige aprovação
    humana do comando exato. `--allow-shared-infra` se limita ao ensure. Problemas posteriores abrem novo ciclo sem sobrescrever arquivos.
+   Entregue `iphone_url` e `tailnet` do status, os checks executados e as lacunas
+   de Safari/iPhone; previews publicados são cópias persistentes. Nunca edite Serve
+   manualmente nem use Funnel.
    Merge e deploy só com ordem humana explícita, fora deste CLI.
 
 ## Saídas

@@ -292,7 +292,9 @@ def env_up(args,config,pr):
             restore_result='completed'
     atomic_write(cycle_receipt(args,args.cycle),json.dumps({'issue':args.issue,'pr':pr['number'],
                  'ciclo':args.cycle,'sha':pr['headRefOid'],'ready':True}).encode(),0o600)
-    return 0,{**status,'data_mode':mode,'restore':restore_result,'merge_autorizado':False}
+    return 0,{**status,'iphone_url':status.get('iphone_url'),
+              'tailnet':status.get('tailnet',{'host':None,'services':[]}),
+              'data_mode':mode,'restore':restore_result,'merge_autorizado':False}
 
 
 @contextlib.contextmanager
