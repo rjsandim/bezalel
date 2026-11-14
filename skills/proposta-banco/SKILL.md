@@ -46,14 +46,20 @@ humana da versão exata vem antes da migration e do código que depende dela.
 troque o status "Modelo não preenchido" pela versão submetida.
    Mantenha-o autocontido, em UTF-8, sem scripts remotos, credenciais ou dados
    pessoais, e abra-o para inspecionar a renderização.
-6. **Apresente para decisão:** caminho do arquivo, base, versão, resumo das
+6. **Publique e apresente para decisão.** Quando solicitado acesso privado,
+   resolva a raiz do pacote a partir desta skill (`../..`) e execute
+   `python3 "$BEZALEL_ROOT/scripts/preview.py" publish --project . --issue N <arquivo>`.
+   O script copia para `${BEZALEL_PREVIEWS_DIR:-$HOME/previews}/<projeto>/issue-N/`
+   e devolve a URL privada; não muda o Serve. Use nome com versão; conflito de
+   conteúdo exige novo nome. A cópia publicada fica guardada após a decisão.
+   Apresente: caminho do arquivo, base, versão, resumo das
    diferenças, hash (`shasum -a 256 <arquivo>`) e os pontos que o humano precisa
    aprovar. Aguarde resposta explícita na conversa ou na issue.
 7. **Ajuste pedido = nova versão.** Atualize o HTML como `v<N+1>`, recalcule o
    hash e reapresente; a aprovação vale só para a versão que ela cita.
 8. **Feche após a decisão final.** Registre na issue ou conversa decisão, base,
    versão, resumo e hash; exclua as cópias da tarefa em `.bezalel/reviews/` e
-   confirme a ausência. O template do pacote permanece.
+   confirme a ausência. O template do pacote e as cópias publicadas em previews permanecem.
 
 ## Saídas
 

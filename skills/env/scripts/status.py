@@ -5,6 +5,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+import tailnet
+
 
 def query(args):
     result=subprocess.run(args,capture_output=True,text=True,timeout=60)
@@ -51,10 +53,19 @@ def status(root,state,name,context):
         port=json.loads(shared.read_text())['pool']['port']
     issue=(state/'issue').read_text().strip() if (state/'issue').is_file() else None
     branch=(state/'worktree-branch').read_text().strip()
-    return {'project':project,'environment':name,'issue':int(issue) if issue else None,
+    network = tailnet.report(root,state,name)
+    primary = next((s['url'] for s in network['services'] if s['folder']==network.get('primary')),None)
+    only_tailnet = manifest.get('access') == 'tailnet'
+    if only_tailnet:
+        for service in services:
+            service['url'] = next((s['url'] for s in network['services'] if s['folder']==service['folder']),None)
+            service['aliases'] = []
+    network_ready = all(s['serve_ok'] and s['probe_ok']
+                        for s in network['services'] if s['folder'] in required)
+    return {'tailnet': network, 'iphone_url': primary, 'project':project,'environment':name,'issue':int(issue) if issue else None,
             'environment_id':(state/'environment-id').read_text().strip() if (state/'environment-id').is_file() else None,
             'branch':branch,'worktree':str(root/'.worktrees'/name),'docker_context':context,
-            'ready':bool(required) and all(ready(s) for s in required),'services':services,
+            'ready':bool(required) and all(ready(s) for s in required) and network_ready,'services':services,
             'database':{'engine':engine,'host':'localhost','port':port}}
 
 

@@ -25,7 +25,8 @@ def build(source, output):
         for name, value in files(source / directory).items():
             content[('contracts' if directory == 'agents' else directory) + '/' + name] = value
     for script in ['distribution.py', 'project.py', 'plugin.py', 'check_delivery.py',
-                   'check_handoff.py', 'ci_gate.py', 'issue_bot.py', 'issue_session.py', 'issue_session.sh']:
+                   'check_handoff.py', 'ci_gate.py', 'issue_bot.py', 'issue_session.py', 'issue_session.sh',
+                   'preview.py', 'preview_launchagent.py', 'templates/preview-server.plist']:
         content['scripts/' + script] = ((source / 'scripts' / script).read_bytes(), 0o644)
     for name in ['.bezalel/project.example.json']:
         content[name] = ((source / name).read_bytes(), 0o644)

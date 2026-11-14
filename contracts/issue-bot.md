@@ -179,3 +179,13 @@ aplicativo, Docker, CI remota ou execução de snapshot. Sessão e env têm cicl
 vida independentes; session-down preserva env/logs. Destroy de ENV continua manual,
 com `--confirm projeto/ambiente`, preservação, sem força nem remoção por prefixo.
 Skills reservadas à chamada manual continuam fora da automação.
+
+## Acesso privado no iPhone
+
+ENV pode usar `access: tailnet` sem DNS local, mkcert, sudo ou Traefik; a publicação
+privada ainda exige autorização compartilhada somente no ensure. O `env-up`
+preserva `iphone_url` e `tailnet` do status público. O prompt exige o link exato,
+os checks executados e as pendências de Safari/login/cookies/4G/5G do Rafael.
+Previews são copiados pelo `scripts/preview.py publish` da distribuição carregada
+e permanecem em previews após a exclusão do original temporário de R6.
+Nunca editar Serve manualmente, usar Funnel ou alterar a porta 443 e seu `/`.

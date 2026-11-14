@@ -1,6 +1,6 @@
 ---
 name: env
-description: Cria e opera ambientes locais isolados por Git worktree e Docker (serviços PHP/Node, MySQL/PostgreSQL e Redis atrás de Traefik com HTTPS) a partir do manifesto .envstack/stack.yaml do projeto. Use quando o pedido for "sobe um ambiente para essa branch", "cria um ambiente isolado para corrigir-login", "env new/start/stop/status/update/destroy <nome>", "liga o serviço api do ambiente" ou "configura o env neste projeto". Não use para deploy ou servidor remoto (vps-deploy), limpeza em lote de ambientes concluídos (limpar-orbstack), stacks fora de PHP/Node ou máquinas fora do macOS sem adaptação. Os comandos new, start, ensure e update podem instalar dnsmasq e mkcert via Homebrew, usar sudo em /etc/resolver e alterar Traefik e DNS compartilhados, por isso exigem ENV_ALLOW_SHARED_INFRA=1 na execução autorizada; destroy apaga volumes do ambiente e exige --confirm <projeto>/<nome>.
+description: Cria e opera ambientes locais isolados por Git worktree e Docker (serviços PHP/Node, MySQL/PostgreSQL e Redis com HTTPS por Traefik ou Tailscale Serve privado) a partir do manifesto .envstack/stack.yaml do projeto. Use quando o pedido for "sobe um ambiente para essa branch", "cria um ambiente isolado para corrigir-login", "env new/start/stop/status/update/destroy <nome>", "liga o serviço api do ambiente" ou "configura o env neste projeto". Não use para deploy ou servidor remoto (vps-deploy), limpeza em lote de ambientes concluídos (limpar-orbstack), stacks fora de PHP/Node ou máquinas fora do macOS sem adaptação. Os comandos new, start, ensure e update podem instalar dnsmasq e mkcert via Homebrew, usar sudo em /etc/resolver e alterar Traefik e DNS compartilhados, por isso exigem ENV_ALLOW_SHARED_INFRA=1 na execução autorizada; destroy apaga volumes do ambiente e exige --confirm <projeto>/<nome>.
 ---
 
 # ENV
@@ -56,6 +56,10 @@ usuário, prefixo e bancos lógicos por serviço. Para configurar ou migrar, lei
 5. **Para new, start, ensure e update**, informe o impacto na infraestrutura
    compartilhada e rode com `ENV_ALLOW_SHARED_INFRA=1` somente nessa execução
    autorizada, sem exportar a variável no shell.
+   Para acesso privado no iPhone, configure o opt-in `tailnet` do manifesto;
+   `access: tailnet` dispensa DNS, mkcert, sudo e Traefik. Siga a seção Tailnet do
+   [guia](references/operacao.md#tailnet-acesso-privado-no-iphone), use somente Serve
+   e nunca edite sua configuração à mão nem altere 443 e o `/` principal.
 6. **Antes de testes ou capturas**, rode `ensure <nome> <serviço...>` (ou
    `--all`) e espere os serviços ficarem prontos.
 7. **Para destroy**, preserve dados e confirme o alvo com
@@ -70,6 +74,7 @@ usuário, prefixo e bancos lógicos por serviço. Para configurar ou migrar, lei
 | `scripts/ctl.sh start\|ensure <nome> [serviço...\|--all]` | Liga serviços e dependências e o Traefik global | `ENV_ALLOW_SHARED_INFRA=1` |
 | `scripts/ctl.sh stop <nome>` | Para o ambiente; preserva containers, volumes e arquivos | Pedido do usuário |
 | `scripts/ctl.sh restart <nome>` | Reinicia só os serviços já ativos | Pedido do usuário |
+| `scripts/ctl.sh check <nome>` | Verifica Serve, HTTP, caminhos declarados e dependências locais; aponta lacunas | Leitura |
 | `scripts/ctl.sh status <nome>` | Lista containers, inclusive parados | Leitura |
 | `scripts/update.sh <nome> [serviço...\|--all]` | Regenera Compose e reconstrói; preserva `.env`, worktree e volumes | `ENV_ALLOW_SHARED_INFRA=1` |
 | `scripts/destroy.sh <nome> --confirm <projeto>/<nome> [--keep-worktree]` | Remove containers, volumes exclusivos e estado; sem `--keep-worktree`, também worktree e branch | Pedido explícito do usuário com projeto e ambiente |
@@ -84,7 +89,9 @@ O vínculo é preservado e divergências são recusadas. O metadado local
 `environment-id` identifica a geração do ambiente: start/update preservam seu
 valor, destroy/new gera outro. Ele permite ao issue-bot evitar restores repetidos.
 `status <nome> --json` informa URLs/portas/branch/worktree/readiness e a identidade
-da geração, sem credenciais. Retorna 5 quando não pronto; ambiente ausente também
+da geração, sem credenciais. Com Tailnet, inclui `tailnet` e `iphone_url`, o link
+exato para abrir no Safari; `check` mostra verificações e casos não configurados.
+O status também avisa variáveis de URL local nos `.env` existentes preservados. Retorna 5 quando não pronto; ambiente ausente também
 retorna JSON com `status: absent`, sem criar estado nem consultar containers.
 
 ## Saídas
@@ -106,12 +113,16 @@ Confira o resultado de cada comando antes de relatá-lo:
   tipos, versões e portas do manifesto.
 - **new/start/ensure/update:** `bash "$SKILL_DIR/scripts/ctl.sh" status <nome>`
   mostra os serviços pedidos em execução e saudáveis, e cada URL anunciada
-  responde por HTTPS (por exemplo, `curl -sk -o /dev/null -w '%{http_code}' <url>`).
+  responde por HTTPS. Com Tailnet, confira `iphone_url`, `serve_ok`, `http_code` e
+  `ctl.sh check <nome>`; relate os caminhos não configurados e o aceite pendente
+  no Safari/iPhone. Por exemplo, `curl -sk -o /dev/null -w '%{http_code}' <url>`.
   Relate apenas os serviços realmente prontos; prontidão HTTP não substitui os
   testes funcionais da tarefa.
 - **Dry-run:** o Compose e os `.env` foram gerados no estado e na worktree.
 - **stop/restart:** `status` mostra o estado esperado e os volumes continuam presentes.
-- **destroy:** `status` deixa de encontrar o ambiente, os volumes exclusivos
+- **destroy:** falha de release Tailnet gera aviso e orientação em stderr;
+  down continua e a reserva fica preservada para recuperação explícita.
+  `status` deixa de encontrar o ambiente, os volumes exclusivos
   sumiram e worktree/branch existem ou não conforme `--keep-worktree`; pools e
   infraestrutura compartilhada continuam de pé.
 
