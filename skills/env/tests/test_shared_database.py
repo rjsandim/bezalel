@@ -139,6 +139,19 @@ class SharedGenerationTests(unittest.TestCase):
         self.run_process([lifecycle.DOCKER, "compose", "-f", str(pool_compose), "config", "--quiet"])
         self.assertIn("DB_CONNECTION=pgsql", (self.repo / ".worktrees/pg/api/.env").read_text())
 
+    def test_pgvector_pool_generation_and_version_change_rejected(self):
+        content = self.manifest.read_text().replace("mysql", "postgres").replace("8-4", "vector-17").replace("8.4", "17").replace("35306", "35432")
+        self.manifest.write_text(content.replace("image: postgres:17", "image: pgvector/pgvector:pg17"))
+        self.command("new.sh", "vector", extra={"ENV_DRY_RUN": "1"})
+        pool = self.skill / "state/_databases/fixture/postgres-vector-17/compose.json"
+        config = json.loads(pool.read_text())
+        self.assertEqual(config["services"]["postgres"]["image"], "pgvector/pgvector:pg17")
+        self.run_process([lifecycle.DOCKER, "compose", "-f", str(pool), "config", "--quiet"])
+        before = pool.read_bytes()
+        self.manifest.write_text(content)
+        self.command("update.sh", "vector", extra={"ENV_DRY_RUN": "1"}, expected=1)
+        self.assertEqual(pool.read_bytes(), before)
+
     def test_connection_drift_blocks_pool_start_without_exposing_secret(self):
         envfile = self.repo / ".worktrees/shared/api/.env"
         envfile.write_text("DB_PASSWORD=private-test-value\n")

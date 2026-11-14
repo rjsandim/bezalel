@@ -1,5 +1,5 @@
   postgres:
-    image: postgres:17
+    image: ${DB_IMAGE}
     container_name: ${PROJECT}-${ENV_NAME}-postgres
     restart: unless-stopped
     ports:
@@ -9,7 +9,7 @@
       POSTGRES_PASSWORD: ${PG_PASS}
       POSTGRES_DB: ${PG_USER}
     volumes:
-      - dbdata:/var/lib/postgresql/data
+      - dbdata:${PG_DATA_DIR}
       - ${STATE_DIR}/initdb.sql:/docker-entrypoint-initdb.d/10-init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${PG_USER}"]

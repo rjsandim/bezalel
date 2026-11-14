@@ -12,7 +12,7 @@ require_tools git yq jq envsubst python3
 
 ROOT="$(repo_root)"
 ENVSTACK="$ROOT/.envstack"
-MANIFEST="$ENVSTACK/stack.yaml"
+MANIFEST="$(manifest_path)"
 [ -f "$MANIFEST" ] || fail "Manifesto nao encontrado. Rode scripts/detect.sh primeiro."
 
 PROJECT="$(project_name)"

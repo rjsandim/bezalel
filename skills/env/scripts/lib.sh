@@ -29,14 +29,10 @@ require_tools() {
 }
 
 # ─── Contexto do projeto ───────────────────────────────────────
-# SEMPRE o repo principal, mesmo se chamado de dentro de uma worktree linkada
-# (`--show-toplevel` retornaria a worktree, quebrando project_name/state/destroy).
-# git-common-dir aponta para o .git compartilhado; seu pai e o repo principal.
+# Arquivos e identidade do ambiente pertencem à raiz da worktree atual.
+# Não redirecionar manifesto, init ou geração para o checkout principal.
 repo_root() {
-    local cdir
-    cdir="$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
-    if [ -n "$cdir" ]; then dirname "$cdir"
-    else git rev-parse --show-toplevel 2>/dev/null || fail "Nao esta dentro de um repositorio git."; fi
+    git rev-parse --show-toplevel 2>/dev/null || fail "Nao esta dentro de um repositorio git."
 }
 manifest_path(){ echo "$(repo_root)/.envstack/stack.yaml"; }
 
